@@ -26,12 +26,73 @@
  * - showHidden - if true then the object's non-enumerable and symbol properties
  * will be shown too. Defaults to false.
  * - depth - tells inspect how many times to recurse while formatting the
- * object. This is useful for inspecting large complicated objects. Defaults to 2. To make it recurse indefinitely pass null.
+ * object. This is useful for inspecting large complicated objects.
+ * Defaults to 2. To make it recurse indefinitely pass null.
  * - colors - if true, then the output will be styled with ANSI color codes.
  * Defaults to false. Colors are customizable, see below.
  * - customInspect - if false, then custom inspect(depth, opts) functions
  * defined on the objects being inspected won't be called. Defaults to true.
- * @version 0.0.1
+ *
+ * <h2>Customizing inspect colors</h2>
+ * Color output (if enabled) of inspect is customizable globally
+ * via `inspect.styles` and `inspect.colors` objects.
+ *
+ * The `inspect.styles` is a map assigning each style a color
+ * from `inspect.colors`. Highlighted styles and their default values are:
+ * - number (yellow)
+ * - boolean (yellow)
+ * - string (green)
+ * - date (magenta)
+ * - regexp (red)
+ * - null (bold)
+ * - undefined (grey)
+ * - special - only function at this time (cyan)
+ * - name (intentionally no styling)
+ *
+ * Predefined color codes are:
+ * - white
+ * - grey
+ * - black
+ * - blue
+ * - cyan
+ * - green
+ * - magenta
+ * - red
+ * - yellow.
+ *
+ * There are also:
+ *  - bold
+ *  - italic
+ *  - underline
+ *  - inverse
+ *
+ * <h2>Custom inspect() function on Objects</h2>
+ * Objects also may define their own `inspect(depth)` function which `inspect`
+ * will invoke and use the result of when inspecting the object.
+ *
+ * You may also return another Object entirely, and the returned String will
+ * be formatted according to the returned Object. This is similar to
+ * how JSON.stringify() works.
+ *
+ * @example
+ * var util = require('inspect-x');
+ *
+ * var obj = { name: 'nate' };
+ * obj.inspect = function(depth) {
+ *   return '{' + this.name + '}';
+ * };
+ *
+ * inspect(obj);
+ *   // "{nate}"
+ *
+ * var obj = { foo: 'this will not show up in the inspect() output' };
+ * obj.inspect = function(depth) {
+ *   return { bar: 'baz' };
+ * };
+ *
+ * inspect(obj);
+ *   // "{ bar: 'baz' }"
+ * @version 1.0.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -53,18 +114,89 @@
   'use strict';
 
   var ES = require('es-abstract/es6'),
+    defProps = require('define-properties'),
     hasOwnProperty = require('has-own-property-x'),
     isDate = require('is-date-object'),
     toStringTag = require('to-string-tag-x'),
-    isArrayBuffer = require('is-array-buffer'),
-    isTypedArray = require('is-typedarray'),
-    isObject = require('is-object'),
-    isFunction = require('lodash.isfunction'),
+    typedArrayLib = require('is-typed-array-x'),
+    isArrayBuffer = typedArrayLib.isArrayBuffer,
+    isTypedArray = typedArrayLib.isTypedArray,
+    isPrimitive = require('is-primitive'),
     assign = require('object.assign').getPolyfill(),
-    hasSymbol = typeof Symbol === 'function' && typeof Symbol() === 'symbol',
-    hasSet = typeof Set === 'function',
-    hasMap = typeof Map === 'function',
-    inspectIt, formatValueIt;
+    SetObject = require('collections-x').Set,
+    pSetForEach = SetObject.prototype.forEach,
+    pSetAdd = SetObject.prototype.add,
+    pSetHas = SetObject.prototype.has,
+    pSetDelete = SetObject.prototype['delete'],
+    ERROR = Error,
+    SYMBOL = typeof Symbol === 'function' &&
+      typeof Symbol() === 'symbol' && Symbol,
+    SET = typeof Set === 'function' && Set,
+    MAP = typeof Map === 'function' && Map,
+    PROMISE = typeof Promise === 'function' && Promise,
+    DATAVIEW = typeof DataView === 'function' && DataView,
+    sForEach = SET && SET.prototype.forEach,
+    mForEach = MAP && MAP.prototype.forEach,
+    pSymbolToString = SYMBOL && SYMBOL.prototype.toString,
+    pFunctionToString = Function.prototype.toString,
+    pErrorToString = ERROR.prototype.toString,
+    pRegExpToString = RegExp.prototype.toString,
+    pExec = RegExp.prototype.exec,
+    pBooleanToString = Boolean.prototype.toString,
+    pNumberToString = Number.prototype.toString,
+    pDateToString = Date.prototype.toString,
+    pUTCToString = Date.prototype.toUTCString,
+    pUnshift = Array.prototype.unshift,
+    pPush = Array.prototype.push,
+    pIndexOf = Array.prototype.indexOf,
+    pFilter = Array.prototype.filter,
+    pReduce = Array.prototype.reduce,
+    pSlice = Array.prototype.slice,
+    pJoin = Array.prototype.join,
+    pConcat = Array.prototype.concat,
+    pReplace = String.prototype.replace,
+    pMatch = String.prototype.match,
+    pSubstr = String.prototype.substr,
+    $stringify = JSON.stringify,
+    $keys = Object.keys,
+    $getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor,
+    $getPrototypeOf = Object.getPrototypeOf,
+    $getOwnPropertyNames = Object.getOwnPropertyNames,
+    $getOwnPropertySymbols = Object.getOwnPropertySymbols,
+    // .buffer goes last, it's not a primitive like the others.
+    hiddenTypedArray = [
+      'BYTES_PER_ELEMENT',
+      'length',
+      'byteLength',
+      'byteOffset',
+      'buffer'
+    ],
+    hiddenDataView = ES.Call(pSlice, hiddenTypedArray, [2]),
+    hiddenMessage = ['message'],
+    hiddenStack = ['stack'],
+    hiddenLength = ['length'],
+    hiddenSize = ['size'],
+    hiddeByteLength = ['byteLength'],
+    unwantedOldArrayBuffer = ['slice', 'length'],
+    unwantedOldTypedArray = ['get', 'set', 'slice', 'subarray'],
+    unwantedProto = ['__proto__'],
+    unwantedDataView = [
+      'getUint8', 'getInt8', 'getUint16', 'getInt16', 'getUint32', 'getInt32',
+      'getFloat32', 'getFloat64', 'setUint8', 'setInt8', 'setUint16',
+      'setInt16', 'setUint32', 'setInt32', 'setFloat32', 'setFloat64'
+    ],
+    unwantedMap = MAP ? $keys(new MAP()) : [],
+    unwantedSet = SET ? $keys(new SET()) : [],
+    unwantedArrayBuffer =
+      typedArrayLib.hasArrayBuffer ? $keys(new ArrayBuffer(4)) : [],
+    unwantedTypedArray =
+      typedArrayLib.hasArrayBuffer ? $keys(new Int16Array(4)) : [],
+    unwantedError, inspectIt, formatValueIt;
+  try {
+    throw new ERROR('a');
+  } catch (e) {
+    unwantedError = $keys(e);
+  }
 
   function isNull(arg) {
     return arg === null;
@@ -72,6 +204,10 @@
 
   function isUndefined(arg) {
     return typeof arg === 'undefined';
+  }
+
+  function isNil(arg) {
+    return isNull(arg) || isUndefined(arg);
   }
 
   function isBoolean(arg) {
@@ -87,22 +223,69 @@
   }
 
   function isSymbol(arg) {
-    return hasSymbol && typeof arg === 'symbol';
+    return SYMBOL && typeof arg === 'symbol';
   }
 
   function isError(err) {
-    return isObject(err) &&
-      (toStringTag(err) === '[object Error]' || err instanceof Error);
+    return !isPrimitive(err) &&
+      (toStringTag(err) === '[object Error]' || err instanceof ERROR);
   }
 
   function isSet(value) {
-    return hasSet && isObject(value) &&
-      (toStringTag(value) === '[object Set]' || value instanceof Set);
+    return SET && !isPrimitive(value) &&
+      (toStringTag(value) === '[object Set]' || value instanceof SET) &&
+      ES.IsCallable(value.add);
   }
 
   function isMap(value) {
-    return hasMap && isObject(value) &&
-      (toStringTag(value) === '[object Map]' || value instanceof Map);
+    return MAP && !isPrimitive(value) &&
+      (toStringTag(value) === '[object Map]' || value instanceof MAP) &&
+      ES.IsCallable(value.set);
+  }
+
+  function isCollection(value) {
+    return !isPrimitive(value) && (isSet(value) || isMap(value));
+  }
+
+  function isPromise(value) {
+    return PROMISE && !isPrimitive(value) &&
+      (toStringTag(value) === '[object Promise]' || value instanceof PROMISE) &&
+      ES.IsCallable(value.then);
+  }
+
+  function isCollectionIterator(value, stringTag) {
+    return !isPrimitive(value) &&
+      toStringTag(value) === stringTag &&
+      ES.IsCallable(value.next);
+  }
+
+  function isMapIterator(value) {
+    return MAP && isCollectionIterator(value, '[object Map Iterator]');
+  }
+
+  function isSetIterator(value) {
+    return SET && isCollectionIterator(value, '[object Set Iterator]');
+  }
+
+  function isDataView(value) {
+    return DATAVIEW && !isPrimitive(value) &&
+      (toStringTag(value) === '[object DataView]' || value instanceof DATAVIEW);
+  }
+
+  function filterUnwanted(keys, list) {
+    return ES.Call(pFilter, keys, [function (key) {
+      return ES.Call(pIndexOf, list, [key]) < 0;
+    }]);
+  }
+
+  function filterIndex(keys, length) {
+    return ES.Call(pFilter, keys, [function (key) {
+      return !(key > -1 && key % 1 === 0 && key <= length);
+    }]);
+  }
+
+  function add(set, value) {
+    return ES.Call(pSetAdd, set, [value]);
   }
 
   function stylizeWithColor(str, styleType) {
@@ -110,47 +293,80 @@
     if (style) {
       return '\u001b[' + inspectIt.colors[style][0] + 'm' + str +
         '\u001b[' + inspectIt.colors[style][1] + 'm';
-    } else {
-      return str;
     }
-  }
-
-  function stylizeNoColor(str) {
     return str;
   }
 
-  function arrayToHash(array) {
-    var hash = Object.create(null);
-    array.forEach(function (val) {
-      hash[val] = true;
-    });
-    return hash;
+  function stylizeNoColor(str, styleType) {
+    /*jshint unused:false */
+    return str;
+  }
+
+  function getFunctionName(fn) {
+    var match;
+    try {
+      match = ES.Call(
+        pExec,
+        /^\s*function\s+([\w\$]+)\s*\(/i,
+        [ES.Call(pFunctionToString, fn)]
+      );
+    } catch (ignore) {}
+    return match ? match[1] : '';
+  }
+
+  function getName(obj) {
+    return !isPrimitive(obj) && (obj.name || getFunctionName(obj)) || '';
+  }
+
+  function getNameSep(obj) {
+    var name = getName(obj);
+    return name ? ': ' + name : name;
+  }
+
+  function arrayEach(arrayLike, callback, thisArg) {
+    var l = ES.ToLength(arrayLike.length),
+      i = 0;
+    while (i < l) {
+      ES.Call(callback, thisArg, [arrayLike[i], i, arrayLike]);
+      i += 1;
+    }
+  }
+
+  function collectionEach(collection, callback, thisArg) {
+    var forEach = isMap(collection) ? mForEach : sForEach;
+    if (forEach) {
+      ES.Call(forEach, collection, [callback, thisArg]);
+    }
+  }
+
+  function replace(str, pattern, replacement) {
+    return ES.Call(pReplace, str, [pattern, replacement]);
   }
 
   function getConstructorOf(obj) {
-    while (obj) {
-      var descriptor = Object.getOwnPropertyDescriptor(obj, 'constructor');
-      if (!isUndefined(descriptor) &&
-          isFunction(descriptor.value) &&
-          descriptor.value.name !== '') {
-
+    var maxLoop = 100,
+      descriptor;
+    while (!isNil(obj) && maxLoop > -1) {
+      obj = ES.ToObject(obj);
+      descriptor = $getOwnPropertyDescriptor(obj, 'constructor');
+      if (!isUndefined(descriptor) && ES.IsCallable(descriptor.value)) {
         return descriptor.value;
       }
-      obj = Object.getPrototypeOf(obj);
+      obj = $getPrototypeOf(obj);
+      maxLoop -= 1;
     }
     return null;
   }
 
   function formatNumber(ctx, value) {
-    // Format -0 as '-0'. Strict equality won't distinguish 0 from -0,
-    // so instead we use the fact that 1 / -0 < 0 whereas 1 / 0 > 0 .
-    if (value === 0 && 1 / value < 0) {
-      return ctx.stylize('-0', 'number');
-    }
-    return ctx.stylize(ES.ToString(value), 'number');
+    // Format -0 as '-0'.
+    return ES.SameValue(value, -0) ?
+      ctx.stylize('-0', 'number') :
+      ctx.stylize(ES.Call(pNumberToString, value), 'number');
   }
 
   function formatPrimitive(ctx, value) {
+    var simple;
     if (isUndefined(value)) {
       return ctx.stylize('undefined', 'undefined');
     }
@@ -159,221 +375,271 @@
       return ctx.stylize('null', 'null');
     }
     if (isString(value)) {
-      var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
-        .replace(/'/g, '\\\'')
-        .replace(/\\"/g, '"') + '\'';
-      return ctx.stylize(simple, 'string');
+      simple = replace($stringify(value), /^"|"$/g, '');
+      simple = replace(simple, /'/g, '\\\'');
+      simple = replace(simple, /\\"/g, '"');
+      return ctx.stylize('\'' + simple + '\'', 'string');
     }
     if (isNumber(value)) {
       return formatNumber(ctx, value);
     }
     if (isBoolean(value)) {
-      return ctx.stylize('' + value, 'boolean');
+      return ctx.stylize(ES.Call(pBooleanToString, value), 'boolean');
     }
     // es6 symbol primitive
     if (isSymbol(value)) {
-      return ctx.stylize(value.toString(), 'symbol');
+      return ctx.stylize(ES.Call(pSymbolToString, value), 'symbol');
     }
   }
 
   function formatPrimitiveNoColor(ctx, value) {
-    var stylize = ctx.stylize;
+    var stylize = ctx.stylize,
+      str;
     ctx.stylize = stylizeNoColor;
-    var str = formatPrimitive(ctx, value);
+    str = formatPrimitive(ctx, value);
     ctx.stylize = stylize;
     return str;
   }
 
   function formatError(value) {
-    return '[' + Error.prototype.toString.call(value) + ']';
+    return '[' + ES.Call(pErrorToString, value) + ']';
   }
 
   function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
-    var desc = Object.getOwnPropertyDescriptor(value, key) || {
+    var desc = $getOwnPropertyDescriptor(value, key) || {
         value: value[key]
       },
-      name, str;
+      name, str, constructor;
+    if (key === 'size' && isCollection(value) && ES.IsCallable(value.size)) {
+      desc.value = value.size();
+    }
     if (desc.get) {
       if (desc.set) {
         str = ctx.stylize('[Getter/Setter]', 'special');
       } else {
         str = ctx.stylize('[Getter]', 'special');
       }
-    } else {
-      if (desc.set) {
-        str = ctx.stylize('[Setter]', 'special');
-      }
+    } else if (desc.set) {
+      str = ctx.stylize('[Setter]', 'special');
     }
-    if (!hasOwnProperty(visibleKeys, key)) {
-      if (isSymbol(key)) {
-        name = '[' + ctx.stylize(key.toString(), 'symbol') + ']';
+    if (!visibleKeys.has(key)) {
+      if (key === 'BYTES_PER_ELEMENT' &&
+          !value.BYTES_PER_ELEMENT && isTypedArray(value)) {
+
+        constructor = getConstructorOf(value);
+        if (constructor) {
+          desc.value = constructor.BYTES_PER_ELEMENT;
+        }
+      } else if (isSymbol(key)) {
+        name = '[' + ctx.stylize(ES.Call(pSymbolToString, key), 'symbol') + ']';
       } else {
         name = '[' + key + ']';
       }
     }
     if (!str) {
-      if (ctx.seen.indexOf(desc.value) < 0) {
-        if (isNull(recurseTimes)) {
-          str = formatValueIt(ctx, desc.value, null);
-        } else {
-          str = formatValueIt(ctx, desc.value, recurseTimes - 1);
-        }
+      if (!ES.Call(pSetHas, ctx.seen, [desc.value])) {
+        str = formatValueIt(
+          ctx,
+          desc.value,
+          isNull(recurseTimes) ? null : recurseTimes - 1
+        );
         if (str.indexOf('\n') > -1) {
-          if (array) {
-            str = str.replace(/\n/g, '\n  ');
-          } else {
-            str = str.replace(/(^|\n)/g, '\n   ');
-          }
+          str = array ?
+            replace(str, /\n/g, '\n  ') :
+            replace(str, /(^|\n)/g, '\n   ');
         }
       } else {
         str = ctx.stylize('[Circular]', 'special');
       }
     }
     if (isUndefined(name)) {
-      if (array && key.match(/^\d+$/)) {
+      if (array && ES.Call(pMatch, key, [/^\d+$/])) {
         return str;
       }
-      name = JSON.stringify(ES.ToString(key));
-      if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
-        name = name.substr(1, name.length - 2);
-        name = ctx.stylize(name, 'name');
+      name = $stringify(key);
+      if (ES.Call(pMatch, name, [/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/])) {
+        name = ctx.stylize(
+          ES.Call(pSubstr, name, [1, name.length - 2]),
+          'name'
+        );
       } else {
-        name = name.replace(/'/g, '\\\'')
-          .replace(/\\"/g, '"')
-          .replace(/(^"|"$)/g, '\'')
-          .replace(/\\\\/g, '\\');
+        name = replace(name, /'/g, '\\\'');
+        name = replace(name, /\\"/g, '"');
+        name = replace(name, /(^"|"$)/g, '\'');
+        name = replace(name, /\\\\/g, '\\');
         name = ctx.stylize(name, 'string');
       }
     }
-
     return name + ': ' + str;
   }
 
   function formatObject(ctx, value, recurseTimes, visibleKeys, keys) {
-    return keys.map(function (key) {
-      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, false);
-    });
+    var output = [];
+    ES.Call(pSetForEach, keys, [function (key) {
+      ES.Call(pPush, output,
+        [formatProperty(ctx, value, recurseTimes, visibleKeys, key, false)]
+      );
+    }]);
+    return output;
   }
 
   function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
     var output = [];
-    for (var i = 0, l = value.length; i < l; i += 1) {
-      var k = ES.ToString(i);
+    arrayEach(value, function (unused, index) {
+      var k = ES.Call(pNumberToString, index);
       if (hasOwnProperty(value, k)) {
-        output.push(
-          formatProperty(ctx, value, recurseTimes, visibleKeys, k, true)
+        ES.Call(pPush, output,
+          [formatProperty(ctx, value, recurseTimes, visibleKeys, k, true)]
         );
       } else {
-        output.push('');
-      }
-    }
-    keys.forEach(function (key) {
-      if (isSymbol(key) || !key.match(/^\d+$/)) {
-        output.push(
-          formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
-        );
+        ES.Call(pPush, output, ['']);
       }
     });
+    ES.Call(pSetForEach, keys, [function (key) {
+      if (isSymbol(key) || !key.match(/^\d+$/)) {
+        ES.Call(pPush, output,
+          [formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)]
+        );
+      }
+    }]);
     return output;
   }
 
   function formatTypedArray(ctx, value, recurseTimes, visibleKeys, keys) {
-    var output = new Array(value.length);
-    for (var i = 0, l = value.length; i < l; i += 1) {
-      output[i] = formatNumber(ctx, value[i]);
-    }
-    keys.forEach(function (key) {
+    var output = [];
+    arrayEach(value, function (item) {
+      ES.Call(pPush, output, [formatNumber(ctx, item)]);
+    });
+    ES.Call(pSetForEach, keys, [function (key) {
       if (isSymbol(key) || !key.match(/^\d+$/)) {
-        output.push(
-          formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
+        ES.Call(pPush, output,
+          [formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)]
         );
       }
-    });
+    }]);
     return output;
   }
 
   function formatSet(ctx, value, recurseTimes, visibleKeys, keys) {
     var output = [];
-    value.forEach(function (v) {
-      var nextRecurseTimes = isNull(recurseTimes) ? null : recurseTimes - 1;
-      var str = formatValueIt(ctx, v, nextRecurseTimes);
-      output.push(str);
+    collectionEach(value, function (v) {
+      var nextRecurseTimes = isNull(recurseTimes) ? null : recurseTimes - 1,
+        str = formatValueIt(ctx, v, nextRecurseTimes);
+      ES.Call(pPush, output, [str]);
     });
-    keys.forEach(function (key) {
-      output.push(
-        formatProperty(ctx, value, recurseTimes, visibleKeys, key, false)
+    ES.Call(pSetForEach, keys, [function (key) {
+      ES.Call(pPush, output,
+        [formatProperty(ctx, value, recurseTimes, visibleKeys, key, false)]
       );
-    });
+    }]);
     return output;
   }
 
   function formatMap(ctx, value, recurseTimes, visibleKeys, keys) {
     var output = [];
-    value.forEach(function (v, k) {
-      var nextRecurseTimes = isNull(recurseTimes) ? null : recurseTimes - 1;
-      var str = formatValueIt(ctx, k, nextRecurseTimes);
+    collectionEach(value, function (v, k) {
+      var nextRecurseTimes = isNull(recurseTimes) ? null : recurseTimes - 1,
+        str = formatValueIt(ctx, k, nextRecurseTimes);
       str += ' => ';
       str += formatValueIt(ctx, v, nextRecurseTimes);
-      output.push(str);
+      ES.Call(pPush, output, [str]);
     });
-    keys.forEach(function (key) {
-      output.push(
-        formatProperty(ctx, value, recurseTimes, visibleKeys, key, false)
+    ES.Call(pSetForEach, keys, [function (key) {
+      ES.Call(pPush, output,
+        [formatProperty(ctx, value, recurseTimes, visibleKeys, key, false)]
       );
-    });
+    }]);
     return output;
   }
 
   function reduceToSingleString(output, base, braces) {
-    var length = output.reduce(function (prev, cur) {
-      return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
-    }, 0);
-
+    var length = ES.Call(pReduce, output, [function (prev, cur) {
+        return prev + replace(cur, /\u001b\[\d\d?m/g, '').length + 1;
+      }, 0]),
+      result;
     if (length > 60) {
-      return braces[0] +
+      result = braces[0] +
         // If the opening "brace" is too large, like in the case of "Set {",
         // we need to force the first item to be on the next line or the
         // items will not line up correctly.
-        (base === '' && braces[0].length === 1 ? '' : base + '\n ') +
-        ' ' +
-        output.join(',\n  ') +
-        ' ' +
-        braces[1];
+        (base === '' && braces[0].length === 1 ? '' : base + '\n ') + ' ' +
+        ES.Call(pJoin, output, [',\n  ']) + ' ' + braces[1];
+    } else {
+      result = braces[0] + base + ' ' + ES.Call(pJoin, output, [', ']) +
+        ' ' + braces[1];
     }
-
-    return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+    return replace(result, /\{[\s\n]+\}/, '{}');
   }
 
   formatValueIt = function formatValue(ctx, value, recurseTimes) {
+    var ret, dateString, primitive, keys, visibleKeys, formatted, raw,
+      constructor, name, base, empty, braces, formatter, output;
     // Provide a hook for user-specified inspect functions.
     // Check that value is an object with an inspect function on it
-    if (ctx.customInspect && value && isFunction(value.inspect) &&
+    if (ctx.customInspect && !isPrimitive(value) &&
+      ES.IsCallable(value.inspect) &&
       // Filter out the util module, it's inspect function is special
       value.inspect !== inspectIt &&
       // Also filter out any prototype objects using the circular check.
       !(value.constructor && value.constructor.prototype === value)) {
 
-      var ret = value.inspect(recurseTimes, ctx);
+      ret = value.inspect(recurseTimes, ctx);
       if (!isString(ret)) {
-        ret = formatValue(ctx, ret, recurseTimes);
+        return formatValue(ctx, ret, recurseTimes);
       }
       return ret;
     }
 
     // Primitive types cannot have properties
-    var primitive = formatPrimitive(ctx, value);
+    primitive = formatPrimitive(ctx, value);
     if (primitive) {
       return primitive;
     }
 
     // Look up the keys of the object.
-    var keys = Object.keys(value);
-    var visibleKeys = arrayToHash(keys);
+    keys = filterUnwanted($keys(value), unwantedProto);
+    if (isError(value)) {
+      keys = filterUnwanted(keys, unwantedError);
+    } else if (isMap(value)) {
+      keys = filterUnwanted(keys, unwantedMap);
+    } else if (isSet(value)) {
+      keys = filterUnwanted(keys, unwantedSet);
+    } else if (isArrayBuffer(value)) {
+      keys = filterUnwanted(keys, unwantedArrayBuffer);
+    } else if (isTypedArray(value)) {
+      keys = filterUnwanted(keys, unwantedTypedArray);
+    } else if (isDataView(value)) {
+      keys = filterUnwanted(
+        filterIndex(keys, value.byteLength),
+        unwantedDataView
+      );
+    }
 
-    if (ctx.showHidden && isFunction(Object.getOwnPropertyNames)) {
-      keys = Object.getOwnPropertyNames(value);
-      if (isFunction(Object.getOwnPropertySymbols)) {
-        keys = keys.concat(Object.getOwnPropertySymbols(value));
+    visibleKeys = new SetObject(keys);
+    if (ctx.showHidden) {
+      keys = $getOwnPropertyNames(value);
+      if (isError(value)) {
+        if (ES.Call(pIndexOf, keys, hiddenMessage) < 0) {
+          ES.Call(pUnshift, keys, hiddenMessage);
+        }
+        if (ES.Call(pIndexOf, keys, hiddenStack) < 0) {
+          ES.Call(pUnshift, keys, hiddenStack);
+        }
+      } else if (isTypedArray(value)) {
+        keys = filterUnwanted(keys, unwantedOldTypedArray);
+      } else if (isArrayBuffer(value)) {
+        keys = filterUnwanted(
+          filterIndex(keys, value.byteLength),
+          unwantedOldArrayBuffer
+        );
+      } else if (isDataView(value)) {
+        keys = filterUnwanted(
+          filterIndex(keys, value.byteLength),
+          unwantedDataView
+        );
+      }
+      if ($getOwnPropertySymbols) {
+        keys = ES.Call(pConcat, keys, [$getOwnPropertySymbols(value)]);
       }
     }
 
@@ -381,34 +647,33 @@
     // NOTE: Avoid calling `valueOf` on `Date` instance because it will return
     // a number which, when object has some additional user-stored `keys`,
     // will be printed out.
-    var formatted;
-    var raw = value;
+    raw = value;
     try {
       // the .valueOf() call can fail for a multitude of reasons
-      if (!isDate(value)) {
-        raw = value.valueOf();
-      }
+      raw = isDate(value) ? raw : value.valueOf();
     } catch (ignore) { }
 
     if (isString(raw)) {
       // for boxed Strings, we have to remove the 0-n indexed entries,
       // since they just noisey up the output and are redundant
-      keys = keys.filter(function (key) {
-        return !(key > -1 && key % 1 === 0 && key <= raw.length);
-      });
+      keys = filterIndex(keys, raw.length);
     }
 
     // Some type of object without properties can be shortcutted.
     if (keys.length === 0) {
-      if (isFunction(value)) {
-        var name = value.name ? ': ' + value.name : '';
-        return ctx.stylize('[Function' + name + ']', 'special');
+      if (ES.IsCallable(value)) {
+        return ctx.stylize('[Function' + getNameSep(value) + ']', 'special');
       }
       if (ES.IsRegExp(value)) {
-        return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+        return ctx.stylize(ES.Call(pRegExpToString, value), 'regexp');
       }
       if (isDate(value)) {
-        return ctx.stylize(Date.prototype.toString.call(value), 'date');
+        try {
+          dateString = ES.Call(pDateToString, value);
+        } catch (e) {
+          dateString = 'Date {}';
+        }
+        return ctx.stylize(dateString, 'date');
       }
       if (isError(value)) {
         return formatError(value);
@@ -426,19 +691,29 @@
         formatted = formatPrimitiveNoColor(ctx, raw);
         return ctx.stylize('[Boolean: ' + formatted + ']', 'boolean');
       }
-      // Fast path for ArrayBuffer.  Can't do the same for DataView because it
+      // Fast path for ArrayBuffer. Can't do the same for DataView because it
       // has a non-primitive .buffer property that we need to recurse for.
       if (isArrayBuffer(value)) {
-        return getConstructorOf(value).name +
-          ' { byteLength: ' + formatNumber(ctx, value.byteLength) + ' }';
+        return 'ArrayBuffer { byteLength: ' +
+          formatNumber(ctx, value.byteLength) + ' }';
+      }
+      if (isMapIterator(value)) {
+        return 'MapIterator {}';
+      }
+      if (isSetIterator(value)) {
+        return 'SetIterator {}';
+      }
+      if (isPromise(value)) {
+        return 'Promise {}';
       }
     }
 
-    var constructor = getConstructorOf(value);
-    var base = '',
-      empty = false,
-      braces;
-    var formatter = formatObject;
+    constructor = getConstructorOf(value);
+    name = constructor && getName(constructor);
+    base = '';
+    empty = false;
+    braces = ['{', '}'];
+    formatter = formatObject;
 
     // We can't compare constructors for various objects using a comparison
     // like `constructor === Array` because the object could have come from a
@@ -447,118 +722,126 @@
     // needed) to determine object types.
     if (Array.isArray(value)) {
       // Unset the constructor to prevent "Array [...]" for ordinary arrays.
-      if (constructor && constructor.name === 'Array') {
-        constructor = null;
-      }
+      name = name === 'Array' ? null : name;
       braces = ['[', ']'];
+      if (ctx.showHidden) {
+        ES.Call(pUnshift, keys, hiddenLength);
+      }
       empty = value.length === 0;
       formatter = formatArray;
-    } else if (isSet(value)) {
-      braces = ['{', '}'];
+    } else if (isCollection(value)) {
       // With `showHidden`, `length` will display as a hidden property for
       // arrays. For consistency's sake, do the same for `size`, even though
       // this property isn't selected by Object.getOwnPropertyNames().
       if (ctx.showHidden) {
-        keys.unshift('size');
+        ES.Call(pUnshift, keys, hiddenSize);
       }
       empty = value.size === 0;
-      formatter = formatSet;
-    } else if (isMap(value)) {
-      braces = ['{', '}'];
-      // Ditto.
-      if (ctx.showHidden) {
-        keys.unshift('size');
+      if (isSet(value)) {
+        name = 'Set';
+        formatter = formatSet;
+      } else {
+        name = 'Map';
+        formatter = formatMap;
       }
-      empty = value.size === 0;
-      formatter = formatMap;
     } else if (isArrayBuffer(value)) {
-      braces = ['{', '}'];
-      keys.unshift('byteLength');
-      visibleKeys.byteLength = true;
+      name = 'ArrayBuffer';
+      ES.Call(pUnshift, keys, hiddeByteLength);
+      add(visibleKeys, 'byteLength');
+    } else if (isDataView(value)) {
+      name = 'DataView';
+      ES.Call(pUnshift, keys, hiddenDataView);
+      add(visibleKeys, 'byteLength');
+      add(visibleKeys, 'byteOffset');
+      add(visibleKeys, 'buffer');
     } else if (isTypedArray(value)) {
       braces = ['[', ']'];
       formatter = formatTypedArray;
       if (ctx.showHidden) {
-        // .buffer goes last, it's not a primitive like the others.
-        keys.unshift('BYTES_PER_ELEMENT',
-          'length',
-          'byteLength',
-          'byteOffset',
-          'buffer');
+        ES.Call(pUnshift, keys, hiddenTypedArray);
       }
+    } else if (isPromise(value)) {
+      name = 'Promise';
+    } else if (isMapIterator(value)) {
+      name = 'MapIterator';
+      empty = true;
+    } else if (isSetIterator(value)) {
+      name = 'SetIterator';
+      empty = true;
     } else {
-      // Unset the constructor to prevent "Object {...}" for ordinary
-      // objects.
-      if (constructor && constructor.name === 'Object') {
-        constructor = null;
-      }
-      braces = ['{', '}'];
-      empty = true; // No other data than keys.
+      // Unset the constructor to prevent "Object {...}" for ordinary objects.
+      name = name === 'Object' ? null : name;
+      empty = true;  // No other data than keys.
     }
 
     empty = empty === true && keys.length === 0;
 
-    // Make functions say that they are functions
-    if (isFunction(value)) {
-      var n = value.name ? ': ' + value.name : '';
-      base = ' [Function' + n + ']';
-    }
-
-    // Make RegExps say that they are RegExps
-    if (ES.IsRegExp(value)) {
-      base = ' ' + RegExp.prototype.toString.call(value);
-    }
-
-    // Make dates with properties first say the date
-    if (isDate(value)) {
-      base = ' ' + Date.prototype.toUTCString.call(value);
-    }
-
-    // Make error with message first say the error
-    if (isError(value)) {
-      base = ' ' + formatError(value);
-    }
-
-    // Make boxed primitive Strings look like such
-    if (isString(raw)) {
+    if (ES.IsCallable(value)) {
+      // Make functions say that they are functions
+      base = '[Function' + getNameSep(value) + ']';
+    } else if (ES.IsRegExp(value)) {
+      // Make RegExps say that they are RegExps
+      name = 'RegExp';
+      base = ES.Call(pRegExpToString, value);
+    } else if (isDate(value)) {
+      // Make dates with properties first say the date
+      name = 'Date';
+      try {
+        dateString = ES.Call(pUTCToString, value);
+      } catch (e) {
+        dateString = name + ' {}';
+      }
+      base = dateString;
+    } else if (isError(value)) {
+      // Make error with message first say the error
+      base = formatError(value);
+    } else if (isString(raw)) {
+      // Make boxed primitive Strings look like such
       formatted = formatPrimitiveNoColor(ctx, raw);
-      base = ' [String: ' + formatted + ']';
+      base = '[String: ' + formatted + ']';
+    } else if (isNumber(raw)) {
+      // Make boxed primitive Numbers look like such
+      formatted = formatPrimitiveNoColor(ctx, raw);
+      base = '[Number: ' + formatted + ']';
+    } else if (isBoolean(raw)) {
+      // Make boxed primitive Booleans look like such
+      formatted = formatPrimitiveNoColor(ctx, raw);
+      base = '[Boolean: ' + formatted + ']';
     }
 
-    // Make boxed primitive Numbers look like such
-    if (isNumber(raw)) {
-      formatted = formatPrimitiveNoColor(ctx, raw);
-      base = ' ' + '[Number: ' + formatted + ']';
-    }
-
-    // Make boxed primitive Booleans look like such
-    if (isBoolean(raw)) {
-      formatted = formatPrimitiveNoColor(ctx, raw);
-      base = ' ' + '[Boolean: ' + formatted + ']';
+    if (base) {
+      base = ' ' + base;
     }
 
     // Add constructor name if available
-    if (base === '' && constructor) {
-      braces[0] = constructor.name + ' ' + braces[0];
+    if (!base && name) {
+      if (name) {
+        braces[0] = name + ' ' + braces[0];
+      }
     }
 
-    if (empty === true) {
+    if (empty) {
       return braces[0] + base + braces[1];
     }
 
     if (recurseTimes < 0) {
       if (ES.IsRegExp(value)) {
-        return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-      } else {
-        return ctx.stylize('[Object]', 'special');
+        return ctx.stylize(ES.Call(pRegExpToString, value), 'regexp');
       }
+      return ctx.stylize('[Object]', 'special');
     }
 
-    ctx.seen.push(value);
+    add(ctx.seen, value);
 
-    var output = formatter(ctx, value, recurseTimes, visibleKeys, keys);
+    output = formatter(
+      ctx,
+      value,
+      recurseTimes,
+      visibleKeys,
+      new SetObject(keys)
+    );
 
-    ctx.seen.pop();
+    ES.Call(pSetDelete, ctx.seen, [value]);
 
     return reduceToSingleString(output, base, braces);
   };
@@ -566,28 +849,63 @@
   /**
    * Echos the value of a value. Trys to print the value out
    * in the best way possible given the different types.
+   * Values may supply their own custom `inspect(depth, opts)` functions,
+   * when called they receive the current depth in the recursive inspection,
+   * as well as the options object passed to `inspect`.
    *
    * @param {Object} obj The object to print out.
    * @param {Object} [opts] Options object that alters the output.
    * @return {string} The string representation.
+   * @example
+   * var inspect = require('inspect-x');
+   *
+   * console.log(inspect(inspect, { showHidden: true, depth: null }));
+   * //{ [Function: inspect]
+   * //  [length]: 2,
+   * //  [name]: 'inspect',
+   * //  [prototype]: inspect { [constructor]: [Circular] },
+   * //  [colors]:
+   * //   { [bold]: [ 1, 22, [length]: 2 ],
+   * //     [italic]: [ 3, 23, [length]: 2 ],
+   * //     [underline]: [ 4, 24, [length]: 2 ],
+   * //     [inverse]: [ 7, 27, [length]: 2 ],
+   * //     [white]: [ 37, 39, [length]: 2 ],
+   * //     [grey]: [ 90, 39, [length]: 2 ],
+   * //     [black]: [ 30, 39, [length]: 2 ],
+   * //     [blue]: [ 34, 39, [length]: 2 ],
+   * //     [cyan]: [ 36, 39, [length]: 2 ],
+   * //     [green]: [ 32, 39, [length]: 2 ],
+   * //     [magenta]: [ 35, 39, [length]: 2 ],
+   * //     [red]: [ 31, 39, [length]: 2 ],
+   * //     [yellow]: [ 33, 39, [length]: 2 ] },
+   * //  [styles]:
+   * //   { [special]: 'cyan',
+   * //     [number]: 'yellow',
+   * //     [boolean]: 'yellow',
+   * //     [undefined]: 'grey',
+   * //     [null]: 'bold',
+   * //     [string]: 'green',
+   * //     [symbol]: 'green',
+   * //     [date]: 'magenta',
+   * //     [regexp]: 'red' } }
    */
   module.exports = inspectIt = function inspect(obj, opts) {
     // default options
     var ctx = {
-      seen: [],
+      seen: new SetObject(),
       stylize: stylizeNoColor
     };
     // legacy...
     if (arguments.length >= 3) {
       ctx.depth = arguments[2];
-    }
-    if (arguments.length >= 4) {
-      ctx.colors = arguments[3];
+      if (arguments.length >= 4) {
+        ctx.colors = arguments[3];
+      }
     }
     if (isBoolean(opts)) {
       // legacy...
       ctx.showHidden = opts;
-    } else if (isObject(opts)) {
+    } else if (!isPrimitive(opts) && !ES.IsCallable(opts)) {
       // got an "options" object
       assign(ctx, opts);
     }
@@ -611,7 +929,12 @@
   };
 
   // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-  inspectIt.colors = {
+  defProps(inspectIt, {
+    colors: {},
+    styles: {}
+  });
+
+  defProps(inspectIt.colors, {
     'bold': [1, 22],
     'italic': [3, 23],
     'underline': [4, 24],
@@ -625,10 +948,10 @@
     'magenta': [35, 39],
     'red': [31, 39],
     'yellow': [33, 39]
-  };
+  });
 
   // Don't use 'blue' not visible on cmd.exe
-  inspectIt.styles = {
+  defProps(inspectIt.styles, {
     'special': 'cyan',
     'number': 'yellow',
     'boolean': 'yellow',
@@ -639,5 +962,5 @@
     'date': 'magenta',
     // "name": intentionally not styling
     'regexp': 'red'
-  };
+  });
 }());

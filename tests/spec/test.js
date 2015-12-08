@@ -478,11 +478,7 @@
         /*jshint undef:false */
         undef();
       } catch (e) {
-        if (oldIEerror) {
-          text = '[TypeError:';
-        } else {
-          text = '[ReferenceError:';
-        }
+        text = oldIEerror ? '[TypeError:' : '[ReferenceError:';
         expect(inspect(e).indexOf(text)).not.toBe(-1, text);
       }
       var ex = inspect(new Error('FAILURE'), true);

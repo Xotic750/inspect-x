@@ -122,11 +122,6 @@
     isArrayBuffer = typedArrayLib.isArrayBuffer,
     isTypedArray = typedArrayLib.isTypedArray,
     isPrimitive = require('is-primitive'),
-    SetObject = require('collections-x').Set,
-    pSetForEach = SetObject.prototype.forEach,
-    pSetAdd = SetObject.prototype.add,
-    pSetHas = SetObject.prototype.has,
-    pSetDelete = SetObject.prototype['delete'],
     ERROR = Error,
     SYMBOL = typeof Symbol === 'function' &&
       typeof Symbol() === 'symbol' && Symbol,
@@ -146,11 +141,12 @@
     pUTCToString = Date.prototype.toUTCString,
     pUnshift = Array.prototype.unshift,
     pPush = Array.prototype.push,
+    pPop = Array.prototype.pop,
     pIndexOf = Array.prototype.indexOf,
     pFilter = Array.prototype.filter,
     pReduce = Array.prototype.reduce,
-    pSlice = Array.prototype.slice,
     pJoin = Array.prototype.join,
+    pForEach = Array.prototype.forEach,
     pConcat = Array.prototype.concat,
     pReplace = String.prototype.replace,
     pMatch = String.prototype.match,
@@ -162,19 +158,6 @@
     $getOwnPropertyNames = Object.getOwnPropertyNames,
     $getOwnPropertySymbols = Object.getOwnPropertySymbols,
     // .buffer goes last, it's not a primitive like the others.
-    hiddenTypedArray = [
-      'BYTES_PER_ELEMENT',
-      'length',
-      'byteLength',
-      'byteOffset',
-      'buffer'
-    ],
-    hiddenDataView = ES.Call(pSlice, hiddenTypedArray, [2]),
-    hiddenMessage = ['message'],
-    hiddenStack = ['stack'],
-    hiddenLength = ['length'],
-    hiddenSize = ['size'],
-    hiddeByteLength = ['byteLength'],
     unwantedOldArrayBuffer = ['slice', 'length'],
     unwantedOldTypedArray = ['get', 'set', 'slice', 'subarray'],
     unwantedProto = ['__proto__'],
@@ -190,6 +173,7 @@
     unwantedTypedArray =
       typedArrayLib.hasArrayBuffer ? $keys(new Int16Array(4)) : [],
     unwantedError, inspectIt, formatValueIt;
+
   try {
     throw new ERROR('a');
   } catch (e) {
@@ -270,9 +254,13 @@
       (toStringTag(value) === '[object DataView]' || value instanceof DATAVIEW);
   }
 
+  function includes(arr, value)  {
+    return ES.Call(pIndexOf, arr, [value]) > -1;
+  }
+
   function filterUnwanted(keys, list) {
     return ES.Call(pFilter, keys, [function (key) {
-      return ES.Call(pIndexOf, list, [key]) < 0;
+      return !includes(list, key);
     }]);
   }
 
@@ -282,8 +270,18 @@
     }]);
   }
 
-  function add(set, value) {
-    return ES.Call(pSetAdd, set, [value]);
+  function pushUniq(arr, value) {
+    var val = [value];
+    if (ES.Call(pIndexOf, arr, val) < 0) {
+      ES.Call(pPush, arr, val);
+    }
+  }
+
+  function unshiftUniq(arr, value) {
+    var val = [value];
+    if (ES.Call(pIndexOf, arr, val) < 0) {
+      ES.Call(pUnshift, arr, val);
+    }
   }
 
   function stylizeWithColor(str, styleType) {
@@ -437,7 +435,7 @@
     } else if (desc.set) {
       str = ctx.stylize('[Setter]', 'special');
     }
-    if (!visibleKeys.has(key)) {
+    if (!includes(visibleKeys, key)) {
       if (key === 'BYTES_PER_ELEMENT' &&
           !value.BYTES_PER_ELEMENT && isTypedArray(value)) {
 
@@ -452,7 +450,7 @@
       }
     }
     if (!str) {
-      if (!ES.Call(pSetHas, ctx.seen, [desc.value])) {
+      if (!includes(ctx.seen, desc.value)) {
         str = formatValueIt(
           ctx,
           desc.value,
@@ -490,7 +488,7 @@
 
   function formatObject(ctx, value, recurseTimes, visibleKeys, keys) {
     var output = [];
-    ES.Call(pSetForEach, keys, [function (key) {
+    ES.Call(pForEach, keys, [function (key) {
       ES.Call(pPush, output,
         [formatProperty(ctx, value, recurseTimes, visibleKeys, key, false)]
       );
@@ -510,7 +508,7 @@
         ES.Call(pPush, output, ['']);
       }
     });
-    ES.Call(pSetForEach, keys, [function (key) {
+    ES.Call(pForEach, keys, [function (key) {
       if (isSymbol(key) || !key.match(/^\d+$/)) {
         ES.Call(pPush, output,
           [formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)]
@@ -525,7 +523,7 @@
     arrayEach(value, function (item) {
       ES.Call(pPush, output, [formatNumber(ctx, item)]);
     });
-    ES.Call(pSetForEach, keys, [function (key) {
+    ES.Call(pForEach, keys, [function (key) {
       if (isSymbol(key) || !key.match(/^\d+$/)) {
         ES.Call(pPush, output,
           [formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)]
@@ -542,7 +540,7 @@
         str = formatValueIt(ctx, v, nextRecurseTimes);
       ES.Call(pPush, output, [str]);
     });
-    ES.Call(pSetForEach, keys, [function (key) {
+    ES.Call(pForEach, keys, [function (key) {
       ES.Call(pPush, output,
         [formatProperty(ctx, value, recurseTimes, visibleKeys, key, false)]
       );
@@ -559,7 +557,7 @@
       str += formatValueIt(ctx, v, nextRecurseTimes);
       ES.Call(pPush, output, [str]);
     });
-    ES.Call(pSetForEach, keys, [function (key) {
+    ES.Call(pForEach, keys, [function (key) {
       ES.Call(pPush, output,
         [formatProperty(ctx, value, recurseTimes, visibleKeys, key, false)]
       );
@@ -604,13 +602,11 @@
       }
       return ret;
     }
-
     // Primitive types cannot have properties
     primitive = formatPrimitive(ctx, value);
     if (primitive) {
       return primitive;
     }
-
     // Look up the keys of the object.
     keys = filterUnwanted($keys(value), unwantedProto);
     if (isError(value)) {
@@ -629,17 +625,12 @@
         unwantedDataView
       );
     }
-
-    visibleKeys = new SetObject(keys);
+    visibleKeys = keys;
     if (ctx.showHidden) {
       keys = $getOwnPropertyNames(value);
       if (isError(value)) {
-        if (ES.Call(pIndexOf, keys, hiddenMessage) < 0) {
-          ES.Call(pUnshift, keys, hiddenMessage);
-        }
-        if (ES.Call(pIndexOf, keys, hiddenStack) < 0) {
-          ES.Call(pUnshift, keys, hiddenStack);
-        }
+        unshiftUniq(keys, 'message');
+        unshiftUniq(keys, 'stack');
       } else if (isTypedArray(value)) {
         keys = filterUnwanted(keys, unwantedOldTypedArray);
       } else if (isArrayBuffer(value)) {
@@ -657,7 +648,6 @@
         keys = ES.Call(pConcat, keys, [$getOwnPropertySymbols(value)]);
       }
     }
-
     // This could be a boxed primitive (new String(), etc.), check valueOf()
     // NOTE: Avoid calling `valueOf` on `Date` instance because it will return
     // a number which, when object has some additional user-stored `keys`,
@@ -667,13 +657,11 @@
       // the .valueOf() call can fail for a multitude of reasons
       raw = isDate(value) ? raw : value.valueOf();
     } catch (ignore) { }
-
     if (isString(raw)) {
       // for boxed Strings, we have to remove the 0-n indexed entries,
       // since they just noisey up the output and are redundant
       keys = filterIndex(keys, raw.length);
     }
-
     // Some type of object without properties can be shortcutted.
     if (keys.length === 0) {
       if (ES.IsCallable(value)) {
@@ -722,14 +710,12 @@
         return 'Promise {}';
       }
     }
-
     constructor = getConstructorOf(value);
     name = constructor && getName(constructor);
     base = '';
     empty = false;
     braces = ['{', '}'];
     formatter = formatObject;
-
     // We can't compare constructors for various objects using a comparison
     // like `constructor === Array` because the object could have come from a
     // different context and thus the constructor won't match. Instead we check
@@ -740,7 +726,7 @@
       name = name === 'Array' ? null : name;
       braces = ['[', ']'];
       if (ctx.showHidden) {
-        ES.Call(pUnshift, keys, hiddenLength);
+        unshiftUniq(keys, 'length');
       }
       empty = value.length === 0;
       formatter = formatArray;
@@ -749,7 +735,7 @@
       // arrays. For consistency's sake, do the same for `size`, even though
       // this property isn't selected by Object.getOwnPropertyNames().
       if (ctx.showHidden) {
-        ES.Call(pUnshift, keys, hiddenSize);
+        unshiftUniq(keys, 'size');
       }
       empty = value.size === 0;
       if (isSet(value)) {
@@ -761,19 +747,25 @@
       }
     } else if (isArrayBuffer(value)) {
       name = 'ArrayBuffer';
-      ES.Call(pUnshift, keys, hiddeByteLength);
-      add(visibleKeys, 'byteLength');
+      unshiftUniq(keys, 'byteLength');
+      pushUniq(visibleKeys, 'byteLength');
     } else if (isDataView(value)) {
       name = 'DataView';
-      ES.Call(pUnshift, keys, hiddenDataView);
-      add(visibleKeys, 'byteLength');
-      add(visibleKeys, 'byteOffset');
-      add(visibleKeys, 'buffer');
+      unshiftUniq(keys, 'buffer');
+      unshiftUniq(keys, 'byteOffset');
+      unshiftUniq(keys, 'byteLength');
+      pushUniq(visibleKeys, 'byteLength');
+      pushUniq(visibleKeys, 'byteOffset');
+      pushUniq(visibleKeys, 'buffer');
     } else if (isTypedArray(value)) {
       braces = ['[', ']'];
       formatter = formatTypedArray;
       if (ctx.showHidden) {
-        ES.Call(pUnshift, keys, hiddenTypedArray);
+        unshiftUniq(keys, 'buffer');
+        unshiftUniq(keys, 'byteOffset');
+        unshiftUniq(keys, 'byteLength');
+        unshiftUniq(keys, 'length');
+        unshiftUniq(keys, 'BYTES_PER_ELEMENT');
       }
     } else if (isPromise(value)) {
       name = 'Promise';
@@ -788,9 +780,7 @@
       name = name === 'Object' ? null : name;
       empty = true;  // No other data than keys.
     }
-
     empty = empty === true && keys.length === 0;
-
     if (ES.IsCallable(value)) {
       // Make functions say that they are functions
       base = '[Function' + getNameSep(value) + ']';
@@ -823,41 +813,27 @@
       formatted = formatPrimitiveNoColor(ctx, raw);
       base = '[Boolean: ' + formatted + ']';
     }
-
     if (base) {
       base = ' ' + base;
     }
-
     // Add constructor name if available
     if (!base && name) {
       if (name) {
         braces[0] = name + ' ' + braces[0];
       }
     }
-
     if (empty) {
       return braces[0] + base + braces[1];
     }
-
     if (recurseTimes < 0) {
       if (ES.IsRegExp(value)) {
         return ctx.stylize(regExpToString(value), 'regexp');
       }
       return ctx.stylize('[Object]', 'special');
     }
-
-    add(ctx.seen, value);
-
-    output = formatter(
-      ctx,
-      value,
-      recurseTimes,
-      visibleKeys,
-      new SetObject(keys)
-    );
-
-    ES.Call(pSetDelete, ctx.seen, [value]);
-
+    ES.Call(pPush, ctx.seen, [value]);
+    output = formatter(ctx, value, recurseTimes, visibleKeys, keys);
+    ES.Call(pPop, ctx.seen);
     return reduceToSingleString(output, base, braces);
   };
 
@@ -907,7 +883,7 @@
   module.exports = inspectIt = function inspect(obj, opts) {
     // default options
     var ctx = {
-      seen: new SetObject(),
+      seen: [],
       stylize: stylizeNoColor
     };
     // legacy...

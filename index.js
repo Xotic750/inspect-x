@@ -122,7 +122,6 @@
     isArrayBuffer = typedArrayLib.isArrayBuffer,
     isTypedArray = typedArrayLib.isTypedArray,
     isPrimitive = require('is-primitive'),
-    assign = require('object.assign').getPolyfill(),
     SetObject = require('collections-x').Set,
     pSetForEach = SetObject.prototype.forEach,
     pSetAdd = SetObject.prototype.add,
@@ -923,7 +922,9 @@
       ctx.showHidden = opts;
     } else if (!isPrimitive(opts) && !ES.IsCallable(opts)) {
       // got an "options" object
-      assign(ctx, opts);
+      arrayEach($keys(opts), function (opt) {
+        ctx[opt] = opts[opt];
+      });
     }
     // set default options
     if (isUndefined(ctx.showHidden)) {

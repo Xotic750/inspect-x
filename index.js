@@ -123,8 +123,7 @@
     isTypedArray = typedArrayLib.isTypedArray,
     isPrimitive = require('is-primitive'),
     ERROR = Error,
-    SYMBOL = typeof Symbol === 'function' &&
-      typeof Symbol() === 'symbol' && Symbol,
+    SYMBOL = require('has-symbol-support-x') && Symbol,
     SET = typeof Set === 'function' && Set,
     MAP = typeof Map === 'function' && Map,
     PROMISE = typeof Promise === 'function' && Promise,

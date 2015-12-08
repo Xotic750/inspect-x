@@ -92,7 +92,7 @@
  *
  * inspect(obj);
  *   // "{ bar: 'baz' }"
- * @version 1.0.0
+ * @version 1.0.1
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -140,7 +140,6 @@
     pSymbolToString = SYMBOL && SYMBOL.prototype.toString,
     pFunctionToString = Function.prototype.toString,
     pErrorToString = ERROR.prototype.toString,
-    pRegExpToString = RegExp.prototype.toString,
     pExec = RegExp.prototype.exec,
     pBooleanToString = Boolean.prototype.toString,
     pNumberToString = Number.prototype.toString,
@@ -356,6 +355,23 @@
       maxLoop -= 1;
     }
     return null;
+  }
+
+  function regExpToString(value) {
+    var str = '/' + value.source + '/';
+    if (value.global) {
+      str += 'g';
+    }
+    if (value.ignoreCase) {
+      str += 'i';
+    }
+    if (value.multiline) {
+      str += 'm';
+    }
+    if (value.sticky) {
+      str += 'y';
+    }
+    return str;
   }
 
   function formatNumber(ctx, value) {
@@ -665,7 +681,7 @@
         return ctx.stylize('[Function' + getNameSep(value) + ']', 'special');
       }
       if (ES.IsRegExp(value)) {
-        return ctx.stylize(ES.Call(pRegExpToString, value), 'regexp');
+        return ctx.stylize(regExpToString(value), 'regexp');
       }
       if (isDate(value)) {
         try {
@@ -782,7 +798,7 @@
     } else if (ES.IsRegExp(value)) {
       // Make RegExps say that they are RegExps
       name = 'RegExp';
-      base = ES.Call(pRegExpToString, value);
+      base = regExpToString(value);
     } else if (isDate(value)) {
       // Make dates with properties first say the date
       name = 'Date';
@@ -826,7 +842,7 @@
 
     if (recurseTimes < 0) {
       if (ES.IsRegExp(value)) {
-        return ctx.stylize(ES.Call(pRegExpToString, value), 'regexp');
+        return ctx.stylize(regExpToString(value), 'regexp');
       }
       return ctx.stylize('[Object]', 'special');
     }

@@ -83,11 +83,11 @@
       expect(inspect('')).toBe('\'\'');
       expect(inspect('hello')).toBe('\'hello\'');
       expect(inspect(function () {})).toBe('[Function]');
+      expect(inspect(function f() {})).toBe('[Function: f]');
       expect(inspect(undefined)).toBe('undefined');
       expect(inspect(null)).toBe('null');
-      var subject = /foo(bar\n)?/gi;
-      expect(inspect(subject)).toBe(subject.toString());
-      subject = new Date(1266148120000);
+      expect(inspect(/foo(bar\n)?/igm)).toBe('/foo(bar\\n)?/gim');
+      var subject = new Date(1266148120000);
       expect(inspect(subject)).toBe(subject.toString());
       expect(inspect('\n\u0001')).toBe('\'\\n\\u0001\'');
 
@@ -409,9 +409,9 @@
 
     it('Regular expressions with properties', function () {
       // Regular expressions with properties
-      var value = /123/ig;
+      var value = /123/mig;
       value.aprop = 42;
-      expect(inspect(value)).toBe('{ ' + value.toString() + ' aprop: 42 }');
+      expect(inspect(value)).toBe('{ /123/gim aprop: 42 }');
     });
 
     it('Dates with properties', function () {

@@ -92,7 +92,7 @@
  *
  * inspect(obj);
  *   // "{ bar: 'baz' }"
- * @version 1.0.1
+ * @version 1.0.2
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -118,16 +118,18 @@
     hasOwnProperty = require('has-own-property-x'),
     isDate = require('is-date-object'),
     toStringTag = require('to-string-tag-x'),
-    typedArrayLib = require('is-typed-array-x'),
-    isArrayBuffer = typedArrayLib.isArrayBuffer,
-    isTypedArray = typedArrayLib.isTypedArray,
+    isArrayBuffer = require('is-array-buffer-x'),
+    isTypedArray = require('is-typed-array'),
+    isDataView = require('is-data-view-x'),
     isPrimitive = require('is-primitive'),
+    isUndefined = require('validate.io-undefined'),
+    isNil = require('is-nil-x'),
+    isNull = require('lodash.isnull'),
     ERROR = Error,
     SYMBOL = require('has-symbol-support-x') && Symbol,
     SET = typeof Set === 'function' && Set,
     MAP = typeof Map === 'function' && Map,
     PROMISE = typeof Promise === 'function' && Promise,
-    DATAVIEW = typeof DataView === 'function' && DataView,
     sForEach = SET && SET.prototype.forEach,
     mForEach = MAP && MAP.prototype.forEach,
     pSymbolToString = SYMBOL && SYMBOL.prototype.toString,
@@ -168,28 +170,15 @@
     ],
     unwantedMap = MAP ? $keys(new MAP()) : [],
     unwantedSet = SET ? $keys(new SET()) : [],
-    unwantedArrayBuffer =
-      typedArrayLib.hasArrayBuffer ? $keys(new ArrayBuffer(4)) : [],
-    unwantedTypedArray =
-      typedArrayLib.hasArrayBuffer ? $keys(new Int16Array(4)) : [],
+    hasArrayBuffer = typeof ArrayBuffer === 'function',
+    unwantedArrayBuffer = hasArrayBuffer ? $keys(new ArrayBuffer(4)) : [],
+    unwantedTypedArray = hasArrayBuffer ? $keys(new Int16Array(4)) : [],
     unwantedError, inspectIt, formatValueIt;
 
   try {
     throw new ERROR('a');
   } catch (e) {
     unwantedError = $keys(e);
-  }
-
-  function isNull(arg) {
-    return arg === null;
-  }
-
-  function isUndefined(arg) {
-    return typeof arg === 'undefined';
-  }
-
-  function isNil(arg) {
-    return isNull(arg) || isUndefined(arg);
   }
 
   function isBoolean(arg) {
@@ -247,11 +236,6 @@
 
   function isSetIterator(value) {
     return SET && isCollectionIterator(value, '[object Set Iterator]');
-  }
-
-  function isDataView(value) {
-    return DATAVIEW && !isPrimitive(value) &&
-      (toStringTag(value) === '[object DataView]' || value instanceof DATAVIEW);
   }
 
   function includes(arr, value)  {

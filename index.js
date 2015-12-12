@@ -126,6 +126,7 @@
     isNil = require('is-nil-x'),
     isNull = require('lodash.isnull'),
     isSymbol = require('is-symbol'),
+    isError = require('is-error-x'),
     ERROR = Error,
     SYMBOL = require('has-symbol-support-x') && Symbol,
     SET = typeof Set === 'function' && Set,
@@ -192,11 +193,6 @@
 
   function isStringType(arg) {
     return typeof arg === 'string';
-  }
-
-  function isError(err) {
-    return !isPrimitive(err) &&
-      (toStringTag(err) === '[object Error]' || err instanceof ERROR);
   }
 
   function isSet(value) {

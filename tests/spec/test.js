@@ -22,11 +22,8 @@
     ifHasArrayBuffer = hasArrayBuffer ? it : xit,
     hasDataView = typeof DataView === 'function',
     ifHasDataView = hasArrayBuffer && hasDataView ? it : xit,
-    hasInt8Array = hasArrayBuffer && typeof Int8Array === 'function',
-    ifHasInt8Array = hasInt8Array ? it : xit,
-    hasUint8ClampedArray = hasArrayBuffer &&
-    typeof Uint8ClampedArray === 'function',
-    ifHasUint8ClampedArray = hasUint8ClampedArray ? it : xit,
+    hasInt8Array = typeof Int8Array === 'function',
+    hasUint8ClampedArray = typeof Uint8ClampedArray === 'function',
     hasPromise = typeof Promise === 'function',
     ifHasPromiseIt = hasPromise ? it : xit,
     propVisibleOnArrayBuffer = hasArrayBuffer && (function () {
@@ -43,6 +40,7 @@
       JSON = {};
     }
     require('json3').runInContext(null, JSON);
+    require('es6-shim');
     inspect = require('../../index.js');
   } else {
     inspect = returnExports;
@@ -92,7 +90,10 @@
       expect(inspect('\n\u0001')).toBe('\'\\n\\u0001\'');
 
       expect(inspect([])).toBe('[]');
-      expect(inspect(Object.create([]))).toBe('Array {}');
+      var arr = Object.create([]);
+      var ex = inspect(arr);
+      expect(ex.slice(0, 7)).toBe('Array {');
+      expect(ex.slice(-1)).toBe('}');
       expect(inspect([1, 2])).toBe('[ 1, 2 ]');
       expect(inspect([1, [2, 3]])).toBe('[ 1, [ 2, 3 ] ]');
 
@@ -156,17 +157,22 @@
     ifHasArrayBuffer('ArrayBuffer', function () {
       [true, false].forEach(function (showHidden) {
         var ab = new ArrayBuffer(4);
-        expect(inspect(ab, showHidden))
-          .toBe('ArrayBuffer { byteLength: 4 }');
-        expect(inspect(ab, showHidden))
-          .toBe('ArrayBuffer { byteLength: 4 }');
+        var ex = inspect(ab, showHidden);
+        expect(ex.slice(0, 13)).toBe('ArrayBuffer {');
+        expect(ex.slice(-1)).toBe('}');
+        var match = ex.match(/byteLength: 4/);
+        match = match ? match[0] : ex;
+        expect(match).toBe('byteLength: 4');
         ab.x = 42;
+        ex = inspect(ab, showHidden);
         if (propVisibleOnArrayBuffer) {
-          expect(inspect(ab, showHidden))
-            .toBe('ArrayBuffer { byteLength: 4, x: 42 }');
+          match = ex.match(/(byteLength: 4,)[\s\S]+(x: 42)/);
+          match = match ? match.slice(1).join(' ') : ex;
+          expect(match).toBe('byteLength: 4, x: 42');
         } else {
-          expect(inspect(ab, showHidden))
-            .toBe('ArrayBuffer { byteLength: 4 }');
+          match = ex.match(/byteLength: 4/);
+          match = match ? match[0] : ex;
+          expect(match).toBe('byteLength: 4');
         }
       });
     });
@@ -174,121 +180,87 @@
     ifHasDataView('DataView', function () {
       [true, false].forEach(function (showHidden) {
         var ab = new ArrayBuffer(4),
-          dv = new DataView(ab, 1, 2);
-        expect(inspect(new DataView(ab, 1, 2), showHidden))
-          .toBe('DataView {\n' +
-            '  byteLength: 2,\n' +
-            '  byteOffset: 1,\n' +
-            '  buffer: ArrayBuffer { byteLength: 4 } }');
-        expect(inspect(dv, showHidden))
-          .toBe('DataView {\n' +
-            '  byteLength: 2,\n' +
-            '  byteOffset: 1,\n' +
-            '  buffer: ArrayBuffer { byteLength: 4 } }');
+          dv = new DataView(ab, 1, 2),
+          ex = inspect(dv, showHidden);
+
+        expect(ex.slice(0, 10)).toBe('DataView {');
+        expect(ex.slice(-1)).toBe('}');
+        var match = ex.match(/(byteLength: 2,)[\s\S]+(byteOffset: 1,)[\s\S]+(buffer:)[\s\S]+(ArrayBuffer)[\s\S]+(byteLength: 4)/);
+        match = match ? match.slice(1).join(' ') : ex;
+        expect(match).toBe('byteLength: 2, byteOffset: 1, buffer: ArrayBuffer byteLength: 4');
+        ex = inspect(dv, showHidden);
+        match = ex.match(/(byteLength: 2,)[\s\S]+(byteOffset: 1,)[\s\S]+(buffer:)[\s\S]+(ArrayBuffer)[\s\S]+(byteLength: 4)/);
+        match = match ? match.slice(1).join(' ') : ex;
+        expect(match).toBe('byteLength: 2, byteOffset: 1, buffer: ArrayBuffer byteLength: 4');
         ab.x = 42;
         dv.y = 1337;
+        ex = inspect(dv, showHidden);
         if (propVisibleOnArrayBuffer) {
-          expect(inspect(dv, showHidden))
-            .toBe('DataView {\n' +
-              '  byteLength: 2,\n' +
-              '  byteOffset: 1,\n' +
-              '  buffer: ArrayBuffer { byteLength: 4, x: 42 },\n' +
-              '  y: 1337 }');
+          match = ex.match(/(byteLength: 2,)[\s\S]+(byteOffset: 1,)[\s\S]+(buffer:)[\s\S]+(ArrayBuffer)[\s\S]+(byteLength: 4,)[\s\S]+(x: 42)[\s\S]+(y: 1337)/);
+          match = match ? match.slice(1).join(' ') : ex;
+          expect(match).toBe('byteLength: 2, byteOffset: 1, buffer: ArrayBuffer byteLength: 4, x: 42 y: 1337');
         } else {
-          expect(inspect(dv, showHidden))
-            .toBe('DataView {\n' +
-              '  byteLength: 2,\n' +
-              '  byteOffset: 1,\n' +
-              '  buffer: ArrayBuffer { byteLength: 4 },\n' +
-              '  y: 1337 }');
+          match = ex.match(/(byteLength: 2,)[\s\S]+(byteOffset: 1,)[\s\S]+(buffer:)[\s\S]+(ArrayBuffer)[\s\S]+(byteLength: 4)[\s\S]+(y: 1337)/);
+          match = match ? match.slice(1).join(' ') : ex;
+          expect(match).toBe('byteLength: 2, byteOffset: 1, buffer: ArrayBuffer byteLength: 4 y: 1337');
         }
       });
     });
 
     ifHasArrayBuffer('TypedArrays', function () {
-      [{
-        Ctr: Float32Array,
-        name: 'Float32Array'
-      }, {
-        Ctr: Float64Array,
-        name: 'Float64Array'
-      }, {
-        Ctr: Int16Array,
-        name: 'Int16Array'
-      }, {
-        Ctr: Int32Array,
-        name: 'Int32Array'
-      }, {
-        Ctr: Uint16Array,
-        name: 'Uint16Array'
-      }, {
-        Ctr: Uint32Array,
-        name: 'Uint32Array'
-      }, {
-        Ctr: Uint8Array,
-        name: 'Uint8Array'
-      }].forEach(function (item) {
+      var arrays = [{
+          Ctr: Float32Array,
+          name: 'Float32Array'
+        }, {
+          Ctr: Float64Array,
+          name: 'Float64Array'
+        }, {
+          Ctr: Int16Array,
+          name: 'Int16Array'
+        }, {
+          Ctr: Int32Array,
+          name: 'Int32Array'
+        }, {
+          Ctr: Uint16Array,
+          name: 'Uint16Array'
+        }, {
+          Ctr: Uint32Array,
+          name: 'Uint32Array'
+        }, {
+          Ctr: Uint8Array,
+          name: 'Uint8Array'
+        }];
+      if (hasUint8ClampedArray) {
+        arrays.push({
+          Ctr: Uint8ClampedArray,
+          name: 'Uint8ClampedArray'
+        });
+      }
+      if (hasInt8Array) {
+        arrays.push({
+          Ctr: Int8Array,
+          name: 'Int8Array'
+        });
+      }
+      arrays.forEach(function (item) {
         var length = 2;
         var byteLength = length * item.Ctr.BYTES_PER_ELEMENT;
         var array = new item.Ctr(new ArrayBuffer(byteLength), 0, length);
         array[0] = 65;
         array[1] = 97;
-        expect(inspect(array, true)).toBe(item.name + ' [\n' +
-          '  65,\n' +
-          '  97,\n' +
-          '  [BYTES_PER_ELEMENT]: ' + item.Ctr.BYTES_PER_ELEMENT + ',\n' +
-          '  [length]: ' + length + ',\n' +
-          '  [byteLength]: ' + byteLength + ',\n' +
-          '  [byteOffset]: 0,\n' +
-          '  [buffer]: ArrayBuffer { byteLength: ' + byteLength + ' } ]');
-        expect(inspect(array, false))
-          .toBe(item.name + ' [ 65, 97 ]');
-      });
-    });
+        var ex = inspect(array, true);
+        expect(ex.slice(0, item.name.length + 2)).toBe(item.name + ' [');
+        expect(ex.slice(-1)).toBe(']');
+        var match = ex.match(/(65,)[\s\S]+(97)[\s\S]+\[?(BYTES_PER_ELEMENT)\]?: (\d*)[\s\S]+\[?(length)\]?: (\d*)[\s\S]+\[?(byteLength)\]?: (\d*)[\s\S]+\[?(byteOffset)\]?: (0)[\s\S]+\[?(buffer)\]?:[\s\S]+(ArrayBuffer)[\s\S]+(byteLength: \d*)/);
+        match = match ? match.slice(1).join(' ') : ex;
+        expect(match).toBe('65, 97 BYTES_PER_ELEMENT ' + item.Ctr.BYTES_PER_ELEMENT + ' length ' + length + ' byteLength ' + byteLength + ' byteOffset 0 buffer ArrayBuffer byteLength: ' + byteLength);
 
-    ifHasInt8Array('TypedArrays', function () {
-      [{
-        Ctr: Int8Array,
-        name: 'Int8Array'
-      }].forEach(function (item) {
-        var length = 2;
-        var byteLength = length * item.Ctr.BYTES_PER_ELEMENT;
-        var array = new item.Ctr(new ArrayBuffer(byteLength), 0, length);
-        array[0] = 65;
-        array[1] = 97;
-        expect(inspect(array, true)).toBe(item.name + ' [\n' +
-          '  65,\n' +
-          '  97,\n' +
-          '  [BYTES_PER_ELEMENT]: ' + item.Ctr.BYTES_PER_ELEMENT + ',\n' +
-          '  [length]: ' + length + ',\n' +
-          '  [byteLength]: ' + byteLength + ',\n' +
-          '  [byteOffset]: 0,\n' +
-          '  [buffer]: ArrayBuffer { byteLength: ' + byteLength + ' } ]');
-        expect(inspect(array, false))
-          .toBe(item.name + ' [ 65, 97 ]');
-      });
-    });
-
-    ifHasUint8ClampedArray('TypedArrays', function () {
-      [{
-        Ctr: Uint8ClampedArray,
-        name: 'Uint8ClampedArray'
-      }].forEach(function (item) {
-        var length = 2;
-        var byteLength = length * item.Ctr.BYTES_PER_ELEMENT;
-        var array = new item.Ctr(new ArrayBuffer(byteLength), 0, length);
-        array[0] = 65;
-        array[1] = 97;
-        expect(inspect(array, true)).toBe(item.name + ' [\n' +
-          '  65,\n' +
-          '  97,\n' +
-          '  [BYTES_PER_ELEMENT]: ' + item.Ctr.BYTES_PER_ELEMENT + ',\n' +
-          '  [length]: ' + length + ',\n' +
-          '  [byteLength]: ' + byteLength + ',\n' +
-          '  [byteOffset]: 0,\n' +
-          '  [buffer]: ArrayBuffer { byteLength: ' + byteLength + ' } ]');
-        expect(inspect(array, false))
-          .toBe(item.name + ' [ 65, 97 ]');
+        ex = inspect(array, false);
+        expect(ex.slice(0, item.name.length + 2)).toBe(item.name + ' [');
+        expect(ex.slice(-1)).toBe(']');
+        match = ex.match(/(65,)[\s\S]+(97)/);
+        match = match ? match.slice(1).join(' ') : ex;
+        expect(match).toBe('65, 97');
       });
     });
 
@@ -481,17 +453,28 @@
         text = oldIEerror ? '[TypeError:' : '[ReferenceError:';
         expect(inspect(e).indexOf(text)).not.toBe(-1, text);
       }
-      var ex = inspect(new Error('FAILURE'), true);
+      var err = new Error('FAILURE');
+      var ex = inspect(err, true);
       expect(ex.indexOf('[Error: FAILURE]')).not.toBe(-1, '[Error: FAILURE]');
-      expect(ex.indexOf('[stack]'))
-        .not.toBe(-1, 'Error must be thrown to get stack in old IE');
-      expect(ex.indexOf('[message]')).not.toBe(-1, ex);
+      if (err.stack !== undefined) {
+        var stack = ex.match(/\[?stack\]?:/);
+        stack = stack ? stack[1] : ex;
+        expect(stack).not.toBe('stack');
+      }
+      if (err.message !== undefined) {
+        var message = ex.match(/\[?(message)\]?(: \'FAILURE\')/);
+        message = message ? message[1] + message[2] : ex;
+        expect(message).toBe('message: \'FAILURE\'');
+      }
     });
 
     it('GH-1941', function () {
       // GH-1941
       // should not throw:
-      expect(inspect(Object.create(Date.prototype))).toBe('Date {}');
+      var prot = Object.create(Date.prototype);
+      var ex = inspect(prot);
+      expect(ex.slice(0, 6)).toBe('Date {');
+      expect(ex.slice(-1)).toBe('}');
     });
 
     it('GH-1944', function () {
@@ -764,49 +747,47 @@
 
     ifHasSetIt('Set', function () {
       // test Set
-      var subject = new Set();
-      expect(inspect(subject)).toBe('Set {}');
-      subject.add(1);
-      subject.add(2);
-      subject.add(3);
-      if (subject.forEach) {
-        expect(inspect(subject)).toBe('Set { 1, 2, 3 }');
-      } else {
-        expect(inspect(subject)).toBe('Set {}');
-      }
       var set = new Set();
+      var ex = inspect(set);
+      expect(ex.slice(0, 5)).toBe('Set {');
+      expect(ex.slice(-1)).toBe('}');
+      set.add(1);
+      set.add(2);
+      set.add(3);
+      set.add(4);
+      ex = inspect(set);
+      var match = ex.match(/1, 2, 3/);
+      match = match ? match[0] : ex;
+      expect(match).toBe('1, 2, 3');
+      set = new Set();
       set.add('foo');
       set.bar = 42;
-      if (subject.forEach) {
-        expect(inspect(set, true)).toBe('Set { \'foo\', [size]: 1, bar: 42 }');
-      } else {
-        expect(inspect(set, true)).toBe('Set { [size]: 1, bar: 42 }');
-      }
+      ex = inspect(set, true);
+      match = ex.match(/(\'foo\',)[\s\S]+(\[size\]: 1,)[\s\S]+(bar: 42)/);
+      match = match ? match.slice(1).join(' ') : ex;
+      expect(match).toBe('\'foo\', [size]: 1, bar: 42');
     });
 
     ifHasMapIt('Map', function () {
       // test Map
-      var subject = new Map();
-      expect(inspect(subject)).toBe('Map {}');
-
-      subject.set(1, 'a');
-      subject.set(2, 'b');
-      subject.set(3, 'c');
-      if (subject.forEach) {
-        expect(inspect(subject))
-          .toBe('Map { 1 => \'a\', 2 => \'b\', 3 => \'c\' }');
-      } else {
-        expect(inspect(subject)).toBe('Map {}');
-      }
       var map = new Map();
+      var ex = inspect(map);
+      expect(ex.slice(0, 5)).toBe('Map {');
+      expect(ex.slice(-1)).toBe('}');
+      map.set(1, 'a');
+      map.set(2, 'b');
+      map.set(3, 'c');
+      ex = inspect(map);
+      var match = ex.match(/1 => \'a\', 2 => \'b\', 3 => \'c\'/);
+      match = match ? match[0] : ex;
+      expect(match).toBe('1 => \'a\', 2 => \'b\', 3 => \'c\'');
+      map = new Map();
       map.set('foo', null);
       map.bar = 42;
-      if (subject.forEach) {
-        expect(inspect(map, true))
-          .toBe('Map { \'foo\' => null, [size]: 1, bar: 42 }');
-      } else {
-        expect(inspect(map, true)).toBe('Map { [size]: 1, bar: 42 }');
-      }
+      ex = inspect(map, true);
+      match = ex.match(/(\'foo\' => null,)[\s\S]+(\[size\]: 1,)[\s\S]+(bar: 42)/);
+      match = match ? match.slice(1).join(' ') : ex;
+      expect(match).toBe('\'foo\' => null, [size]: 1, bar: 42');
     });
 
     ifHasPromiseIt('Promise', function () {

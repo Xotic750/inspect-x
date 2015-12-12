@@ -20,6 +20,7 @@
  * alt="npm version" height="18">
  * </a>
  *
+ * An implementation of node's ES6 inspect module.
  * Return a string representation of object, which is useful for debugging.
  * An optional options object may be passed that alters certain aspects of the
  * formatted string:
@@ -92,7 +93,7 @@
  *
  * inspect(obj);
  *   // "{ bar: 'baz' }"
- * @version 1.0.3
+ * @version 1.0.4
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -119,6 +120,8 @@
     isDate = require('is-date-object'),
     toStringTag = require('to-string-tag-x'),
     isArrayBuffer = require('is-array-buffer-x'),
+    isSet = require('is-set-x'),
+    isMap = require('is-map-x'),
     isTypedArray = require('is-typed-array'),
     isDataView = require('is-data-view-x'),
     isPrimitive = require('is-primitive'),
@@ -126,10 +129,13 @@
     isNil = require('is-nil-x'),
     isNull = require('lodash.isnull'),
     isSymbol = require('is-symbol'),
+    isError = require('is-error-x'),
+    isObjectLike = require('is-object-like-x'),
     ERROR = Error,
-    SYMBOL = require('has-symbol-support-x') && Symbol,
-    SET = typeof Set === 'function' && Set,
-    MAP = typeof Map === 'function' && Map,
+    hasSymbolSupport = require('has-symbol-support-x'),
+    SYMBOL = hasSymbolSupport && Symbol,
+    SET = typeof Set === 'function' && isSet(new Set()) && Set,
+    MAP = typeof Map === 'function' && isMap(new Map()) && Map,
     PROMISE = typeof Promise === 'function' && Promise,
     sForEach = SET && SET.prototype.forEach,
     mForEach = MAP && MAP.prototype.forEach,
@@ -160,27 +166,7 @@
     $getPrototypeOf = Object.getPrototypeOf,
     $getOwnPropertyNames = Object.getOwnPropertyNames,
     $getOwnPropertySymbols = Object.getOwnPropertySymbols,
-    // .buffer goes last, it's not a primitive like the others.
-    unwantedOldArrayBuffer = ['slice', 'length'],
-    unwantedOldTypedArray = ['get', 'set', 'slice', 'subarray'],
-    unwantedProto = ['__proto__'],
-    unwantedDataView = [
-      'getUint8', 'getInt8', 'getUint16', 'getInt16', 'getUint32', 'getInt32',
-      'getFloat32', 'getFloat64', 'setUint8', 'setInt8', 'setUint16',
-      'setInt16', 'setUint32', 'setInt32', 'setFloat32', 'setFloat64'
-    ],
-    unwantedMap = MAP ? $keys(new MAP()) : [],
-    unwantedSet = SET ? $keys(new SET()) : [],
-    hasArrayBuffer = typeof ArrayBuffer === 'function',
-    unwantedArrayBuffer = hasArrayBuffer ? $keys(new ArrayBuffer(4)) : [],
-    unwantedTypedArray = hasArrayBuffer ? $keys(new Int16Array(4)) : [],
-    unwantedError, inspectIt, formatValueIt;
-
-  try {
-    throw new ERROR('a');
-  } catch (e) {
-    unwantedError = $keys(e);
-  }
+    inspectIt, formatValueIt;
 
   function isBooleanType(arg) {
     return typeof arg === 'boolean';
@@ -194,35 +180,22 @@
     return typeof arg === 'string';
   }
 
-  function isError(err) {
-    return !isPrimitive(err) &&
-      (toStringTag(err) === '[object Error]' || err instanceof ERROR);
-  }
-
-  function isSet(value) {
-    return SET && !isPrimitive(value) &&
-      (toStringTag(value) === '[object Set]' || value instanceof SET) &&
-      ES.IsCallable(value.add);
-  }
-
-  function isMap(value) {
-    return MAP && !isPrimitive(value) &&
-      (toStringTag(value) === '[object Map]' || value instanceof MAP) &&
-      ES.IsCallable(value.set);
+  function isSymbolType(arg) {
+    return isPrimitive(arg) && isSymbol(arg);
   }
 
   function isCollection(value) {
-    return !isPrimitive(value) && (isSet(value) || isMap(value));
+    return isObjectLike(value) && (isSet(value) || isMap(value));
   }
 
   function isPromise(value) {
-    return PROMISE && !isPrimitive(value) &&
+    return PROMISE && isObjectLike(value) &&
       (toStringTag(value) === '[object Promise]' || value instanceof PROMISE) &&
       ES.IsCallable(value.then);
   }
 
   function isCollectionIterator(value, stringTag) {
-    return !isPrimitive(value) &&
+    return isObjectLike(value) &&
       toStringTag(value) === stringTag &&
       ES.IsCallable(value.next);
   }
@@ -237,12 +210,6 @@
 
   function includes(arr, value)  {
     return ES.Call(pIndexOf, arr, [value]) > -1;
-  }
-
-  function filterUnwanted(keys, list) {
-    return ES.Call(pFilter, keys, [function (key) {
-      return !includes(list, key);
-    }]);
   }
 
   function filterIndex(keys, length) {
@@ -390,7 +357,7 @@
       return ctx.stylize(ES.Call(pBooleanToString, value), 'boolean');
     }
     // es6 symbol primitive
-    if (isPrimitive(value) && isSymbol(value)) {
+    if (isSymbolType(value)) {
       return ctx.stylize(ES.Call(pSymbolToString, value), 'symbol');
     }
   }
@@ -433,7 +400,7 @@
         if (constructor) {
           desc.value = constructor.BYTES_PER_ELEMENT;
         }
-      } else if (isPrimitive(key) && isSymbol(key)) {
+      } else if (isSymbolType(key)) {
         name = '[' + ctx.stylize(ES.Call(pSymbolToString, key), 'symbol') + ']';
       } else {
         name = '[' + key + ']';
@@ -501,7 +468,7 @@
       }
     });
     forEach(keys, function (key) {
-      if (isPrimitive(key) && isSymbol(key) || !key.match(/^\d+$/)) {
+      if (isSymbolType(key) || !key.match(/^\d+$/)) {
         push(
           output,
           formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
@@ -517,7 +484,7 @@
       push(output, formatNumber(ctx, item));
     });
     forEach(keys, function (key) {
-      if (isPrimitive(key) && isSymbol(key) || !key.match(/^\d+$/)) {
+      if (isSymbolType(key) || !key.match(/^\d+$/)) {
         push(
           output,
           formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
@@ -604,42 +571,9 @@
       return primitive;
     }
     // Look up the keys of the object.
-    keys = filterUnwanted($keys(value), unwantedProto);
-    if (isError(value)) {
-      keys = filterUnwanted(keys, unwantedError);
-    } else if (isMap(value)) {
-      keys = filterUnwanted(keys, unwantedMap);
-    } else if (isSet(value)) {
-      keys = filterUnwanted(keys, unwantedSet);
-    } else if (isArrayBuffer(value)) {
-      keys = filterUnwanted(keys, unwantedArrayBuffer);
-    } else if (isTypedArray(value)) {
-      keys = filterUnwanted(keys, unwantedTypedArray);
-    } else if (isDataView(value)) {
-      keys = filterUnwanted(
-        filterIndex(keys, value.byteLength),
-        unwantedDataView
-      );
-    }
-    visibleKeys = keys;
+    visibleKeys = keys = $keys(value);
     if (ctx.showHidden) {
       keys = $getOwnPropertyNames(value);
-      if (isError(value)) {
-        unshiftUniq(keys, 'message');
-        unshiftUniq(keys, 'stack');
-      } else if (isTypedArray(value)) {
-        keys = filterUnwanted(keys, unwantedOldTypedArray);
-      } else if (isArrayBuffer(value)) {
-        keys = filterUnwanted(
-          filterIndex(keys, value.byteLength),
-          unwantedOldArrayBuffer
-        );
-      } else if (isDataView(value)) {
-        keys = filterUnwanted(
-          filterIndex(keys, value.byteLength),
-          unwantedDataView
-        );
-      }
       if ($getOwnPropertySymbols) {
         keys = ES.Call(pConcat, keys, [$getOwnPropertySymbols(value)]);
       }
@@ -657,6 +591,8 @@
       // for boxed Strings, we have to remove the 0-n indexed entries,
       // since they just noisey up the output and are redundant
       keys = filterIndex(keys, raw.length);
+    } else if (isArrayBuffer(value)) {
+      keys = filterIndex(keys, raw.byteLength);
     }
     // Some type of object without properties can be shortcutted.
     if (keys.length === 0) {
@@ -895,7 +831,7 @@
     if (isBooleanType(opts)) {
       // legacy...
       ctx.showHidden = opts;
-    } else if (!isPrimitive(opts) && !ES.IsCallable(opts)) {
+    } else if (isObjectLike(opts)) {
       // got an "options" object
       forEach($keys(opts), function (opt) {
         ctx[opt] = opts[opt];

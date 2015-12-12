@@ -92,7 +92,7 @@
  *
  * inspect(obj);
  *   // "{ bar: 'baz' }"
- * @version 1.0.2
+ * @version 1.0.3
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -125,6 +125,7 @@
     isUndefined = require('validate.io-undefined'),
     isNil = require('is-nil-x'),
     isNull = require('lodash.isnull'),
+    isSymbol = require('is-symbol'),
     ERROR = Error,
     SYMBOL = require('has-symbol-support-x') && Symbol,
     SET = typeof Set === 'function' && Set,
@@ -181,20 +182,16 @@
     unwantedError = $keys(e);
   }
 
-  function isBoolean(arg) {
+  function isBooleanType(arg) {
     return typeof arg === 'boolean';
   }
 
-  function isNumber(arg) {
+  function isNumberType(arg) {
     return typeof arg === 'number';
   }
 
-  function isString(arg) {
+  function isStringType(arg) {
     return typeof arg === 'string';
-  }
-
-  function isSymbol(arg) {
-    return SYMBOL && typeof arg === 'symbol';
   }
 
   function isError(err) {
@@ -380,20 +377,20 @@
     if (isNull(value)) {
       return ctx.stylize('null', 'null');
     }
-    if (isString(value)) {
+    if (isStringType(value)) {
       simple = replace($stringify(value), /^"|"$/g, '');
       simple = replace(simple, /'/g, '\\\'');
       simple = replace(simple, /\\"/g, '"');
       return ctx.stylize('\'' + simple + '\'', 'string');
     }
-    if (isNumber(value)) {
+    if (isNumberType(value)) {
       return formatNumber(ctx, value);
     }
-    if (isBoolean(value)) {
+    if (isBooleanType(value)) {
       return ctx.stylize(ES.Call(pBooleanToString, value), 'boolean');
     }
     // es6 symbol primitive
-    if (isSymbol(value)) {
+    if (isPrimitive(value) && isSymbol(value)) {
       return ctx.stylize(ES.Call(pSymbolToString, value), 'symbol');
     }
   }
@@ -436,7 +433,7 @@
         if (constructor) {
           desc.value = constructor.BYTES_PER_ELEMENT;
         }
-      } else if (isSymbol(key)) {
+      } else if (isPrimitive(key) && isSymbol(key)) {
         name = '[' + ctx.stylize(ES.Call(pSymbolToString, key), 'symbol') + ']';
       } else {
         name = '[' + key + ']';
@@ -504,7 +501,7 @@
       }
     });
     forEach(keys, function (key) {
-      if (isSymbol(key) || !key.match(/^\d+$/)) {
+      if (isPrimitive(key) && isSymbol(key) || !key.match(/^\d+$/)) {
         push(
           output,
           formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
@@ -520,7 +517,7 @@
       push(output, formatNumber(ctx, item));
     });
     forEach(keys, function (key) {
-      if (isSymbol(key) || !key.match(/^\d+$/)) {
+      if (isPrimitive(key) && isSymbol(key) || !key.match(/^\d+$/)) {
         push(
           output,
           formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
@@ -596,7 +593,7 @@
       !(value.constructor && value.constructor.prototype === value)) {
 
       ret = value.inspect(recurseTimes, ctx);
-      if (!isString(ret)) {
+      if (!isStringType(ret)) {
         return formatValue(ctx, ret, recurseTimes);
       }
       return ret;
@@ -656,7 +653,7 @@
       // the .valueOf() call can fail for a multitude of reasons
       raw = isDate(value) ? raw : value.valueOf();
     } catch (ignore) {}
-    if (isString(raw)) {
+    if (isStringType(raw)) {
       // for boxed Strings, we have to remove the 0-n indexed entries,
       // since they just noisey up the output and are redundant
       keys = filterIndex(keys, raw.length);
@@ -681,19 +678,19 @@
         return formatError(value);
       }
       // now check the `raw` value to handle boxed primitives
-      if (isString(raw)) {
+      if (isStringType(raw)) {
         return ctx.stylize(
           '[String: ' + formatPrimitiveNoColor(ctx, raw) + ']',
           'string'
         );
       }
-      if (isNumber(raw)) {
+      if (isNumberType(raw)) {
         return ctx.stylize(
           '[Number: ' + formatPrimitiveNoColor(ctx, raw) + ']',
           'number'
         );
       }
-      if (isBoolean(raw)) {
+      if (isBooleanType(raw)) {
         return ctx.stylize(
           '[Boolean: ' + formatPrimitiveNoColor(ctx, raw) + ']',
           'boolean'
@@ -805,13 +802,13 @@
     } else if (isError(value)) {
       // Make error with message first say the error
       base = formatError(value);
-    } else if (isString(raw)) {
+    } else if (isStringType(raw)) {
       // Make boxed primitive Strings look like such
       base = '[String: ' + formatPrimitiveNoColor(ctx, raw) + ']';
-    } else if (isNumber(raw)) {
+    } else if (isNumberType(raw)) {
       // Make boxed primitive Numbers look like such
       base = '[Number: ' + formatPrimitiveNoColor(ctx, raw) + ']';
-    } else if (isBoolean(raw)) {
+    } else if (isBooleanType(raw)) {
       // Make boxed primitive Booleans look like such
       base = '[Boolean: ' + formatPrimitiveNoColor(ctx, raw) + ']';
     }
@@ -895,7 +892,7 @@
         ctx.colors = arguments[3];
       }
     }
-    if (isBoolean(opts)) {
+    if (isBooleanType(opts)) {
       // legacy...
       ctx.showHidden = opts;
     } else if (!isPrimitive(opts) && !ES.IsCallable(opts)) {

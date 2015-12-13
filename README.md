@@ -20,6 +20,7 @@ alt="devDependency status" height="18"/>
 alt="npm version" height="18">
 </a>
 
+An implementation of node's ES6 inspect module.
 Return a string representation of object, which is useful for debugging.
 An optional options object may be passed that alters certain aspects of the
 formatted string:

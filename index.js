@@ -20,6 +20,7 @@
  * alt="npm version" height="18">
  * </a>
  *
+ * An implementation of node's ES6 inspect module.
  * Return a string representation of object, which is useful for debugging.
  * An optional options object may be passed that alters certain aspects of the
  * formatted string:
@@ -119,6 +120,8 @@
     isDate = require('is-date-object'),
     toStringTag = require('to-string-tag-x'),
     isArrayBuffer = require('is-array-buffer-x'),
+    isSet = require('is-set-x'),
+    isMap = require('is-map-x'),
     isTypedArray = require('is-typed-array'),
     isDataView = require('is-data-view-x'),
     isPrimitive = require('is-primitive'),
@@ -131,8 +134,8 @@
     ERROR = Error,
     hasSymbolSupport = require('has-symbol-support-x'),
     SYMBOL = hasSymbolSupport && Symbol,
-    SET = typeof Set === 'function' && Set,
-    MAP = typeof Map === 'function' && Map,
+    SET = typeof Set === 'function' && isSet(new Set()) && Set,
+    MAP = typeof Map === 'function' && isMap(new Map()) && Map,
     PROMISE = typeof Promise === 'function' && Promise,
     sForEach = SET && SET.prototype.forEach,
     mForEach = MAP && MAP.prototype.forEach,
@@ -179,39 +182,16 @@
     ],
     unwantedMap = MAP ? $keys(new MAP()) : [],
     unwantedSet = SET ? $keys(new SET()) : [],
-    hasArrayBuffer = typeof ArrayBuffer === 'function',
+    hasArrayBuffer = typeof ArrayBuffer === 'function' &&
+      isArrayBuffer(new ArrayBuffer(4)),
     unwantedArrayBuffer = hasArrayBuffer ? $keys(new ArrayBuffer(4)) : [],
     unwantedTypedArray = hasArrayBuffer ? $keys(new Int16Array(4)) : [],
-    unwantedError, inspectIt, formatValueIt, getterMapSize, getterSetSize;
+    unwantedError, inspectIt, formatValueIt;
 
   try {
     throw new ERROR('a');
   } catch (e) {
     unwantedError = $keys(e);
-  }
-
-  if (MAP) {
-    try {
-      getterMapSize = Object.getOwnPropertyDescriptor(
-        Object.getPrototypeOf(new MAP()),
-        'size'
-      ).get;
-      ES.Call(getterMapSize, new MAP());
-    } catch (ignore) {
-      MAP = getterMapSize = null;
-    }
-  }
-
-  if (SET) {
-    try {
-      getterSetSize = Object.getOwnPropertyDescriptor(
-        Object.getPrototypeOf(new SET()),
-        'size'
-      ).get;
-      ES.Call(getterSetSize, new SET());
-    } catch (ignore) {
-      SET = getterSetSize = null;
-    }
   }
 
   function isBooleanType(arg) {
@@ -228,28 +208,6 @@
 
   function isSymbolType(arg) {
     return isPrimitive(arg) && isSymbol(arg);
-  }
-
-  function isSet(value) {
-    if (!SET || !isObjectLike(value)) {
-      return false;
-    }
-    try {
-      ES.Call(getterSetSize, value);
-      return true;
-    } catch (ignore) {}
-    return false;
-  }
-
-  function isMap(value) {
-    if (!MAP || !isObjectLike(value)) {
-      return false;
-    }
-    try {
-      ES.Call(getterMapSize, value);
-      return true;
-    } catch (ignore) {}
-    return false;
   }
 
   function isCollection(value) {

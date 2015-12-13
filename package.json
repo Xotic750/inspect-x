@@ -1,7 +1,7 @@
 {
   "name": "inspect-x",
   "version": "1.0.4",
-  "description": "An implementation of node's inspect module.",
+  "description": "An implementation of node's ES6 inspect module.",
   "homepage": "https://github.com/Xotic750/inspect-x",
   "author": {
     "name": "Graham Fairweather",
@@ -9,6 +9,7 @@
   },
   "copyright": "Copyright (c) 2015",
   "keywords": [
+    "ES6",
     "inspect",
     "module",
     "javascript",
@@ -33,6 +34,9 @@
     "is-date-object": "^1.0.1",
     "to-string-tag-x": "^1.0.0",
     "is-typed-array": "^1.0.3",
+    "is-array-buffer-x": "^1.0.1",
+    "is-map-x": "^1.0.0",
+    "is-set-x": "^1.0.0",
     "is-primitive": "^2.0.0",
     "has-own-property-x": "^1.0.0",
     "has-symbol-support-x": "^1.0.1",

@@ -43,6 +43,7 @@
       JSON = {};
     }
     require('json3').runInContext(null, JSON);
+    require('es6-shim');
     inspect = require('../../index.js');
   } else {
     inspect = returnExports;

@@ -75,7 +75,7 @@ be formatted according to the returned Object. This is similar to
 how JSON.stringify() works.
 
 **See**: https://nodejs.org/api/util.html#util_util_inspect_object_options  
-**Version**: 1.0.3  
+**Version**: 1.0.4  
 **Author:** Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  

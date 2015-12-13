@@ -92,7 +92,7 @@
  *
  * inspect(obj);
  *   // "{ bar: 'baz' }"
- * @version 1.0.3
+ * @version 1.0.4
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -127,8 +127,10 @@
     isNull = require('lodash.isnull'),
     isSymbol = require('is-symbol'),
     isError = require('is-error-x'),
+    isObjectLike = require('is-object-like-x'),
     ERROR = Error,
-    SYMBOL = require('has-symbol-support-x') && Symbol,
+    hasSymbolSupport = require('has-symbol-support-x'),
+    SYMBOL = hasSymbolSupport && Symbol,
     SET = typeof Set === 'function' && Set,
     MAP = typeof Map === 'function' && Map,
     PROMISE = typeof Promise === 'function' && Promise,
@@ -175,12 +177,36 @@
     hasArrayBuffer = typeof ArrayBuffer === 'function',
     unwantedArrayBuffer = hasArrayBuffer ? $keys(new ArrayBuffer(4)) : [],
     unwantedTypedArray = hasArrayBuffer ? $keys(new Int16Array(4)) : [],
-    unwantedError, inspectIt, formatValueIt;
+    unwantedError, inspectIt, formatValueIt, getterMapSize, getterSetSize;
 
   try {
     throw new ERROR('a');
   } catch (e) {
     unwantedError = $keys(e);
+  }
+
+  if (MAP) {
+    try {
+      getterMapSize = Object.getOwnPropertyDescriptor(
+        Object.getPrototypeOf(new MAP()),
+        'size'
+      ).get;
+      ES.Call(getterMapSize, new MAP());
+    } catch (ignore) {
+      MAP = getterMapSize = null;
+    }
+  }
+
+  if (SET) {
+    try {
+      getterSetSize = Object.getOwnPropertyDescriptor(
+        Object.getPrototypeOf(new SET()),
+        'size'
+      ).get;
+      ES.Call(getterSetSize, new SET());
+    } catch (ignore) {
+      SET = getterSetSize = null;
+    }
   }
 
   function isBooleanType(arg) {
@@ -195,30 +221,44 @@
     return typeof arg === 'string';
   }
 
+  function isSymbolType(arg) {
+    return isPrimitive(arg) && isSymbol(arg);
+  }
+
   function isSet(value) {
-    return SET && !isPrimitive(value) &&
-      (toStringTag(value) === '[object Set]' || value instanceof SET) &&
-      ES.IsCallable(value.add);
+    if (!SET || !isObjectLike(value)) {
+      return false;
+    }
+    try {
+      ES.Call(getterSetSize, value);
+      return true;
+    } catch (ignore) {}
+    return false;
   }
 
   function isMap(value) {
-    return MAP && !isPrimitive(value) &&
-      (toStringTag(value) === '[object Map]' || value instanceof MAP) &&
-      ES.IsCallable(value.set);
+    if (!MAP || !isObjectLike(value)) {
+      return false;
+    }
+    try {
+      ES.Call(getterMapSize, value);
+      return true;
+    } catch (ignore) {}
+    return false;
   }
 
   function isCollection(value) {
-    return !isPrimitive(value) && (isSet(value) || isMap(value));
+    return isObjectLike(value) && (isSet(value) || isMap(value));
   }
 
   function isPromise(value) {
-    return PROMISE && !isPrimitive(value) &&
+    return PROMISE && isObjectLike(value) &&
       (toStringTag(value) === '[object Promise]' || value instanceof PROMISE) &&
       ES.IsCallable(value.then);
   }
 
   function isCollectionIterator(value, stringTag) {
-    return !isPrimitive(value) &&
+    return isObjectLike(value) &&
       toStringTag(value) === stringTag &&
       ES.IsCallable(value.next);
   }
@@ -386,7 +426,7 @@
       return ctx.stylize(ES.Call(pBooleanToString, value), 'boolean');
     }
     // es6 symbol primitive
-    if (isPrimitive(value) && isSymbol(value)) {
+    if (isSymbolType(value)) {
       return ctx.stylize(ES.Call(pSymbolToString, value), 'symbol');
     }
   }
@@ -429,7 +469,7 @@
         if (constructor) {
           desc.value = constructor.BYTES_PER_ELEMENT;
         }
-      } else if (isPrimitive(key) && isSymbol(key)) {
+      } else if (isSymbolType(key)) {
         name = '[' + ctx.stylize(ES.Call(pSymbolToString, key), 'symbol') + ']';
       } else {
         name = '[' + key + ']';
@@ -497,7 +537,7 @@
       }
     });
     forEach(keys, function (key) {
-      if (isPrimitive(key) && isSymbol(key) || !key.match(/^\d+$/)) {
+      if (isSymbolType(key) || !key.match(/^\d+$/)) {
         push(
           output,
           formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
@@ -513,7 +553,7 @@
       push(output, formatNumber(ctx, item));
     });
     forEach(keys, function (key) {
-      if (isPrimitive(key) && isSymbol(key) || !key.match(/^\d+$/)) {
+      if (isSymbolType(key) || !key.match(/^\d+$/)) {
         push(
           output,
           formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
@@ -891,7 +931,7 @@
     if (isBooleanType(opts)) {
       // legacy...
       ctx.showHidden = opts;
-    } else if (!isPrimitive(opts) && !ES.IsCallable(opts)) {
+    } else if (isObjectLike(opts)) {
       // got an "options" object
       forEach($keys(opts), function (opt) {
         ctx[opt] = opts[opt];

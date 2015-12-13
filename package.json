@@ -1,6 +1,6 @@
 {
   "name": "inspect-x",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "An implementation of node's inspect module.",
   "homepage": "https://github.com/Xotic750/inspect-x",
   "author": {
@@ -42,12 +42,14 @@
     "validate.io-undefined": "^1.0.3",
     "lodash.isnull": "^3.0.0",
     "is-symbol": "^1.0.1",
-    "is-error-x": "^1.0.0"
+    "is-error-x": "^1.0.0",
+    "is-object-like-x": "^1.0.0"
   },
   "devDependencies": {
     "es5-shim": "^4.4.0",
+    "es6-shim": "^0.33.13",
     "json3": "^3.3.2",
-    "jscs": "^2.5.1",
+    "jscs": "^2.7.0",
     "uglify-js": "^2.6.1",
     "browserify": "12.0.1",
     "jasmine-node": "^1.14.5",

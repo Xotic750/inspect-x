@@ -37,7 +37,7 @@
     "has-own-property-x": "^1.0.0",
     "has-symbol-support-x": "^1.0.1",
     "is-array-buffer-x": "^1.0.0",
-    "is-data-view-x": "^1.0.1",
+    "is-data-view-x": "^1.0.2",
     "is-nil-x": "^1.0.0",
     "validate.io-undefined": "^1.0.3",
     "lodash.isnull": "^3.0.0",

@@ -131,6 +131,7 @@
     isError = require('is-error-x'),
     isObjectLike = require('is-object-like-x'),
     isPromise = require('is-promise'),
+    getFunctionName = require('get-function-name-x'),
     ERROR = Error,
     SET = typeof Set === 'function' && isSet(new Set()) && Set,
     MAP = typeof Map === 'function' && isMap(new Map()) && Map,
@@ -138,8 +139,6 @@
     mForEach = MAP && MAP.prototype.forEach,
     pSymbolToString = require('has-symbol-support-x') &&
       Symbol.prototype.toString,
-    supportsFunctionName = (function test() {}).name === 'test',
-    pFunctionToString = Function.prototype.toString,
     pErrorToString = ERROR.prototype.toString,
     pBooleanToString = Boolean.prototype.toString,
     pNumberToString = Number.prototype.toString,
@@ -241,24 +240,6 @@
   function stylizeNoColor(str, styleType) {
     /*jshint unused:false */
     return str;
-  }
-
-  function getFunctionName(obj) {
-    var match;
-    if (!ES.IsCallable(obj)) {
-      return;
-    }
-    if (supportsFunctionName) {
-      return obj.name;
-    }
-    try {
-      match = ES.Call(
-        pMatch,
-        ES.Call(pFunctionToString, obj),
-        [/^\s*function\s+([\w\$]+)\s*\(/i]
-      );
-    } catch (ignore) {}
-    return match ? match[1] : '';
   }
 
   function getNameSep(obj) {
@@ -644,7 +625,7 @@
       }
     }
     constructor = getConstructorOf(value);
-    name = constructor && getFunctionName(constructor);
+    name = ES.IsCallable(constructor) && getFunctionName(constructor);
     base = '';
     empty = false;
     braces = ['{', '}'];

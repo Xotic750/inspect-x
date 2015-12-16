@@ -134,10 +134,12 @@
     ERROR = Error,
     SET = typeof Set === 'function' && isSet(new Set()) && Set,
     MAP = typeof Map === 'function' && isMap(new Map()) && Map,
-    testMap = MAP && new MAP([[1, true]]),
-    testSet = SET && new SET([true]),
+    testMap = MAP && new MAP([[1, 'MapSentinel']]),
+    testSet = SET && new SET(['SetSentinel']),
     sForEach = SET && SET.prototype.forEach,
     mForEach = MAP && MAP.prototype.forEach,
+    sValues = SET && SET.prototype.values,
+    mValues = MAP && MAP.prototype.values,
     pSymbolToString = require('has-symbol-support-x') &&
       Symbol.prototype.toString,
     pErrorToString = ERROR.prototype.toString,
@@ -191,7 +193,10 @@
       return false;
     }
     try {
-      return ES.Call(value.next, testMap.values()).value === true;
+      return ES.Call(
+        value.next,
+        ES.Call(mValues, testMap)
+      ).value === 'MapSentinel';
     } catch (ignore) {}
     return false;
   }
@@ -201,7 +206,10 @@
       return false;
     }
     try {
-      return ES.Call(value.next, testSet.values()).value === true;
+      return ES.Call(
+        value.next,
+        ES.Call(sValues, testSet)
+      ).value === 'SetSentinel';
     } catch (ignore) {}
     return false;
   }

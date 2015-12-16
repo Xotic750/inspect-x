@@ -12,25 +12,9 @@
 (function () {
   'use strict';
 
-  var hasSymbol = typeof Symbol === 'function' && typeof Symbol() === 'symbol',
-    ifHasSymbolIt = hasSymbol ? it : xit,
-    hasSet = typeof Set === 'function',
-    ifHasSetIt = hasSet ? it : xit,
-    hasMap = typeof Map === 'function',
-    ifHasMapIt = hasMap ? it : xit,
-    hasArrayBuffer = typeof ArrayBuffer === 'function',
-    ifHasArrayBuffer = hasArrayBuffer ? it : xit,
-    hasDataView = typeof DataView === 'function',
-    ifHasDataView = hasArrayBuffer && hasDataView ? it : xit,
-    hasInt8Array = typeof Int8Array === 'function',
-    hasUint8ClampedArray = typeof Uint8ClampedArray === 'function',
-    hasPromise = typeof Promise === 'function',
-    ifHasPromiseIt = hasPromise ? it : xit,
-    propVisibleOnArrayBuffer = hasArrayBuffer && (function () {
-      var ab = new ArrayBuffer(4);
-      ab.x = true;
-      return Object.keys(ab).indexOf('x') > -1;
-    }()),
+  var hasSymbol, ifHasSymbolIt, hasSet, ifHasSetIt, hasMap, ifHasMapIt,
+    hasArrayBuffer, ifHasArrayBuffer, hasDataView, ifHasDataView, hasInt8Array,
+    hasUint8ClampedArray, hasPromise, ifHasPromiseIt, propVisibleOnArrayBuffer,
     noHidden, oldIEerror, getSupport, ifGetSupportIt, inspect;
 
   if (typeof module === 'object' && module.exports) {
@@ -45,6 +29,26 @@
   } else {
     inspect = returnExports;
   }
+
+  hasSymbol = typeof Symbol === 'function' && typeof Symbol() === 'symbol';
+  ifHasSymbolIt = hasSymbol ? it : xit;
+  hasSet = typeof Set === 'function';
+  ifHasSetIt = hasSet ? it : xit;
+  hasMap = typeof Map === 'function';
+  ifHasMapIt = hasMap ? it : xit;
+  hasArrayBuffer = typeof ArrayBuffer === 'function';
+  ifHasArrayBuffer = hasArrayBuffer ? it : xit;
+  hasDataView = typeof DataView === 'function';
+  ifHasDataView = hasArrayBuffer && hasDataView ? it : xit;
+  hasInt8Array = typeof Int8Array === 'function';
+  hasUint8ClampedArray = typeof Uint8ClampedArray === 'function';
+  hasPromise = typeof Promise === 'function';
+  ifHasPromiseIt = hasPromise ? it : xit;
+  propVisibleOnArrayBuffer = hasArrayBuffer && (function () {
+    var ab = new ArrayBuffer(4);
+    ab.x = true;
+    return Object.keys(ab).indexOf('x') > -1;
+  }());
 
   oldIEerror = (function () {
     try {

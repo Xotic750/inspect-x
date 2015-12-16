@@ -466,6 +466,11 @@
         message = message ? message[1] + message[2] : ex;
         expect(message).toBe('message: \'FAILURE\'');
       }
+      if (err.name !== undefined) {
+        var name = ex.match(/\[?(name)\]?(: \'Error\')/);
+        name = name ? name[1] + name[2] : ex;
+        expect(name).toBe('name: \'Error\'');
+      }
     });
 
     it('GH-1941', function () {

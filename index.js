@@ -128,21 +128,19 @@
     isUndefined = require('validate.io-undefined'),
     isNil = require('is-nil-x'),
     isNull = require('lodash.isnull'),
-    isSymbol = require('is-symbol'),
     isError = require('is-error-x'),
     isObjectLike = require('is-object-like-x'),
+    isPromise = require('is-promise'),
     ERROR = Error,
-    hasSymbolSupport = require('has-symbol-support-x'),
-    SYMBOL = hasSymbolSupport && Symbol,
     SET = typeof Set === 'function' && isSet(new Set()) && Set,
     MAP = typeof Map === 'function' && isMap(new Map()) && Map,
-    PROMISE = typeof Promise === 'function' && Promise,
     sForEach = SET && SET.prototype.forEach,
     mForEach = MAP && MAP.prototype.forEach,
-    pSymbolToString = SYMBOL && SYMBOL.prototype.toString,
+    pSymbolToString = require('has-symbol-support-x') &&
+      Symbol.prototype.toString,
+    supportsFunctionName = (function test() {}).name === 'test',
     pFunctionToString = Function.prototype.toString,
     pErrorToString = ERROR.prototype.toString,
-    pExec = RegExp.prototype.exec,
     pBooleanToString = Boolean.prototype.toString,
     pNumberToString = Number.prototype.toString,
     pDateToString = Date.prototype.toString,
@@ -181,17 +179,11 @@
   }
 
   function isSymbolType(arg) {
-    return isPrimitive(arg) && isSymbol(arg);
+    return typeof arg === 'symbol';
   }
 
   function isCollection(value) {
     return isObjectLike(value) && (isSet(value) || isMap(value));
-  }
-
-  function isPromise(value) {
-    return PROMISE && isObjectLike(value) &&
-      (toStringTag(value) === '[object Promise]' || value instanceof PROMISE) &&
-      ES.IsCallable(value.then);
   }
 
   function isCollectionIterator(value, stringTag) {
@@ -223,7 +215,7 @@
   }
 
   function pushUniq(arr, value) {
-    if (ES.Call(pIndexOf, arr, [value]) < 0) {
+    if (!includes(arr, value)) {
       push(arr, value);
     }
   }
@@ -251,24 +243,26 @@
     return str;
   }
 
-  function getFunctionName(fn) {
+  function getFunctionName(obj) {
     var match;
+    if (!ES.IsCallable(obj)) {
+      return;
+    }
+    if (supportsFunctionName) {
+      return obj.name;
+    }
     try {
       match = ES.Call(
-        pExec,
-        /^\s*function\s+([\w\$]+)\s*\(/i,
-        [ES.Call(pFunctionToString, fn)]
+        pMatch,
+        ES.Call(pFunctionToString, obj),
+        [/^\s*function\s+([\w\$]+)\s*\(/i]
       );
     } catch (ignore) {}
     return match ? match[1] : '';
   }
 
-  function getName(obj) {
-    return !isPrimitive(obj) && (obj.name || getFunctionName(obj)) || '';
-  }
-
   function getNameSep(obj) {
-    var name = getName(obj);
+    var name = getFunctionName(obj);
     return name ? ': ' + name : name;
   }
 
@@ -330,9 +324,10 @@
 
   function formatNumber(ctx, value) {
     // Format -0 as '-0'.
-    return ES.SameValue(value, -0) ?
-      ctx.stylize('-0', 'number') :
-      ctx.stylize(ES.Call(pNumberToString, value), 'number');
+    return ctx.stylize(
+      ES.SameValue(value, -0) ? '-0' : ES.Call(pNumberToString, value),
+      'number'
+    );
   }
 
   function formatPrimitive(ctx, value) {
@@ -411,7 +406,7 @@
         str = formatValueIt(
           ctx,
           desc.value,
-          isNull(recurseTimes) ? null : recurseTimes - 1
+          isNull(recurseTimes) ? recurseTimes : recurseTimes - 1
         );
         if (str.indexOf('\n') > -1) {
           str = array ?
@@ -427,7 +422,7 @@
         return str;
       }
       name = $stringify(key);
-      if (ES.Call(pMatch, name, [/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/])) {
+      if (ES.Call(pMatch, name, [/^"([a-z_][\w]*)"$/i])) {
         name = ctx.stylize(
           ES.Call(pSubstr, name, [1, name.length - 2]),
           'name'
@@ -468,7 +463,7 @@
       }
     });
     forEach(keys, function (key) {
-      if (isSymbolType(key) || !key.match(/^\d+$/)) {
+      if (isSymbolType(key) || !ES.Call(pMatch, key, [/^\d+$/])) {
         push(
           output,
           formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
@@ -484,7 +479,7 @@
       push(output, formatNumber(ctx, item));
     });
     forEach(keys, function (key) {
-      if (isSymbolType(key) || !key.match(/^\d+$/)) {
+      if (isSymbolType(key) || !ES.Call(pMatch, key, [/^\d+$/])) {
         push(
           output,
           formatProperty(ctx, value, recurseTimes, visibleKeys, key, true)
@@ -649,7 +644,7 @@
       }
     }
     constructor = getConstructorOf(value);
-    name = constructor && getName(constructor);
+    name = constructor && getFunctionName(constructor);
     base = '';
     empty = false;
     braces = ['{', '}'];

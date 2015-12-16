@@ -798,17 +798,6 @@
       var promise = Promise.resolve('foo');
       promise.bar = 42;
       expect(inspect(promise)).toBe('Promise { bar: 42 }');
-
-      // Make sure it doesn't choke on polyfills. Unlike Set/Map, there is no
-      // standard interface to synchronously inspect a Promise, so our
-      // techniques
-      // only work on a bonafide native Promise.
-      var oldPromise = Promise;
-      Promise = function () {
-        this.bar = 42;
-      };
-      expect(inspect(new Promise())).toBe('{ bar: 42 }');
-      Promise = oldPromise;
     });
 
     ifHasMapIt('Map/Set Iterators', function () {

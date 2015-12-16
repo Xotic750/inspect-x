@@ -118,7 +118,6 @@
     defProps = require('define-properties'),
     hasOwnProperty = require('has-own-property-x'),
     isDate = require('is-date-object'),
-    toStringTag = require('to-string-tag-x'),
     isArrayBuffer = require('is-array-buffer-x'),
     isSet = require('is-set-x'),
     isMap = require('is-map-x'),
@@ -135,6 +134,8 @@
     ERROR = Error,
     SET = typeof Set === 'function' && isSet(new Set()) && Set,
     MAP = typeof Map === 'function' && isMap(new Map()) && Map,
+    testMap = MAP && new MAP([[1, true]]),
+    testSet = SET && new SET([true]),
     sForEach = SET && SET.prototype.forEach,
     mForEach = MAP && MAP.prototype.forEach,
     pSymbolToString = require('has-symbol-support-x') &&
@@ -185,18 +186,24 @@
     return isObjectLike(value) && (isSet(value) || isMap(value));
   }
 
-  function isCollectionIterator(value, stringTag) {
-    return isObjectLike(value) &&
-      toStringTag(value) === stringTag &&
-      ES.IsCallable(value.next);
-  }
-
   function isMapIterator(value) {
-    return MAP && isCollectionIterator(value, '[object Map Iterator]');
+    if (!MAP || !isObjectLike(value) || !ES.IsCallable(value.next)) {
+      return false;
+    }
+    try {
+      return ES.Call(value.next, testMap.values()).value === true;
+    } catch (ignore) {}
+    return false;
   }
 
   function isSetIterator(value) {
-    return SET && isCollectionIterator(value, '[object Set Iterator]');
+    if (!SET || !isObjectLike(value) || !ES.IsCallable(value.next)) {
+      return false;
+    }
+    try {
+      return ES.Call(value.next, testSet.values()).value === true;
+    } catch (ignore) {}
+    return false;
   }
 
   function includes(arr, value)  {
@@ -625,7 +632,7 @@
       }
     }
     constructor = getConstructorOf(value);
-    name = ES.IsCallable(constructor) && getFunctionName(constructor);
+    name = constructor && getFunctionName(constructor);
     base = '';
     empty = false;
     braces = ['{', '}'];

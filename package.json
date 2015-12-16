@@ -32,7 +32,6 @@
     "es-abstract": "^1.4.3",
     "define-properties": "^1.1.2",
     "is-date-object": "^1.0.1",
-    "to-string-tag-x": "^1.0.0",
     "is-typed-array": "^1.0.3",
     "is-map-x": "^1.0.0",
     "is-set-x": "^1.0.0",
@@ -46,11 +45,11 @@
     "lodash.isnull": "^3.0.0",
     "is-error-x": "^1.0.1",
     "is-object-like-x": "^1.0.0",
-    "is-promise": "^2.1.0",
-    "get-function-name-x": "^1.0.0"
+    "get-function-name-x": "^1.0.0",
+    "is-promise": "^2.1.0"
   },
   "devDependencies": {
-    "es5-shim": "^4.4.0",
+    "es5-shim": "^4.4.1",
     "es6-shim": "^0.34.0",
     "json3": "^3.3.2",
     "jscs": "^2.7.0",

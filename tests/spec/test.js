@@ -792,40 +792,65 @@
 
     ifHasPromiseIt('Promise', function () {
       // test Promise
-      expect(inspect(Promise.resolve(3))).toBe('Promise {}');
-      expect(inspect(Promise.reject(3))).toBe('Promise {}');
-      expect(inspect(new Promise(function () {}))).toBe('Promise {}');
+      var ex = inspect(Promise.resolve(3));
+      expect(ex.slice(0, 9)).toBe('Promise {');
+      expect(ex.slice(-1)).toBe('}');
+      ex = inspect(Promise.reject(3));
+      expect(ex.slice(0, 9)).toBe('Promise {');
+      expect(ex.slice(-1)).toBe('}');
+      ex = inspect(new Promise(function () {}));
+      expect(ex.slice(0, 9)).toBe('Promise {');
+      expect(ex.slice(-1)).toBe('}');
       var promise = Promise.resolve('foo');
       promise.bar = 42;
-      expect(inspect(promise)).toBe('Promise { bar: 42 }');
+      ex = inspect(promise);
+      expect(ex.slice(0, 9)).toBe('Promise {');
+      expect(ex.slice(-1)).toBe('}');
+      var match = ex.match(/(bar: 42)/);
+      match = match ? match[0] : ex;
+      expect(match).toBe('bar: 42');
     });
 
-    ifHasMapIt('Map/Set Iterators', function () {
-      var m = new Map();
+    ifHasMapIt('MapIterator', function () {
+      var m = new Map(),
+        ex;
       m.set('foo', 'bar');
       if (m.keys) {
-        expect(inspect(m.keys())).toBe('MapIterator {}');
+        ex = inspect(m.keys());
+        expect(ex.slice(0, 13)).toBe('MapIterator {');
+        expect(ex.slice(-1)).toBe('}');
       }
       if (m.values) {
-        expect(inspect(m.values())).toBe('MapIterator {}');
+        ex = inspect(m.values());
+        expect(ex.slice(0, 13)).toBe('MapIterator {');
+        expect(ex.slice(-1)).toBe('}');
       }
       if (m.entries) {
-        expect(inspect(m.entries())).toBe('MapIterator {}');
+        ex = inspect(m.entries());
+        expect(ex.slice(0, 13)).toBe('MapIterator {');
+        expect(ex.slice(-1)).toBe('}');
       }
     });
 
-    ifHasSetIt('Set Iterators', function () {
-      var s = new Set();
+    ifHasSetIt('SetIterator', function () {
+      var s = new Set(),
+        ex;
       s.add(1);
       s.add(3);
       if (s.keys) {
-        expect(inspect(s.keys())).toBe('SetIterator {}');
+        ex = inspect(s.keys());
+        expect(ex.slice(0, 13)).toBe('SetIterator {');
+        expect(ex.slice(-1)).toBe('}');
       }
       if (s.values) {
-        expect(inspect(s.values())).toBe('SetIterator {}');
+        ex = inspect(s.values());
+        expect(ex.slice(0, 13)).toBe('SetIterator {');
+        expect(ex.slice(-1)).toBe('}');
       }
       if (s.entries) {
-        expect(inspect(s.entries())).toBe('SetIterator {}');
+        ex = inspect(s.entries());
+        expect(ex.slice(0, 13)).toBe('SetIterator {');
+        expect(ex.slice(-1)).toBe('}');
       }
     });
 

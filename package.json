@@ -44,7 +44,7 @@
     "validate.io-undefined": "^1.0.3",
     "lodash.isnull": "^3.0.0",
     "is-error-x": "^1.0.1",
-    "is-object-like-x": "^1.0.0",
+    "is-object-like-x": "^1.0.1",
     "get-function-name-x": "^1.0.0",
     "is-promise": "^2.1.0"
   },

@@ -75,6 +75,22 @@ You may also return another Object entirely, and the returned String will
 be formatted according to the returned Object. This is similar to
 how JSON.stringify() works.
 
+`es5-shim.js` monkey-patches a JavaScript context to contain all EcmaScript 5
+methods that can be faithfully emulated with a legacy JavaScript engine.
+
+`es5-sham.js` monkey-patches other ES5 methods as closely as possible.
+For these methods, as closely as possible to ES5 is not very close.
+Many of these shams are intended only to allow code to be written to ES5
+without causing run-time errors in older engines. In many cases,
+this means that these shams cause many ES5 methods to silently fail.
+Decide carefully whether this is what you want. Note: es5-sham.js requires
+es5-shim.js to be able to work properly.
+
+`json3.js` monkey-patches the EcmaScript 5 JSON implimentation faithfully.
+
+`es6.shim.js` provides compatibility shims so that legacy JavaScript engines
+behave as closely as possible to ECMAScript 6 (Harmony).
+
 **See**: https://nodejs.org/api/util.html#util_util_inspect_object_options  
 **Version**: 1.0.4  
 **Author:** Xotic750 <Xotic750@gmail.com>  

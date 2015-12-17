@@ -34,7 +34,7 @@
     "is-date-object": "^1.0.1",
     "is-typed-array": "^1.0.3",
     "is-map-x": "^1.0.0",
-    "is-set-x": "^1.0.0",
+    "is-set-x": "^1.0.1",
     "is-primitive": "^2.0.0",
     "has-own-property-x": "^1.0.0",
     "has-symbol-support-x": "^1.0.1",

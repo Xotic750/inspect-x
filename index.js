@@ -145,8 +145,8 @@
     pErrorToString = ERROR.prototype.toString,
     pBooleanToString = Boolean.prototype.toString,
     pNumberToString = Number.prototype.toString,
-    pDateToString = Date.prototype.toString,
-    pUTCToString = Date.prototype.toUTCString,
+    pRegExpToString = RegExp.prototype.toString,
+    pToISOString = Date.prototype.toISOString,
     pUnshift = Array.prototype.unshift,
     pPush = Array.prototype.push,
     pPop = Array.prototype.pop,
@@ -301,23 +301,6 @@
     return null;
   }
 
-  function regExpToString(value) {
-    var str = '/' + value.source + '/';
-    if (value.global) {
-      str += 'g';
-    }
-    if (value.ignoreCase) {
-      str += 'i';
-    }
-    if (value.multiline) {
-      str += 'm';
-    }
-    if (value.sticky) {
-      str += 'y';
-    }
-    return str;
-  }
-
   function formatNumber(ctx, value) {
     // Format -0 as '-0'.
     return ctx.stylize(
@@ -360,10 +343,6 @@
     str = formatPrimitive(ctx, value);
     ctx.stylize = stylize;
     return str;
-  }
-
-  function formatError(value) {
-    return '[' + ES.Call(pErrorToString, value) + ']';
   }
 
   function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
@@ -599,18 +578,18 @@
         return ctx.stylize('[Function' + getNameSep(value) + ']', 'special');
       }
       if (ES.IsRegExp(value)) {
-        return ctx.stylize(regExpToString(value), 'regexp');
+        return ctx.stylize(ES.Call(pRegExpToString, value), 'regexp');
       }
       if (isDate(value)) {
         try {
-          dateString = ES.Call(pDateToString, value);
+          dateString = ES.Call(pToISOString, value);
         } catch (e) {
           dateString = 'Date {}';
         }
         return ctx.stylize(dateString, 'date');
       }
       if (isError(value)) {
-        return formatError(value);
+        return '[' + ES.Call(pErrorToString, value) + ']';
       }
       // now check the `raw` value to handle boxed primitives
       if (isStringType(raw)) {
@@ -724,19 +703,19 @@
     } else if (ES.IsRegExp(value)) {
       // Make RegExps say that they are RegExps
       name = 'RegExp';
-      base = regExpToString(value);
+      base = ES.Call(pRegExpToString, value);
     } else if (isDate(value)) {
       // Make dates with properties first say the date
       name = 'Date';
       try {
-        dateString = ES.Call(pUTCToString, value);
+        dateString = ES.Call(pToISOString, value);
       } catch (e) {
         dateString = name + ' {}';
       }
       base = dateString;
     } else if (isError(value)) {
       // Make error with message first say the error
-      base = formatError(value);
+      base = '[' + ES.Call(pErrorToString, value) + ']';
     } else if (isStringType(raw)) {
       // Make boxed primitive Strings look like such
       base = '[String: ' + formatPrimitiveNoColor(ctx, raw) + ']';
@@ -761,7 +740,7 @@
     }
     if (recurseTimes < 0) {
       if (ES.IsRegExp(value)) {
-        return ctx.stylize(regExpToString(value), 'regexp');
+        return ctx.stylize(ES.Call(pRegExpToString, value), 'regexp');
       }
       return ctx.stylize('[Object]', 'special');
     }

@@ -90,12 +90,15 @@
       expect(inspect(null)).toBe('null');
       expect(inspect(/foo(bar\n)?/igm)).toBe('/foo(bar\\n)?/gim');
       var subject = new Date(1266148120000);
-      expect(inspect(subject)).toBe(subject.toString());
+      var ex = inspect(subject);
+      var match = ex.match(/(2010-02-14T11:48:40.000Z)/);
+      match = match ? match[0]: ex;
+      expect(match).toBe('2010-02-14T11:48:40.000Z');
       expect(inspect('\n\u0001')).toBe('\'\\n\\u0001\'');
 
       expect(inspect([])).toBe('[]');
       var arr = Object.create([]);
-      var ex = inspect(arr);
+      ex = inspect(arr);
       expect(ex.slice(0, 7)).toBe('Array {');
       expect(ex.slice(-1)).toBe('}');
       expect(inspect([1, 2])).toBe('[ 1, 2 ]');
@@ -394,7 +397,12 @@
       // Dates with properties
       var value = new Date(1266148120000);
       value.aprop = 42;
-      expect(inspect(value)).toBe('{ ' + value.toUTCString() + ' aprop: 42 }');
+      var ex = inspect(value);
+      expect(ex.slice(0, 1)).toBe('{');
+      expect(ex.slice(-1)).toBe('}');
+      var match = ex.match(/(2010-02-14T11:48:40.000Z)[\s\S]+(aprop: 42)/);
+      match = match ? match.slice(1).join(' ') : ex;
+      expect(match).toBe('2010-02-14T11:48:40.000Z aprop: 42');
     });
 
     it('positive/negative zero', function () {
@@ -491,6 +499,12 @@
       expect(function () {
         var d = new Date();
         d.toUTCString = null;
+        inspect(d);
+      }).not.toThrow();
+
+      expect(function() {
+        var d = new Date();
+        d.toISOString = null;
         inspect(d);
       }).not.toThrow();
 

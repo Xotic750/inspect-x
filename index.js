@@ -75,6 +75,7 @@
  * be formatted according to the returned Object. This is similar to
  * how JSON.stringify() works.
  *
+ * <h2>ECMAScript compatibility shims for legacy JavaScript engines</h2>
  * `es5-shim.js` monkey-patches a JavaScript context to contain all EcmaScript 5
  * methods that can be faithfully emulated with a legacy JavaScript engine.
  *

@@ -110,7 +110,7 @@
  *
  * inspect(obj);
  *   // "{ bar: 'baz' }"
- * @version 1.0.4
+ * @version 1.0.5
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -565,9 +565,11 @@
         if (!includes(visibleKeys, 'message') && !includes(keys, 'message')) {
           unshiftUniq(keys, 'message');
         }
+        /*
         if (!includes(visibleKeys, 'name') && !includes(keys, 'name')) {
           unshiftUniq(keys, 'name');
         }
+        */
       }
       if ($getOwnPropertySymbols) {
         keys = ES.Call(pConcat, keys, [$getOwnPropertySymbols(value)]);

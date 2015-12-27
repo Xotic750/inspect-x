@@ -29,7 +29,7 @@
     "url": "https://github.com/Xotic750/inspect-x/issues"
   },
   "dependencies": {
-    "es-abstract": "^1.4.3",
+    "es-abstract": "^1.5.0",
     "define-properties": "^1.1.2",
     "is-date-object": "^1.0.1",
     "is-typed-array": "^1.0.3",

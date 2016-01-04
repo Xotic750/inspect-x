@@ -36,7 +36,7 @@
     "is-map-x": "^1.0.1",
     "is-set-x": "^1.0.1",
     "is-primitive": "^2.0.0",
-    "has-own-property-x": "^1.0.1",
+    "has-own-property-x": "^1.0.2",
     "has-symbol-support-x": "^1.0.2",
     "is-array-buffer-x": "^1.0.3",
     "is-data-view-x": "^1.0.4",

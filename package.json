@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "es5-shim": "^4.4.1",
-    "es6-shim": "^0.34.0",
+    "es6-shim": "^0.34.1",
     "json3": "^3.3.2",
     "jscs": "^2.7.0",
     "uglify-js": "^2.6.1",

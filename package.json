@@ -1,6 +1,6 @@
 {
   "name": "inspect-x",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "An implementation of node's ES6 inspect module.",
   "homepage": "https://github.com/Xotic750/inspect-x",
   "author": {
@@ -33,26 +33,26 @@
     "define-properties": "^1.1.2",
     "is-date-object": "^1.0.1",
     "is-typed-array": "^1.0.3",
-    "is-map-x": "^1.0.2",
-    "is-set-x": "^1.0.2",
+    "is-map-x": "^1.0.3",
+    "is-set-x": "^1.0.3",
     "is-primitive": "^2.0.0",
-    "has-own-property-x": "^1.0.2",
-    "has-symbol-support-x": "^1.0.3",
-    "is-array-buffer-x": "^1.0.4",
-    "is-data-view-x": "^1.0.5",
-    "is-nil-x": "^1.0.2",
+    "has-own-property-x": "^1.0.3",
+    "has-symbol-support-x": "^1.0.4",
+    "is-array-buffer-x": "^1.0.5",
+    "is-data-view-x": "^1.0.6",
+    "is-nil-x": "^1.0.3",
     "validate.io-undefined": "^1.0.3",
     "lodash.isnull": "^3.0.0",
-    "is-error-x": "^1.0.5",
-    "is-object-like-x": "^1.0.2",
-    "get-function-name-x": "^1.0.2",
+    "is-error-x": "^1.0.6",
+    "is-object-like-x": "^1.0.3",
+    "get-function-name-x": "^1.0.3",
     "is-promise": "^2.1.0"
   },
   "devDependencies": {
     "es5-shim": "^4.4.1",
-    "es6-shim": "^0.34.0",
+    "es6-shim": "^0.34.1",
     "json3": "^3.3.2",
-    "jscs": "^2.7.0",
+    "jscs": "^2.8.0",
     "uglify-js": "^2.6.1",
     "browserify": "^12.0.1",
     "jasmine-node": "^1.14.5",
@@ -63,6 +63,6 @@
     "style": "jscs index.js",
     "docs": "jsdoc2md --name-format --example-lang js index.js > README.md",
     "build": "browserify -e index.js -o lib/inspect-x.js -u 'crypto' -s returnExports",
-    "build-uglify": "uglifyjs lib/inspect-x.js -o lib/inspect-x.min.js --compress unused=false,dead_code=false --keep-fnames --mangle --beautify ascii_only=true,beautify=false --source-map lib/inspect-x.map"
+    "build-uglify": "uglifyjs lib/inspect-x.js -o lib/inspect-x.min.js --compress --keep-fnames --mangle --beautify ascii_only=true,beautify=false --source-map lib/inspect-x.map"
   }
 }

@@ -110,7 +110,7 @@
  *
  * inspect(obj);
  *   // "{ bar: 'baz' }"
- * @version 1.0.8
+ * @version 1.0.9
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -148,6 +148,9 @@
     isObjectLike = require('is-object-like-x'),
     isPromise = require('is-promise'),
     getFunctionName = require('get-function-name-x'),
+    reSingle = new RegExp(
+      '\\{[' + require('white-space-x')(false, true) + ']+\\}'
+    ),
     ERROR = Error,
     SET = typeof Set === 'function' && isSet(new Set()) && Set,
     MAP = typeof Map === 'function' && isMap(new Map()) && Map,
@@ -531,7 +534,7 @@
       result = braces[0] + base + ' ' + ES.Call(pJoin, output, [', ']) +
         ' ' + braces[1];
     }
-    return replace(result, /\{[\s\n]+\}/, '{}');
+    return replace(result, reSingle, '{}');
   }
 
   formatValueIt = function formatValue(ctx, value, recurseTimes) {

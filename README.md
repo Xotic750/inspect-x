@@ -23,19 +23,19 @@ alt="npm version" height="18">
 An implementation of node's ES6 inspect module.
 Return a string representation of object, which is useful for debugging.
 An optional options object may be passed that alters certain aspects of the
-formatted string:
+fmtted string:
 - showHidden - if true then the object's non-enumerable and symbol properties
 will be shown too. Defaults to false.
-- depth - tells inspect how many times to recurse while formatting the
+- depth - tells inspect how many times to recurse while fmtting the
 object. This is useful for inspecting large complicated objects.
 Defaults to 2. To make it recurse indefinitely pass null.
-- colors - if true, then the output will be styled with ANSI color codes.
+- colors - if true, then the out will be styled with ANSI color codes.
 Defaults to false. Colors are customizable, see below.
 - customInspect - if false, then custom inspect(depth, opts) functions
 defined on the objects being inspected won't be called. Defaults to true.
 
 <h2>Customizing inspect colors</h2>
-Color output (if enabled) of inspect is customizable globally
+Color out (if enabled) of inspect is customizable globally
 via `inspect.styles` and `inspect.colors` objects.
 
 The `inspect.styles` is a map assigning each style a color
@@ -72,7 +72,7 @@ Objects also may define their own `inspect(depth)` function which `inspect`
 will invoke and use the result of when inspecting the object.
 
 You may also return another Object entirely, and the returned String will
-be formatted according to the returned Object. This is similar to
+be fmtted according to the returned Object. This is similar to
 how JSON.stringify() works.
 
 <h2>ECMAScript compatibility shims for legacy JavaScript engines</h2>
@@ -93,7 +93,7 @@ es5-shim.js to be able to work properly.
 behave as closely as possible to ECMAScript 6 (Harmony).
 
 **See**: https://nodejs.org/api/util.html#util_util_inspect_object_options  
-**Version**: 1.0.9  
+**Version**: 1.0.10  
 **Author:** Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
@@ -109,7 +109,7 @@ obj.inspect = function(depth) {
 inspect(obj);
   // "{nate}"
 
-var obj = { foo: 'this will not show up in the inspect() output' };
+var obj = { foo: 'this will not show up in the inspect() out' };
 obj.inspect = function(depth) {
   return { bar: 'baz' };
 };
@@ -131,7 +131,7 @@ as well as the options object passed to `inspect`.
 | Param | Type | Description |
 | --- | --- | --- |
 | obj | <code>Object</code> | The object to print out. |
-| [opts] | <code>Object</code> | Options object that alters the output. |
+| [opts] | <code>Object</code> | Options object that alters the out. |
 
 **Example**  
 ```js

@@ -110,7 +110,7 @@
  *
  * inspect(obj);
  *   // "{ bar: 'baz' }"
- * @version 1.0.13
+ * @version 1.0.14
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -800,12 +800,12 @@
   };
 
   // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-  define.defineProperties(inspectIt, {
+  define.properties(inspectIt, {
     colors: {},
     styles: {}
   });
 
-  define.defineProperties(inspectIt.colors, {
+  define.properties(inspectIt.colors, {
     'bold': [1, 22],
     'italic': [3, 23],
     'underline': [4, 24],
@@ -822,7 +822,7 @@
   });
 
   // Don't use 'blue' not visible on cmd.exe
-  define.defineProperties(inspectIt.styles, {
+  define.properties(inspectIt.styles, {
     'special': 'cyan',
     'number': 'yellow',
     'boolean': 'yellow',

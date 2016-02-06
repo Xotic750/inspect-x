@@ -152,6 +152,7 @@
   var isBoolean = require('is-boolean-object');
   var getFunctionName = require('get-function-name-x');
   var hasSymbolSupport = require('has-symbol-support-x');
+  var isNegZero = require('negative-zero');
   var reSingle = new RegExp(
     '\\{[' + require('white-space-x')(false, true) + ']+\\}'
   );
@@ -186,14 +187,11 @@
   var pReplace = String.prototype.replace;
   var pTest = RegExp.prototype.test;
   var sSlice = String.prototype.slice;
-  var sIncludes = String.prototype.includes;
   var $stringify = JSON.stringify;
   var $keys = Object.keys;
   var $getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
   var $getPrototypeOf = Object.getPrototypeOf;
   var $ownKeys = require('reflect.ownkeys');
-  var $is = Object.is;
-  var $assign = Object.assign;
   var $isArray = Array.isArray;
   var $String = String;
   var $Object = Object;
@@ -316,7 +314,7 @@
 
   function fmtNumber(ctx, value) {
     // Format -0 as '-0'.
-    return ctx.stylize($is(value, -0) ? '-0' : nToStr.call(value), 'number');
+    return ctx.stylize(isNegZero(value) ? '-0' : nToStr.call(value), 'number');
   }
 
   function fmtPrimitive(ctx, value) {
@@ -397,7 +395,7 @@
       str = ctx.stylize('[Setter]', 'special');
     } else if (!includes(ctx.seen, desc.value)) {
       str = fmtValueIt(ctx, desc.value, recurse(depth));
-      if (sIncludes.call(str, '\n')) {
+      if (str.indexOf('\n') > -1) {
         str = pReplace.apply(str, arr ? [/\n/g, '\n  '] : [/(^|\n)/g, '\n   ']);
       }
     } else {
@@ -778,7 +776,7 @@
       ctx.showHidden = opts;
     } else if (isObjectLike(opts)) {
       // got an "options" object
-      $assign(ctx, opts);
+      Object.keys(opts).forEach(function(k) { ctx[k] = opts[k]});
     }
     // set default options
     if (isUndefined(ctx.showHidden)) {

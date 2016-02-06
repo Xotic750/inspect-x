@@ -191,7 +191,7 @@
   var $keys = Object.keys;
   var $getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
   var $getPrototypeOf = Object.getPrototypeOf;
-  var $ownKeys = Reflect.ownKeys;
+  var $ownKeys = require('reflect.ownkeys');
   var $is = Object.is;
   var $assign = Object.assign;
   var $isArray = Array.isArray;

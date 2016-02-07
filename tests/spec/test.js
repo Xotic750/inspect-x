@@ -12,10 +12,13 @@
 (function () {
   'use strict';
 
-  var hasSymbol, ifHasSymbolIt, hasSet, ifHasSetIt, hasMap, ifHasMapIt,
-    hasArrayBuffer, ifHasArrayBuffer, hasDataView, ifHasDataView, hasInt8Array,
-    hasUint8ClampedArray, hasPromise, ifHasPromiseIt, propVisibleOnArrayBuffer,
-    noHidden, oldIEerror, getSupport, ifGetSupportIt, inspect;
+  var hasSymbol, ifHasSymbolIt, hadSet, hasSet, ifHasSetIt, ifHasSetIteratorIt,
+    hasMap, ifHasMapIt, hasArrayBuffer, ifHasArrayBuffer, hasDataView,
+    ifHasDataView, hasInt8Array, hasUint8ClampedArray, hasPromise,
+    ifHasPromiseIt, propVisibleOnArrayBuffer, noHidden, oldIEerror, getSupport,
+    ifGetSupportIt, inspect;
+
+  hadSet = typeof Set === 'function';
 
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
@@ -36,6 +39,8 @@
   ifHasSymbolIt = hasSymbol ? it : xit;
   hasSet = typeof Set === 'function';
   ifHasSetIt = hasSet ? it : xit;
+  // Shim can't tell the difference between Set and Map
+  ifHasSetIteratorIt = hadSet ? it : xit;
   hasMap = typeof Map === 'function';
   ifHasMapIt = hasMap ? it : xit;
   hasArrayBuffer = typeof ArrayBuffer === 'function';
@@ -859,7 +864,7 @@
       }
     });
 
-    ifHasSetIt('SetIterator', function () {
+    ifHasSetIteratorIt('SetIterator', function () {
       var s = new Set(),
         ex;
       s.add(1);

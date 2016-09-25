@@ -1,4 +1,5 @@
 <a name="module_inspect-x"></a>
+
 ## inspect-x
 <a href="https://travis-ci.org/Xotic750/inspect-x"
 title="Travis status">
@@ -118,6 +119,7 @@ inspect(obj);
   // "{ bar: 'baz' }"
 ```
 <a name="exp_module_inspect-x--module.exports"></a>
+
 ### `module.exports` ⇒ <code>string</code> ⏏
 Echos the value of a value. Trys to print the value out
 in the best way possible given the different types.

@@ -126,7 +126,8 @@
    es3:false, esnext:true, plusplus:true, maxparams:1, maxdepth:1,
    maxstatements:3, maxcomplexity:2 */
 
-/* eslint strict: 1, max-statements: 1, max-lines: 1, id-length: 1 */
+/* eslint strict: 1, max-statements: 1, max-lines: 1, id-length: 1,
+   complexity: 1, sort-keys: 1, no-multi-assign: 1 */
 
 /* global require, module */
 
@@ -135,6 +136,7 @@
   'use strict';
 
   var isFunction = require('is-function-x');
+  var isGeneratorFunction = require('is-generator-function');
   var isRegExp = require('is-regex');
   var define = require('define-properties-x');
   var isDate = require('is-date-object');
@@ -154,25 +156,29 @@
   var isNumber = require('is-number-object');
   var isBoolean = require('is-boolean-object');
   var isNegZero = require('is-negative-zero');
+  var isSymbol = require('is-symbol');
   var getFunctionName = require('get-function-name-x');
   var hasSymbolSupport = require('has-symbol-support-x');
+  var hasOwnProperty = require('has-own-property-x');
+  var toStringTag = require('to-string-tag-x');
   var reSingle = new RegExp('\\{[' + require('white-space-x').ws + ']+\\}');
   var hasSet = typeof Set === 'function' && isSet(new Set());
   var testSet = hasSet && new Set(['SetSentinel']);
   var sForEach = hasSet && Set.prototype.forEach;
   var sValues = hasSet && Set.prototype.values;
   var hasMap = typeof Map === 'function' && isMap(new Map());
-  var testMap = hasMap && new Map([
-    [1, 'MapSentinel']
-  ]);
+  var testMap = hasMap && new Map([[1, 'MapSentinel']]);
   var mForEach = hasMap && Map.prototype.forEach;
   var mValues = hasMap && Map.prototype.values;
   var pSymToStr = hasSymbolSupport && Symbol.prototype.toString;
+  var pSymValOf = hasSymbolSupport && Symbol.prototype.valueOf;
   var eToStr = Error.prototype.toString;
   var bToStr = Boolean.prototype.toString;
   var nToStr = Number.prototype.toString;
   var rToStr = RegExp.prototype.toString;
+  var dToStr = Date.prototype.toString;
   var dToISOStr = Date.prototype.toISOString;
+  var dGetTime = Date.prototype.getTime;
   var sValueOf = String.prototype.valueOf;
   var bValueOf = Boolean.prototype.valueOf;
   var nValueOf = Number.prototype.valueOf;
@@ -199,26 +205,59 @@
   var $isArray = Array.isArray;
   var $String = String;
   var $Object = Object;
+  var $includes = Array.prototype.includes;
+  var $create = Object.create;
+  var $assign = Object.assign;
+  var $isNaN = Number.isNaN;
+  var $defineProperty = Object.defineProperty;
+  var $TypeError = TypeError;
   var bpe = 'BYTES_PER_ELEMENT';
-  var inspectIt, fmtValueIt;
+  var inspect;
+  var fmtValue;
 
-  function isBooleanType(arg) {
+  var supportsGetSet;
+  try {
+    var testVar;
+    var testObject = $defineProperty($create(null), 'defaultOptions', {
+      get: function () {
+        return testVar;
+      },
+      set: function (val) {
+        testVar = val;
+        return testVar;
+      }
+    });
+    testObject.defaultOptions = 'test';
+    supportsGetSet = testVar === 'test';
+  } catch (ignore) {}
+
+  var inspectDefaultOptions = $assign($create(null), {
+    showHidden: false,
+    depth: 2,
+    colors: false,
+    customInspect: true,
+    showProxy: false,
+    maxArrayLength: 100,
+    breakLength: 60
+  });
+
+  var isBooleanType = function (arg) {
     return typeof arg === 'boolean';
-  }
+  };
 
-  function isNumberType(arg) {
+  var isNumberType = function (arg) {
     return typeof arg === 'number';
-  }
+  };
 
-  function isStringType(arg) {
+  var isStringType = function (arg) {
     return typeof arg === 'string';
-  }
+  };
 
-  function isSymbolType(arg) {
+  var isSymbolType = function (arg) {
     return typeof arg === 'symbol';
-  }
+  };
 
-  function isMapIterator(value) {
+  var isMapIterator = function (value) {
     if (!hasMap || !isObjectLike(value)) {
       return false;
     }
@@ -226,9 +265,9 @@
       return value.next.call(mValues.call(testMap)).value === 'MapSentinel';
     } catch (ignore) {}
     return false;
-  }
+  };
 
-  function isSetIterator(value) {
+  var isSetIterator = function (value) {
     if (!hasSet || !isObjectLike(value)) {
       return false;
     }
@@ -236,13 +275,40 @@
       return value.next.call(sValues.call(testSet)).value === 'SetSentinel';
     } catch (ignore) {}
     return false;
-  }
+  };
 
-  function includes(arr, value) {
-    return pIndexOf.call(arr, value) > -1;
-  }
+  var fnToStr = Function.prototype.toString;
+  var ws = require('white-space-x').ws;
+  var fnRxString = '^[' + ws + ']*async[' + ws + ']+(?:function)?';
+  var isFnRegex = new RegExp(fnRxString);
+  var hasToStringTag = typeof Symbol === 'function' && typeof Symbol.toStringTag === 'symbol';
+  var getProto = Object.getPrototypeOf;
+  var getAsyncFunc = function () { // eslint-disable-line consistent-return
+    if (!hasToStringTag) {
+      return false;
+    }
+    try {
+      return new Function('return async function() {}')(); // eslint-disable-line no-new-func
+    } catch (e) {}
+  };
 
-  function filterIndexes(keys, length) {
+  var asyncFunc = getAsyncFunc();
+  var AsyncFunction = asyncFunc ? getProto(asyncFunc) : {};
+
+  var isAsyncFunction = function (fn) {
+    if (!isFunction(fn)) {
+      return false;
+    }
+    if (isFnRegex.test(fnToStr.call(fn))) {
+      return true;
+    }
+    if (!hasToStringTag) {
+      return toStringTag(fn) === '[object AsyncFunction]';
+    }
+    return getProto(fn) === AsyncFunction;
+  };
+
+  var filterIndexes = function (keys, length) {
     var i = keys.length - 1;
     while (i > -1) {
       var key = keys[i];
@@ -251,77 +317,69 @@
       }
       i -= 1;
     }
-  }
+  };
 
-  function pushUniq(arr, value) {
-    if (!includes(arr, value)) {
+  var pushUniq = function (arr, value) {
+    if (!$includes.call(arr, value)) {
       pPush.call(arr, value);
     }
-  }
+  };
 
-  function unshiftUniq(arr, value) {
+  var unshiftUniq = function (arr, value) {
     var index = pIndexOf.call(arr, value);
     if (index > -1) {
       pSplice.call(arr, index, 1);
     }
     pUnshift.call(arr, value);
-  }
+  };
 
-  function stylizeWithColor(str, styleType) {
-    var style = inspectIt.styles[styleType];
+  var stylizeWithColor = function (str, styleType) {
+    var style = inspect.styles[styleType];
     if (style) {
-      var colors = inspectIt.colors[style];
+      var colors = inspect.colors[style];
       return '\u001b[' + colors[0] + 'm' + str + '\u001b[' + colors[1] + 'm';
     }
     return str;
-  }
+  };
 
-  function stylizeNoColor(str) {
+  var stylizeNoColor = function (str) {
     return str;
-  }
+  };
 
-  function getNameSep(obj) {
+  var getNameSep = function (obj) {
     var name = getFunctionName(obj);
     return name ? ': ' + name : name;
-  }
+  };
 
-  function each(arrayLike, callback) {
-    var l = arrayLike.length;
-    var i = 0;
-    while (i < l) {
-      callback(arrayLike[i], i);
-      i += 1;
-    }
-  }
-
-  function collectionEach(collection, callback) {
+  var collectionEach = function (collection, callback) {
     if (isMap(collection)) {
       mForEach.call(collection, callback);
     } else if (isSet(collection)) {
       sForEach.call(collection, callback);
     }
-  }
+  };
 
-  function getConstructorOf(obj) {
+  var getConstructorOf = function (obj) {
+    var o = obj;
     var maxLoop = 100;
-    while (!isNil(obj) && maxLoop > -1) {
-      obj = $Object(obj);
-      var descriptor = $getOwnPropertyDescriptor(obj, 'constructor');
+    while (!isNil(o) && maxLoop > -1) {
+      o = $Object(o);
+      var descriptor = $getOwnPropertyDescriptor(o, 'constructor');
       if (descriptor && descriptor.value) {
         return descriptor.value;
       }
-      obj = $getPrototypeOf(obj);
+      o = $getPrototypeOf(o);
       maxLoop -= 1;
     }
     return null;
-  }
+  };
 
-  function fmtNumber(ctx, value) {
+  var fmtNumber = function (ctx, value) {
     // Format -0 as '-0'.
     return ctx.stylize(isNegZero(value) ? '-0' : nToStr.call(value), 'number');
-  }
+  };
 
-  function fmtPrimitive(ctx, value) {
+  var fmtPrimitive = function (ctx, value) {
     if (isNil(value)) {
       var str = $String(value);
       return ctx.stylize(str, str);
@@ -342,31 +400,32 @@
     if (isSymbolType(value)) {
       return ctx.stylize(pSymToStr.call(value), 'symbol');
     }
-  }
+    return void 0;
+  };
 
-  function fmtPrimNoColor(ctx, value) {
+  var fmtPrimNoColor = function (ctx, value) {
     var stylize = ctx.stylize;
     ctx.stylize = stylizeNoColor;
     var str = fmtPrimitive(ctx, value);
     ctx.stylize = stylize;
     return str;
-  }
+  };
 
-  function recurse(depth) {
+  var recurse = function (depth) {
     return isNull(depth) ? null : depth - 1;
-  }
+  };
 
   /*
-  function isCollection(value) {
+  var isCollection = function (value) {
     return isSet(value) || isMap(value);
-  }
+  };
   */
 
-  function isDigits(key) {
+  var isDigits = function (key) {
     return pTest.call(/^\d+$/, key);
-  }
+  };
 
-  function fmtProp(ctx, value, depth, visibleKeys, key, arr) {
+  var fmtProp = function (ctx, value, depth, visibleKeys, key, arr) {
     var desc = $getOwnPropertyDescriptor(value, key) || { value: value[key] };
 
     /*
@@ -377,7 +436,7 @@
     */
 
     var name;
-    if (!includes(visibleKeys, key)) {
+    if (!$includes.call(visibleKeys, key)) {
       if (key === bpe && !value[bpe] && isTypedArray(value)) {
         var constructor = getConstructorOf(value);
         if (constructor) {
@@ -395,13 +454,13 @@
       str = ctx.stylize(desc.set ? '[Getter/Setter]' : '[Getter]', 'special');
     } else if (desc.set) {
       str = ctx.stylize('[Setter]', 'special');
-    } else if (!includes(ctx.seen, desc.value)) {
-      str = fmtValueIt(ctx, desc.value, recurse(depth));
+    } else if ($includes.call(ctx.seen, desc.value)) {
+      str = ctx.stylize('[Circular]', 'special');
+    } else {
+      str = fmtValue(ctx, desc.value, recurse(depth));
       if (sIndexOf.call(str, '\n') > -1) {
         str = pReplace.apply(str, arr ? [/\n/g, '\n  '] : [/(^|\n)/g, '\n   ']);
       }
-    } else {
-      str = ctx.stylize('[Circular]', 'special');
     }
 
     if (isUndefined(name)) {
@@ -420,69 +479,90 @@
       }
     }
     return name + ': ' + str;
-  }
+  };
 
-  function fmtObject(ctx, value, depth, visibleKeys, keys) {
+  var fmtObject = function (ctx, value, depth, visibleKeys, keys) {
     var out = [];
     pForEach.call(keys, function (key) {
       pPush.call(out, fmtProp(ctx, value, depth, visibleKeys, key, false));
     });
     return out;
-  }
+  };
 
-  function fmtArray(ctx, value, depth, visibleKeys, keys) {
-    var out = [];
-    each(value, function (unused, index) {
-      pPush.call(
-        out,
-        index in value ? fmtProp(ctx, value, depth, visibleKeys, nToStr.call(index), true) : ''
-      );
-    });
+  var fmtArray = function (ctx, value, depth, visibleKeys, keys) {
+    var output = [];
+    var visibleLength = 0;
+    var index = 0;
+    while (index < value.length && visibleLength < ctx.maxArrayLength) {
+      var emptyItems = 0;
+      while (index < value.length && !hasOwnProperty(value, nToStr.call(index))) {
+        emptyItems += 1;
+        index += 1;
+      }
+      if (emptyItems > 0) {
+        var ending = emptyItems > 1 ? 's' : '';
+        var message = '<' + emptyItems + ' empty item' + ending + '>';
+        output.push(ctx.stylize(message, 'undefined'));
+      } else {
+        output.push(fmtProp(ctx, value, depth, visibleKeys, nToStr.call(index), true));
+        index += 1;
+      }
+      visibleLength += 1;
+    }
+    var remaining = value.length - index;
+    if (remaining > 0) {
+      output.push('... ' + remaining + ' more item' + (remaining > 1 ? 's' : ''));
+    }
     pForEach.call(keys, function (key) {
       if (isSymbolType(key) || !isDigits(key)) {
-        pPush.call(out, fmtProp(ctx, value, depth, visibleKeys, key, true));
+        pPush.call(output, fmtProp(ctx, value, depth, visibleKeys, key, true));
       }
     });
-    return out;
-  }
+    return output;
+  };
 
-  function fmtTypedArray(ctx, value, depth, visibleKeys, keys) {
-    var out = [];
-    each(value, function (item) {
-      pPush.call(out, fmtNumber(ctx, item));
-    });
+  var fmtTypedArray = function (ctx, value, depth, visibleKeys, keys) {
+    var maxLength = Math.min(Math.max(0, ctx.maxArrayLength), value.length);
+    var remaining = value.length - maxLength;
+    var output = new Array(maxLength);
+    for (var i = 0; i < maxLength; i += 1) {
+      output[i] = fmtNumber(ctx, value[i]);
+    }
+    if (remaining > 0) {
+      pPush.call(output, '... ' + remaining + ' more item' + (remaining > 1 ? 's' : ''));
+    }
     pForEach.call(keys, function (key) {
       if (isSymbolType(key) || !isDigits(key)) {
-        pPush.call(out, fmtProp(ctx, value, depth, visibleKeys, key, true));
+        pPush.call(output, fmtProp(ctx, value, depth, visibleKeys, key, true));
       }
     });
-    return out;
-  }
+    return output;
+  };
 
-  function fmtSet(ctx, value, depth, visibleKeys, keys) {
+  var fmtSet = function (ctx, value, depth, visibleKeys, keys) {
     var out = [];
     collectionEach(value, function (v) {
-      pPush.call(out, fmtValueIt(ctx, v, recurse(depth)));
+      pPush.call(out, fmtValue(ctx, v, recurse(depth)));
     });
     pForEach.call(keys, function (key) {
       pPush.call(out, fmtProp(ctx, value, depth, visibleKeys, key, false));
     });
     return out;
-  }
+  };
 
-  function fmtMap(ctx, value, depth, visibleKeys, keys) {
+  var fmtMap = function (ctx, value, depth, visibleKeys, keys) {
     var out = [];
     collectionEach(value, function (v, k) {
       var r = recurse(depth);
-      pPush.call(out, fmtValueIt(ctx, k, r) + ' => ' + fmtValueIt(ctx, v, r));
+      pPush.call(out, fmtValue(ctx, k, r) + ' => ' + fmtValue(ctx, v, r));
     });
     pForEach.call(keys, function (key) {
       pPush.call(out, fmtProp(ctx, value, depth, visibleKeys, key, false));
     });
     return out;
-  }
+  };
 
-  function reduceToSingleString(out, base, braces) {
+  var reduceToSingleString = function (out, base, braces) {
     var length = pReduce.call(out, function (prev, cur) {
       return prev + pReplace.call(cur, /\u001b\[\d\d?m/g, '').length + 1;
     }, 0);
@@ -497,14 +577,22 @@
       result = braces[0] + base + ' ' + pJoin.call(out, ', ') + ' ' + braces[1];
     }
     return pReplace.call(result, reSingle, '{}');
-  }
+  };
 
-  fmtValueIt = function fmtValue(ctx, value, depth) {
+  var fmtDate = function (value) {
+    return $isNaN(dGetTime.call(value)) ? dToStr.call(value) : dToISOStr.call(value);
+  };
+
+  var fmtError = function (value) {
+    return value.stack || '[' + eToStr.call(value) + ']';
+  };
+
+  var fmtValue = function (ctx, value, depth) {
     // Provide a hook for user-specified inspect functions.
     // Check that value is an object with an inspect function on it
     if (ctx.customInspect && !isPrimitive(value) && isFunction(value.inspect) &&
       // Filter out the util module, it's inspect function is special
-      value.inspect !== inspectIt &&
+      value.inspect !== inspect &&
       // Also filter out any prototype objects using the circular check.
       !(value.constructor && value.constructor.prototype === value)) {
 
@@ -528,7 +616,7 @@
         keys = pConcat.call(keys, $getOwnPropertySymbols(value));
       }
       if (isError(value)) {
-        if (!includes(visibleKeys, 'message') && !includes(keys, 'message')) {
+        if (!$includes.call(visibleKeys, 'message') && !$includes.call(keys, 'message')) {
           unshiftUniq(keys, 'message');
         }
         /*
@@ -570,6 +658,18 @@
           'boolean'
         );
       }
+      if (isSymbol(value)) {
+        return ctx.stylize(
+          '[Symbol: ' + fmtPrimNoColor(ctx, pSymValOf.call(value)) + ']',
+           'symbol'
+        );
+      }
+      if (isAsyncFunction(value)) {
+        return ctx.stylize('[AsyncFunction' + getNameSep(value) + ']', 'special');
+      }
+      if (isGeneratorFunction(value)) {
+        return ctx.stylize('[GeneratorFunction' + getNameSep(value) + ']', 'special');
+      }
       if (isFunction(value)) {
         return ctx.stylize('[Function' + getNameSep(value) + ']', 'special');
       }
@@ -577,10 +677,10 @@
         return ctx.stylize(rToStr.call(value), 'regexp');
       }
       if (isDate(value)) {
-        return ctx.stylize(dToISOStr.call(value), 'date');
+        return ctx.stylize(fmtDate(value), 'date');
       }
       if (isError(value)) {
-        return '[' + eToStr.call(value) + ']';
+        return fmtError(value);
       }
       // Fast path for ArrayBuffer. Can't do the same for DataView because it
       // has a non-primitive buffer property that we need to recurse for.
@@ -626,10 +726,10 @@
     } else if (isDate(value)) {
       // Make dates with properties first say the date
       name = 'Date';
-      base = dToISOStr.call(value);
+      base = fmtDate(value);
     } else if (isError(value)) {
       // Make error with message first say the error
-      base = '[' + eToStr.call(value) + ']';
+      base = fmtError(value);
     } else if ($isArray(value)) {
       // Unset the constructor to prevent "Array [...]" for ordinary arrays.
       name = name === 'Array' ? '' : name;
@@ -756,54 +856,56 @@
    * //     [date]: 'magenta',
    * //     [regexp]: 'red' } }
    */
-  module.exports = inspectIt = function inspect(obj, opts) {
+  module.exports = inspect = function (obj, opts) {
     // default options
     var ctx = {
       seen: [],
       stylize: stylizeNoColor
     };
     // legacy...
-    if (arguments.length >= 3) {
+    if (arguments.length >= 3 && !isUndefined(arguments[2])) {
       ctx.depth = arguments[2];
-      if (arguments.length >= 4) {
-        ctx.colors = arguments[3];
-      }
     }
-    if (isBooleanType(opts)) {
+    if (arguments.length >= 4 && !isUndefined(arguments[3])) {
+      ctx.colors = arguments[3];
+    }
+    if (isBoolean(opts)) {
       // legacy...
       ctx.showHidden = opts;
-    } else if (isObjectLike(opts)) {
-      // got an "options" object
-      pForEach.call($keys(opts), function (key) {
-        ctx[key] = opts[key];
-      });
     }
-    // set default options
-    if (isUndefined(ctx.showHidden)) {
-      ctx.showHidden = false;
-    }
-    if (isUndefined(ctx.depth)) {
-      ctx.depth = 2;
-    }
-    if (isUndefined(ctx.colors)) {
-      ctx.colors = false;
-    }
-    if (isUndefined(ctx.customInspect)) {
-      ctx.customInspect = true;
+    // Set default and user-specified options
+    if (supportsGetSet) {
+      ctx = $assign($create(null), inspect.defaultOptions, ctx, opts);
+    } else {
+      ctx = $assign($create(null), inspectDefaultOptions, inspect.defaultOptions, ctx, opts);
     }
     if (ctx.colors) {
       ctx.stylize = stylizeWithColor;
     }
-    return fmtValueIt(ctx, obj, ctx.depth);
+    if (isNull(ctx.maxArrayLength)) {
+      ctx.maxArrayLength = Infinity;
+    }
+    return fmtValue(ctx, obj, ctx.depth);
   };
 
-  // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-  define.properties(inspectIt, {
-    colors: {},
-    styles: {}
-  });
+  if (supportsGetSet) {
+    $defineProperty(inspect, 'defaultOptions', {
+      get: function () {
+        return inspectDefaultOptions;
+      },
+      set: function (options) {
+        if (!isObjectLike(options)) {
+          throw new $TypeError('"options" must be an object');
+        }
+        return $assign(inspectDefaultOptions, options);
+      }
+    });
+  } else {
+    define.property(inspect, 'defaultOptions', $assign($create(null), inspectDefaultOptions));
+  }
 
-  define.properties(inspectIt.colors, {
+  // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+  define.property(inspect, 'colors', $assign($create(null), {
     bold: [1, 22],
     italic: [3, 23],
     underline: [4, 24],
@@ -817,10 +919,10 @@
     magenta: [35, 39],
     red: [31, 39],
     yellow: [33, 39]
-  });
+  }));
 
   // Don't use 'blue' not visible on cmd.exe
-  define.properties(inspectIt.styles, {
+  define.property(inspect, 'styles', $assign($create(null), {
     special: 'cyan',
     number: 'yellow',
     'boolean': 'yellow',
@@ -831,5 +933,5 @@
     date: 'magenta',
     // "name": intentionally not styling
     regexp: 'red'
-  });
+  }));
 }());

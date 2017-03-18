@@ -1,21 +1,24 @@
-/*jslint maxlen:80, es6:true, white:true */
+/* jslint maxlen:80, es6:true, white:true */
 
-/*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
-  freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
-  nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:true, esnext:true, plusplus:true, maxparams:false, maxdepth:false,
-  maxstatements:false, maxcomplexity:false */
+/* jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
+   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
+   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
+   es3:false, esnext:true, plusplus:true, maxparams:1, maxdepth:2,
+   maxstatements:12, maxcomplexity:4 */
 
-/*global expect, module, require, describe, xit, it, returnExports,
-  Promise:true, JSON:true */
+/* eslint strict: 1, max-lines: 1, symbol-description: 1, max-nested-callbacks: 1,
+   max-statements: 1, id-length: 1, complexity: 1 */
 
-(function () {
+/* global expect, module, require, describe, xit, it, returnExports,
+   Promise:true, JSON:true, ArrayBuffer, DataView, Int8Array, Uint8ClampedArray,
+   Float32Array, Float64Array, Int16Array, Int32Array, Uint8Array, Uint16Array,
+   Uint32Array */
+
+;(function () { // eslint-disable-line no-extra-semi
+
   'use strict';
 
-  var hasSymbol, ifHasSymbolIt, hasSet, ifHasSetIt, hasMap, ifHasMapIt,
-    hasArrayBuffer, ifHasArrayBuffer, hasDataView, ifHasDataView, hasInt8Array,
-    hasUint8ClampedArray, hasPromise, ifHasPromiseIt, propVisibleOnArrayBuffer,
-    noHidden, oldIEerror, getSupport, ifGetSupportIt, inspect;
+  var inspect;
 
   if (typeof module === 'object' && module.exports) {
     require('es5-shim');
@@ -26,66 +29,107 @@
     require('json3').runInContext(null, JSON);
     require('es6-shim');
     var es7 = require('es7-shim');
-    Object.keys(es7).forEach(function(key) {
+    Object.keys(es7).forEach(function (key) {
       var obj = es7[key];
-      if (typeof obj.shim === 'function'){
+      if (typeof obj.shim === 'function') {
         obj.shim();
       }
     });
     inspect = require('../../index.js');
     // Test against `master`
-    //inspect = require('util').inspect;
+    // inspect = require('util').inspect;
   } else {
     inspect = returnExports;
   }
 
-  hasSymbol = typeof Symbol === 'function' && typeof Symbol() === 'symbol';
-  ifHasSymbolIt = hasSymbol ? it : xit;
-  hasSet = typeof Set === 'function';
-  ifHasSetIt = hasSet ? it : xit;
-  hasMap = typeof Map === 'function';
-  ifHasMapIt = hasMap ? it : xit;
-  hasArrayBuffer = typeof ArrayBuffer === 'function';
-  ifHasArrayBuffer = hasArrayBuffer ? it : xit;
-  hasDataView = typeof DataView === 'function';
-  ifHasDataView = hasArrayBuffer && hasDataView ? it : xit;
-  hasInt8Array = typeof Int8Array === 'function';
-  hasUint8ClampedArray = typeof Uint8ClampedArray === 'function';
-  hasPromise = typeof Promise === 'function';
-  ifHasPromiseIt = hasPromise ? it : xit;
-  propVisibleOnArrayBuffer = hasArrayBuffer && (function () {
+  var hasSymbol = typeof Symbol === 'function' && typeof Symbol() === 'symbol';
+  var ifHasSymbolIt = hasSymbol ? it : xit;
+  var hasSet = typeof Set === 'function';
+  var ifHasSetIt = hasSet ? it : xit;
+  var hasMap = typeof Map === 'function';
+  var ifHasMapIt = hasMap ? it : xit;
+  var hasArrayBuffer = typeof ArrayBuffer === 'function';
+  var ifHasArrayBuffer = hasArrayBuffer ? it : xit;
+  var hasDataView = typeof DataView === 'function';
+  var ifHasDataView = hasArrayBuffer && hasDataView ? it : xit;
+  var hasInt8Array = typeof Int8Array === 'function';
+  var hasUint8ClampedArray = typeof Uint8ClampedArray === 'function';
+  var hasPromise = typeof Promise === 'function';
+  var ifHasPromiseIt = hasPromise ? it : xit;
+  var propVisibleOnArrayBuffer = hasArrayBuffer && (function () {
     var ab = new ArrayBuffer(4);
     ab.x = true;
     return Object.keys(ab).indexOf('x') > -1;
   }());
 
-  oldIEerror = (function () {
+  var oldIEerror = (function () {
     try {
-      /*jshint undef:false */
-      undef();
+      /* jshint undef:false */
+      undef(); // eslint-disable-line no-undef
+      return false;
     } catch (e) {
       return e.name !== 'ReferenceError';
     }
   }());
 
-  getSupport = (function (x) {
-    /*jshint unused:false */
+  var getSupport = (function () {
+    /* jshint unused:false */
     try {
-      /*jshint evil:true */
-      eval('x={get prop(){return;}};');
+      /* jshint evil:true */
+      eval('var x={get prop(){return;}};'); // eslint-disable-line no-eval
       return true;
     } catch (ignore) {}
     return false;
   }());
-  ifGetSupportIt = getSupport ? it : xit;
+  var ifGetSupportIt = getSupport ? it : xit;
 
-  noHidden = (function (x) {
-    x = Object.defineProperty({}, 'hidden', {
+  var noHidden = (function () {
+    var x = Object.defineProperty({}, 'hidden', {
       enumerable: false,
       value: null
     });
     return Object.keys(x).length !== 0;
   }());
+
+  var supportsInferredName;
+  if (function test1() {}.name === 'test1') {
+    var xx = { yy: function () {} };
+    supportsInferredName = xx.yy.name === 'yy';
+  }
+
+  var supportsGetSetIt = xit;
+  try {
+    var testVar;
+    var testObject = Object.defineProperty(Object.create(null), 'defaultOptions', {
+      get: function () {
+        return testVar;
+      },
+      set: function (val) {
+        testVar = val;
+        return testVar;
+      }
+    });
+    testObject.defaultOptions = 'test';
+    supportsGetSetIt = testVar === 'test' ? it : xit;
+  } catch (ignore) {}
+
+  var ifGenSupportedIt = xit;
+  try {
+    new Function('return function*() {}')(); // eslint-disable-line no-new-func
+    ifGenSupportedIt = it;
+  } catch (e) {}
+
+  var ifArrowSupportedIt = xit;
+  try {
+    new Function('return () => {}')(); // eslint-disable-line no-new-func
+    ifArrowSupportedIt = it;
+  } catch (e) {}
+
+  var ifAsyncSupportedIt = xit;
+  try {
+    new Function('return async function() {}')(); // eslint-disable-line no-new-func
+    ifAsyncSupportedIt = it;
+  } catch (e) {}
 
   describe('inspect', function () {
     it('basic', function () {
@@ -95,14 +139,17 @@
       expect(inspect('hello')).toBe('\'hello\'');
       expect(inspect(function () {})).toBe('[Function]');
       expect(inspect(function f() {})).toBe('[Function: f]');
+
       expect(inspect(undefined)).toBe('undefined');
       expect(inspect(null)).toBe('null');
       expect(inspect(/foo(bar\n)?/igm)).toBe('/foo(bar\\n)?/gim');
       var subject = new Date(1266148120000);
       var ex = inspect(subject);
       var match = ex.match(/(2010-02-14T11:48:40.000Z)/);
-      match = match ? match[0]: ex;
+      match = match ? match[0] : ex;
       expect(match).toBe('2010-02-14T11:48:40.000Z');
+      subject = new Date('');
+      expect(inspect(subject)).toBe(subject.toString());
       expect(inspect('\n\u0001')).toBe('\'\\n\\u0001\'');
 
       expect(inspect([])).toBe('[]');
@@ -114,60 +161,30 @@
       expect(inspect([1, [2, 3]])).toBe('[ 1, [ 2, 3 ] ]');
 
       expect(inspect({})).toBe('{}');
-      expect(inspect({
-        a: 1
-      })).toBe('{ a: 1 }');
-      expect(inspect({
-        a: function () {}
-      })).toBe('{ a: [Function] }');
-      expect(inspect({
-        a: function test() {}
-      })).toBe('{ a: [Function: test] }');
-      expect(inspect({
-        a: 1,
-        b: 2
-      })).toBe('{ a: 1, b: 2 }');
-      expect(inspect({
-        'a': {}
-      })).toBe('{ a: {} }');
-      expect(inspect({
-        'a': {
-          'b': 2
-        }
-      })).toBe('{ a: { b: 2 } }');
-      expect(inspect({
-        'a': {
-          'b': {
-            'c': {
-              'd': 2
-            }
-          }
-        }
-      })).toBe('{ a: { b: { c: [Object] } } }');
-      expect(inspect({
-        'a': {
-          'b': {
-            'c': {
-              'd': 2
-            }
-          }
-        }
-      }, false, null)).toBe('{ a: { b: { c: { d: 2 } } } }');
+      expect(inspect({ a: 1 })).toBe('{ a: 1 }');
+      expect(inspect({ a: function () {} })).toBe(supportsInferredName ? '{ a: [Function: a] }' : '{ a: [Function] }');
+      expect(inspect({ a: function test() {} })).toBe('{ a: [Function: test] }');
+      expect(inspect({ a: 1, b: 2 })).toBe('{ a: 1, b: 2 }');
+      expect(inspect({ a: {} })).toBe('{ a: {} }');
+      expect(inspect({ a: { b: 2 } })).toBe('{ a: { b: 2 } }');
+      expect(inspect({ a: { b: { c: { d: 2 } } } })).toBe('{ a: { b: { c: [Object] } } }');
+      expect(inspect({ a: { b: { c: { d: 2 } } } }, false, null)).toBe('{ a: { b: { c: { d: 2 } } } }');
       expect(inspect([1, 2, 3], true)).toBe('[ 1, 2, 3, [length]: 3 ]');
-      expect(inspect({
-        'a': {
-          'b': {
-            'c': 2
-          }
-        }
-      }, false, 0)).toBe('{ a: [Object] }');
-      expect(inspect({
-        'a': {
-          'b': {
-            'c': 2
-          }
-        }
-      }, false, 1)).toBe('{ a: { b: [Object] } }');
+      expect(inspect({ a: { b: { c: 2 } } }, false, 0)).toBe('{ a: [Object] }');
+      expect(inspect({ a: { b: { c: 2 } } }, false, 1)).toBe('{ a: { b: [Object] } }');
+    });
+
+    ifArrowSupportedIt('arrow functions', function () {
+      expect(inspect(new Function('return () => {}')())).toBe('[Function]'); // eslint-disable-line no-new-func
+    });
+
+    ifGenSupportedIt('generator functions', function () {
+      expect(inspect(new Function('return function*() {}')())).toBe('[GeneratorFunction]'); // eslint-disable-line no-new-func
+    });
+
+    ifAsyncSupportedIt('async functions', function () {
+      expect(inspect(new Function('return async function() {}')())).toBe('[AsyncFunction]'); // eslint-disable-line no-new-func
+      expect(inspect(new Function('return async () => {}')())).toBe('[AsyncFunction]'); // eslint-disable-line no-new-func
     });
 
     ifHasArrayBuffer('ArrayBuffer', function () {
@@ -195,9 +212,9 @@
 
     ifHasDataView('DataView', function () {
       [true, false].forEach(function (showHidden) {
-        var ab = new ArrayBuffer(4),
-          dv = new DataView(ab, 1, 2),
-          ex = inspect(dv, showHidden);
+        var ab = new ArrayBuffer(4);
+        var dv = new DataView(ab, 1, 2);
+        var ex = inspect(dv, showHidden);
 
         expect(ex.slice(0, 10)).toBe('DataView {');
         expect(ex.slice(-1)).toBe('}');
@@ -225,27 +242,27 @@
 
     ifHasArrayBuffer('TypedArrays', function () {
       var arrays = [{
-          Ctr: Float32Array,
-          name: 'Float32Array'
-        }, {
-          Ctr: Float64Array,
-          name: 'Float64Array'
-        }, {
-          Ctr: Int16Array,
-          name: 'Int16Array'
-        }, {
-          Ctr: Int32Array,
-          name: 'Int32Array'
-        }, {
-          Ctr: Uint16Array,
-          name: 'Uint16Array'
-        }, {
-          Ctr: Uint32Array,
-          name: 'Uint32Array'
-        }, {
-          Ctr: Uint8Array,
-          name: 'Uint8Array'
-        }];
+        Ctr: Float32Array,
+        name: 'Float32Array'
+      }, {
+        Ctr: Float64Array,
+        name: 'Float64Array'
+      }, {
+        Ctr: Int16Array,
+        name: 'Int16Array'
+      }, {
+        Ctr: Int32Array,
+        name: 'Int32Array'
+      }, {
+        Ctr: Uint16Array,
+        name: 'Uint16Array'
+      }, {
+        Ctr: Uint32Array,
+        name: 'Uint32Array'
+      }, {
+        Ctr: Uint8Array,
+        name: 'Uint8Array'
+      }];
       if (hasUint8ClampedArray) {
         arrays.push({
           Ctr: Uint8ClampedArray,
@@ -286,22 +303,18 @@
       // See http://codereview.chromium.org/9124004/
 
       var out = inspect(Object.create({}, {
+        hidden: { value: 'Visible on ES3' },
         visible: {
-          value: 1,
-          enumerable: true
-        },
-        hidden: {
-          value: 'Visible on ES3'
+          enumerable: true,
+          value: 1
         }
       }), true);
       if (noHidden) {
-        if (!(out !== '{ [hidden]: \'Visible on ES3\', visible: 1 }' &&
-            out !== '{ visible: 1, [hidden]: \'Visible on ES3\' }')) {
+        if (!(out !== '{ [hidden]: \'Visible on ES3\', visible: 1 }' && out !== '{ visible: 1, [hidden]: \'Visible on ES3\' }')) {
 
           expect(false).toBe(true);
         }
-      } else if (out !== '{ [hidden]: \'Visible on ES3\', visible: 1 }' &&
-        out !== '{ visible: 1, [hidden]: \'Visible on ES3\' }') {
+      } else if (out !== '{ [hidden]: \'Visible on ES3\', visible: 1 }' && out !== '{ visible: 1, [hidden]: \'Visible on ES3\' }') {
 
         expect(false).toBe(true);
       }
@@ -310,38 +323,30 @@
     it('Objects without prototype', function () {
       // Objects without prototype
       var out = inspect(Object.create(null, {
+        hidden: { value: 'Visible on ES3' },
         name: {
-          value: 'Tim',
-          enumerable: true
-        },
-        hidden: {
-          value: 'Visible on ES3'
+          enumerable: true,
+          value: 'Tim'
         }
       }), true);
       if (noHidden) {
-        if (!(out !== '{ [hidden]: \'Visible on ES3\', name: \'Tim\' }' &&
-            out !== '{ name: \'Tim\', [hidden]: \'Visible on ES3\' }')) {
+        if (!(out !== '{ [hidden]: \'Visible on ES3\', name: \'Tim\' }' && out !== '{ name: \'Tim\', [hidden]: \'Visible on ES3\' }')) {
 
           expect(false).toBe(true);
         }
-      } else if (out !== '{ [hidden]: \'Visible on ES3\', name: \'Tim\' }' &&
-        out !== '{ name: \'Tim\', [hidden]: \'Visible on ES3\' }') {
+      } else if (out !== '{ [hidden]: \'Visible on ES3\', name: \'Tim\' }' && out !== '{ name: \'Tim\', [hidden]: \'Visible on ES3\' }') {
 
         expect(false).toBe(true);
       }
 
       expect(
         inspect(Object.create(null, {
+          hidden: { value: 'Visible on ES3' },
           name: {
-            value: 'Tim',
-            enumerable: true
-          },
-          hidden: {
-            value: 'Visible on ES3'
+            enumerable: true,
+            value: 'Tim'
           }
-        }))).toBe(noHidden ?
-        '{ name: \'Tim\', hidden: \'Visible on ES3\' }' :
-        '{ name: \'Tim\' }'
+        }))).toBe(noHidden ? '{ name: \'Tim\', hidden: \'Visible on ES3\' }' : '{ name: \'Tim\' }'
       );
     });
 
@@ -358,15 +363,15 @@
       Object.defineProperty(subject, 'readwrite', {
         enumerable: true,
         get: function () {},
-        /*jshint unused:false */
-        set: function (val) {}
+        /* jshint unused:false */
+        set: function (val) {} // eslint-disable-line no-unused-vars
       });
       expect(inspect(subject)).toBe('{ readwrite: [Getter/Setter] }');
 
       subject = {};
-      Object.defineProperty(subject, 'writeonly', {
+      Object.defineProperty(subject, 'writeonly', { // eslint-disable-line accessor-pairs
         enumerable: true,
-        set: function (val) {}
+        set: function (val) {} // eslint-disable-line no-unused-vars
       });
       expect(inspect(subject)).toBe('{ writeonly: [Setter] }');
 
@@ -392,7 +397,7 @@
       // Function with properties
       var value = function () {};
       value.aprop = 42;
-      expect(inspect(value)).toBe('{ [Function] aprop: 42 }');
+      expect(inspect(value)).toBe(supportsInferredName ? '{ [Function: value] aprop: 42 }' : '{ [Function] aprop: 42 }');
     });
 
     it('Regular expressions with properties', function () {
@@ -425,9 +430,12 @@
       var a = ['foo', 'bar', 'baz'];
       expect(inspect(a)).toBe('[ \'foo\', \'bar\', \'baz\' ]');
       delete a[1];
-      expect(inspect(a)).toBe('[ \'foo\', , \'baz\' ]');
-      expect(inspect(a, true)).toBe('[ \'foo\', , \'baz\', [length]: 3 ]');
-      expect(inspect(new Array(5))).toBe('[ , , , ,  ]');
+      expect(inspect(a)).toBe('[ \'foo\', <1 empty item>, \'baz\' ]');
+      expect(inspect(a, true)).toBe('[ \'foo\', <1 empty item>, \'baz\', [length]: 3 ]');
+      expect(inspect(new Array(5))).toBe('[ <5 empty items> ]');
+      a[3] = 'bar';
+      a[100] = 'qux';
+      expect(inspect(a, { breakLength: Infinity })).toBe('[ \'foo\', <1 empty item>, \'baz\', \'bar\', <96 empty items>, \'qux\' ]');
     });
 
     ifGetSupportIt('property descriptors', function () {
@@ -439,11 +447,7 @@
           }
         }
       });
-      var setter = Object.create(null, {
-        b: {
-          set: function () {}
-        }
-      });
+      var setter = Object.create(null, { b: { set: function () {} } }); // eslint-disable-line accessor-pairs
       var getterAndSetter = Object.create(null, {
         c: {
           get: function () {
@@ -459,31 +463,31 @@
 
     it('exceptions should print the error message, not \'{}\'', function () {
       // exceptions should print the error message, not '{}'
-      var text;
-      expect(inspect(new Error()).indexOf('[Error]')).not.toBe(-1, '[Error]');
-      expect(inspect(new Error('FAIL')).indexOf('[Error: FAIL]'))
-        .not.toBe(-1, '[Error: FAIL]');
-      expect(inspect(new TypeError('FAIL')).indexOf('[TypeError: FAIL]'))
-        .not.toBe(-1, '[TypeError: FAIL]');
-      expect(inspect(new SyntaxError('FAIL')).indexOf('[SyntaxError: FAIL]'))
-        .not.toBe(-1, '[SyntaxError: FAIL]');
+      var errors = [];
+      errors.push(new Error());
+      errors.push(new Error('FAIL'));
+      errors.push(new TypeError('FAIL'));
+      errors.push(new SyntaxError('FAIL'));
+      errors.forEach(function (err) {
+        expect(inspect(err)).toBe(err.stack || '[' + err.toString() + ']');
+      });
+
       try {
-        /*jshint undef:false */
-        undef();
+        /* jshint undef:false */
+        undef(); // eslint-disable-line no-undef
       } catch (e) {
-        text = oldIEerror ? '[TypeError:' : '[ReferenceError:';
-        expect(inspect(e).indexOf(text)).not.toBe(-1, text);
+        expect(inspect(e)).toBe(e.stack || '[' + e.toString() + ']');
       }
       var err = new Error('FAILURE');
       var ex = inspect(err, true);
-      expect(ex.indexOf('[Error: FAILURE]')).not.toBe(-1, '[Error: FAILURE]');
+      expect(ex.includes('Error: FAILURE')).toBe(true);
       if (err.stack !== undefined) {
         var stack = ex.match(/\[?stack\]?:/);
         stack = stack ? stack[1] : ex;
         expect(stack).not.toBe('stack');
       }
       if (err.message !== undefined) {
-        var message = ex.match(/\[?(message)\]?(: \'FAILURE\')/);
+        var message = ex.match(/\[?(message)\]?(: 'FAILURE')/);
         message = message ? message[1] + message[2] : ex;
         expect(message).toBe('message: \'FAILURE\'');
       }
@@ -513,7 +517,7 @@
         inspect(d);
       }).not.toThrow();
 
-      expect(function() {
+      expect(function () {
         var d = new Date();
         d.toISOString = null;
         inspect(d);
@@ -539,9 +543,7 @@
 
     it('GH-2225', function () {
       // GH-2225
-      var x = {
-        inspect: inspect
-      };
+      var x = { inspect: inspect };
       expect(inspect(x).indexOf('inspect')).not.toBe(-1);
     });
 
@@ -564,7 +566,7 @@
 
     it('inspect.styles and inspect.colors', function () {
       // inspect.styles and inspect.colors
-      function testColorStyle(style, input) {
+      var testColorStyle = function (style, input) {
         var colorName = inspect.styles[style];
         var color = ['', ''];
         if (inspect.colors[colorName]) {
@@ -573,10 +575,9 @@
 
         var withoutColor = inspect(input, false, 0, false);
         var withColor = inspect(input, false, 0, true);
-        var expected = '\u001b[' + color[0] + 'm' + withoutColor +
-          '\u001b[' + color[1] + 'm';
+        var expected = '\u001b[' + color[0] + 'm' + withoutColor + '\u001b[' + color[1] + 'm';
         expect(withColor).toBe(expected, 'inspect color for style ' + style);
-      }
+      };
 
       testColorStyle('special', function () {});
       testColorStyle('number', 123.456);
@@ -592,7 +593,7 @@
       // an object with "hasOwnProperty" overwritten should not throw
       expect(function () {
         inspect({
-          /*jshint -W001 */
+          /* jshint -W001 */
           hasOwnProperty: null
         });
       }).not.toThrow();
@@ -601,15 +602,9 @@
     it('new API, accepts an "options" object', function () {
       // new API, accepts an "options" object
       var subject = {
+        a: { b: { c: { d: 0 } } },
         foo: 'bar',
-        hello: 31,
-        a: {
-          b: {
-            c: {
-              d: 0
-            }
-          }
-        }
+        hello: 31
       };
       Object.defineProperty(subject, 'hidden', {
         enumerable: false,
@@ -617,28 +612,14 @@
       });
 
       if (!noHidden) {
-        expect(inspect(subject, {
-          showHidden: false
-        }).indexOf('hidden')).toBe(-1, 'Visible on ES3');
+        expect(inspect(subject, { showHidden: false }).indexOf('hidden')).toBe(-1, 'Visible on ES3');
       }
-      expect(inspect(subject, {
-        showHidden: true
-      }).indexOf('hidden')).not.toBe(-1);
-      expect(inspect(subject, {
-        colors: false
-      }).indexOf('\u001b[32m')).toBe(-1);
-      expect(inspect(subject, {
-        colors: true
-      }).indexOf('\u001b[32m')).not.toBe(-1);
-      expect(inspect(subject, {
-        depth: 2
-      }).indexOf('c: [Object]')).not.toBe(1);
-      expect(inspect(subject, {
-        depth: 0
-      }).indexOf('a: [Object]')).not.toBe(-1);
-      expect(inspect(subject, {
-        depth: null
-      }).indexOf('{ d: 0 }')).not.toBe(-1);
+      expect(inspect(subject, { showHidden: true }).indexOf('hidden')).not.toBe(-1);
+      expect(inspect(subject, { colors: false }).indexOf('\u001b[32m')).toBe(-1);
+      expect(inspect(subject, { colors: true }).indexOf('\u001b[32m')).not.toBe(-1);
+      expect(inspect(subject, { depth: 2 }).indexOf('c: [Object]')).not.toBe(1);
+      expect(inspect(subject, { depth: 0 }).indexOf('a: [Object]')).not.toBe(-1);
+      expect(inspect(subject, { depth: null }).indexOf('{ d: 0 }')).not.toBe(-1);
     });
 
     it('"customInspect" option can enable/disable calling inspect() on objects', function () {
@@ -649,27 +630,17 @@
         }
       };
 
-      expect(inspect(subject, {
-        customInspect: true
-      }).indexOf('123')).not.toBe(-1);
-      expect(inspect(subject, {
-        customInspect: true
-      }).indexOf('inspect')).toBe(-1);
-      expect(inspect(subject, {
-        customInspect: false
-      }).indexOf('123')).toBe(-1);
-      expect(inspect(subject, {
-        customInspect: false
-      }).indexOf('inspect')).not.toBe(-1);
+      expect(inspect(subject, { customInspect: true }).indexOf('123')).not.toBe(-1);
+      expect(inspect(subject, { customInspect: true }).indexOf('inspect')).toBe(-1);
+      expect(inspect(subject, { customInspect: false }).indexOf('123')).toBe(-1);
+      expect(inspect(subject, { customInspect: false }).indexOf('inspect')).not.toBe(-1);
     });
 
     it('custom inspect() functions should be able to return other Objects', function () {
       // custom inspect() functions should be able to return other Objects
       var subject = {
         inspect: function () {
-          return {
-            foo: 'bar'
-          };
+          return { foo: 'bar' };
         }
       };
 
@@ -679,24 +650,20 @@
         expect(opts.customInspectOptions).toBe(true);
       };
 
-      inspect(subject, {
-        customInspectOptions: true
-      });
+      inspect(subject, { customInspectOptions: true });
     });
 
     it('inspect with "colors" option should produce as many lines as without it', function () {
       // inspect with "colors" option should produce as many lines as without it
-      function testLines(input) {
+      var testLines = function (input) {
         var countLines = function (str) {
           return (str.match(/\n/g) || []).length;
         };
 
         var withoutColor = inspect(input);
-        var withColor = inspect(input, {
-          colors: true
-        });
+        var withColor = inspect(input, { colors: true });
         expect(countLines(withoutColor)).toBe(countLines(withColor));
-      }
+      };
 
       testLines([1, 2, 3, 4, 5, 6, 7]);
       testLines(function () {
@@ -707,20 +674,16 @@
         return bigArray;
       }());
       testLines({
-        foo: 'bar',
+        b: { a: 35 },
         baz: 35,
-        b: {
-          a: 35
-        }
+        foo: 'bar'
       });
       testLines({
-        foo: 'bar',
+        b: { a: 35 },
         baz: 35,
-        b: {
-          a: 35
-        },
-        veryLongKey: 'very_long_value',
-        evenLongerKey: ['with even longer value in array']
+        evenLongerKey: ['with even longer value in array'],
+        foo: 'bar',
+        veryLongKey: 'very_long_value'
       });
     });
 
@@ -756,13 +719,9 @@
       expect(inspect(Symbol(123))).toBe('Symbol(123)');
       expect(inspect(Symbol('hi'))).toBe('Symbol(hi)');
       expect(inspect([Symbol()])).toBe('[ Symbol() ]');
-      expect(inspect({
-        foo: Symbol()
-      })).toBe('{ foo: Symbol() }');
+      expect(inspect({ foo: Symbol() })).toBe('{ foo: Symbol() }');
 
-      var options = {
-        showHidden: true
-      };
+      var options = { showHidden: true };
       var subject = {};
 
       subject[Symbol('symbol')] = 42;
@@ -776,7 +735,7 @@
       expect(inspect(subject)).toBe('[ 1, 2, 3 ]');
       expect(inspect(subject, options))
         .toBe('[ 1, 2, 3, [length]: 3, [Symbol(symbol)]: 42 ]');
-      expect(inspect(Object(Symbol('object')))).toBe('Symbol {}');
+      expect(inspect(Object(Symbol('object')))).toBe('[Symbol: Symbol(object)]');
     });
 
     ifHasSetIt('Set', function () {
@@ -797,7 +756,7 @@
       set.add('foo');
       set.bar = 42;
       ex = inspect(set, true);
-      match = ex.match(/(\'foo\',)[\s\S]+(\[size\]: 1,)[\s\S]+(bar: 42)/);
+      match = ex.match(/('foo',)[\s\S]+(\[size\]: 1,)[\s\S]+(bar: 42)/);
       match = match ? match.slice(1).join(' ') : ex;
       expect(match).toBe('\'foo\', [size]: 1, bar: 42');
     });
@@ -812,14 +771,14 @@
       map.set(2, 'b');
       map.set(3, 'c');
       ex = inspect(map);
-      var match = ex.match(/1 => \'a\', 2 => \'b\', 3 => \'c\'/);
+      var match = ex.match(/1 => 'a', 2 => 'b', 3 => 'c'/);
       match = match ? match[0] : ex;
       expect(match).toBe('1 => \'a\', 2 => \'b\', 3 => \'c\'');
       map = new Map();
       map.set('foo', null);
       map.bar = 42;
       ex = inspect(map, true);
-      match = ex.match(/(\'foo\' => null,)[\s\S]+(\[size\]: 1,)[\s\S]+(bar: 42)/);
+      match = ex.match(/('foo' => null,)[\s\S]+(\[size\]: 1,)[\s\S]+(bar: 42)/);
       match = match ? match.slice(1).join(' ') : ex;
       expect(match).toBe('\'foo\' => null, [size]: 1, bar: 42');
     });
@@ -829,7 +788,7 @@
       var ex = inspect(Promise.resolve(3));
       expect(ex.slice(0, 9)).toBe('Promise {');
       expect(ex.slice(-1)).toBe('}');
-      ex = inspect(Promise.reject(3));
+      ex = inspect(Promise.reject(new Error()).catch(function () {}));
       expect(ex.slice(0, 9)).toBe('Promise {');
       expect(ex.slice(-1)).toBe('}');
       ex = inspect(new Promise(function () {}));
@@ -892,7 +851,7 @@
       // Test alignment of items in container
       // Assumes that the first numeric character is the start of an item.
 
-      function checkAlignment(container) {
+      var checkAlignment = function (container) {
         var lines = inspect(container).split('\n');
         var pos;
         lines.forEach(function (line) {
@@ -904,7 +863,7 @@
             pos = npos;
           }
         });
-      }
+      };
 
       var bigArray = [];
       for (var i = 0; i < 100; i += 1) {
@@ -937,29 +896,67 @@
 
     it('Corner cases', function () {
       // Corner cases.
-      var x = {
-        constructor: 42
-      };
+      var x = { constructor: 42 };
       expect(inspect(x)).toBe('{ constructor: 42 }');
 
       if (getSupport) {
         x = {};
         Object.defineProperty(x, 'constructor', {
+          enumerable: true,
           get: function () {
             throw new Error('should not access constructor');
-          },
-          enumerable: true
+          }
         });
         expect(inspect(x)).toBe('{ constructor: [Getter] }');
       }
 
-      /*jshint singleGroups:false, supernew:true */
-      x = new(function () {});
-      /*jshint singleGroups:true, supernew:false */
+      /* jshint singleGroups:false, supernew:true */
+      x = new function () {}();
+      /* jshint singleGroups:true, supernew:false */
       expect(inspect(x)).toBe('{}');
 
       x = Object.create(null);
       expect(inspect(x)).toBe('{}');
+    });
+
+    it('inspect.defaultOptions', function () {
+      // inspect.defaultOptions tests
+      var arr = new Array(101).fill();
+      var obj = { a: { a: { a: { a: 1 } } } };
+      var oldOptions = Object.assign({}, inspect.defaultOptions);
+      var reMore = /1 more item/;
+      var reObject = /Object/;
+
+      // Set single option through property assignment
+      inspect.defaultOptions.maxArrayLength = null;
+      expect(!reMore.test(inspect(arr))).toBe(true);
+      inspect.defaultOptions.maxArrayLength = oldOptions.maxArrayLength;
+      expect(reMore.test(inspect(arr))).toBe(true);
+      inspect.defaultOptions.depth = null;
+      expect(!reObject.test(inspect(obj))).toBe(true);
+      inspect.defaultOptions.depth = oldOptions.depth;
+      expect(reObject.test(inspect(obj))).toBe(true);
+      expect(JSON.stringify(inspect.defaultOptions)).toBe(JSON.stringify(oldOptions));
+
+      // Set multiple options through object assignment
+      inspect.defaultOptions = { depth: null, maxArrayLength: null };
+      expect(!reMore.test(inspect(arr))).toBe(true);
+      expect(!reObject.test(inspect(obj))).toBe(true);
+      inspect.defaultOptions = oldOptions;
+      expect(reMore.test(inspect(arr))).toBe(true);
+      expect(reObject.test(inspect(obj))).toBe(true);
+      expect(JSON.stringify(inspect.defaultOptions)).toBe(JSON.stringify(oldOptions));
+
+    });
+
+    supportsGetSetIt('inspect.defaultOptions getter setter error', function () {
+      expect(function () {
+        inspect.defaultOptions = null;
+      }).toThrow('"options" must be an object');
+
+      expect(function () {
+        inspect.defaultOptions = 'bad';
+      }).toThrow('"options" must be an object');
     });
   });
 }());

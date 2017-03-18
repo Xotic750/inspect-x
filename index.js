@@ -110,7 +110,7 @@
  *
  * inspect(obj);
  *   // "{ bar: 'baz' }"
- * @version 1.0.18
+ * @version 1.1.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -118,17 +118,20 @@
  * @module inspect-x
  */
 
-/*jslint maxlen:80, esversion:6, this:true, white:true */
+/* jslint maxlen:80, es6:true, white:true */
 
-/*jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
-  freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
-  nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
-  es3:false, esnext:true, plusplus:true, maxparams:false, maxdepth:false,
-  maxstatements:false, maxcomplexity:false */
+/* jshint bitwise:true, camelcase:true, curly:true, eqeqeq:true, forin:true,
+   freeze:true, futurehostile:true, latedef:true, newcap:true, nocomma:true,
+   nonbsp:true, singleGroups:true, strict:true, undef:true, unused:true,
+   es3:false, esnext:true, plusplus:true, maxparams:1, maxdepth:1,
+   maxstatements:3, maxcomplexity:2 */
 
-/*global require, module */
+/* eslint strict: 1, max-statements: 1, max-lines: 1, id-length: 1 */
 
-;(function () {
+/* global require, module */
+
+;(function () { // eslint-disable-line no-extra-semi
+
   'use strict';
 
   var isFunction = require('is-function-x');
@@ -364,9 +367,7 @@
   }
 
   function fmtProp(ctx, value, depth, visibleKeys, key, arr) {
-    var desc = $getOwnPropertyDescriptor(value, key) || {
-      value: value[key]
-    };
+    var desc = $getOwnPropertyDescriptor(value, key) || { value: value[key] };
 
     /*
     // this is a fix for broken FireFox, should not be needed with es6-shim
@@ -434,9 +435,7 @@
     each(value, function (unused, index) {
       pPush.call(
         out,
-        index in value ?
-          fmtProp(ctx, value, depth, visibleKeys, nToStr.call(index), true) :
-          ''
+        index in value ? fmtProp(ctx, value, depth, visibleKeys, nToStr.call(index), true) : ''
       );
     });
     pForEach.call(keys, function (key) {
@@ -493,8 +492,7 @@
         // If the opening "brace" is too large, like in the case of "Set {",
         // we need to force the first item to be on the next line or the
         // items will not line up correctly.
-        (base === '' && braces[0].length === 1 ? '' : base + '\n ') + ' ' +
-        pJoin.call(out, ',\n  ') + ' ' + braces[1];
+        (base === '' && braces[0].length === 1 ? '' : base + '\n ') + ' ' + pJoin.call(out, ',\n  ') + ' ' + braces[1];
     } else {
       result = braces[0] + base + ' ' + pJoin.call(out, ', ') + ' ' + braces[1];
     }
@@ -504,8 +502,7 @@
   fmtValueIt = function fmtValue(ctx, value, depth) {
     // Provide a hook for user-specified inspect functions.
     // Check that value is an object with an inspect function on it
-    if (ctx.customInspect && !isPrimitive(value) &&
-      isFunction(value.inspect) &&
+    if (ctx.customInspect && !isPrimitive(value) && isFunction(value.inspect) &&
       // Filter out the util module, it's inspect function is special
       value.inspect !== inspectIt &&
       // Also filter out any prototype objects using the circular check.
@@ -588,8 +585,7 @@
       // Fast path for ArrayBuffer. Can't do the same for DataView because it
       // has a non-primitive buffer property that we need to recurse for.
       if (isArrayBuffer(value)) {
-        return 'ArrayBuffer { byteLength: ' +
-          fmtNumber(ctx, value.byteLength) + ' }';
+        return 'ArrayBuffer { byteLength: ' + fmtNumber(ctx, value.byteLength) + ' }';
       }
       if (isMapIterator(value)) {
         return 'MapIterator {}';
@@ -709,9 +705,7 @@
       return braces[0] + base + braces[1];
     }
     if (depth < 0) {
-      return isRegExp(value) ?
-        ctx.stylize(rToStr.call(value), 'regexp') :
-        ctx.stylize('[Object]', 'special');
+      return isRegExp(value) ? ctx.stylize(rToStr.call(value), 'regexp') : ctx.stylize('[Object]', 'special');
     }
     pPush.call(ctx.seen, value);
     var out = fmtter(ctx, value, depth, visibleKeys, keys);
@@ -810,32 +804,32 @@
   });
 
   define.properties(inspectIt.colors, {
-    'bold': [1, 22],
-    'italic': [3, 23],
-    'underline': [4, 24],
-    'inverse': [7, 27],
-    'white': [37, 39],
-    'grey': [90, 39],
-    'black': [30, 39],
-    'blue': [34, 39],
-    'cyan': [36, 39],
-    'green': [32, 39],
-    'magenta': [35, 39],
-    'red': [31, 39],
-    'yellow': [33, 39]
+    bold: [1, 22],
+    italic: [3, 23],
+    underline: [4, 24],
+    inverse: [7, 27],
+    white: [37, 39],
+    grey: [90, 39],
+    black: [30, 39],
+    blue: [34, 39],
+    cyan: [36, 39],
+    green: [32, 39],
+    magenta: [35, 39],
+    red: [31, 39],
+    yellow: [33, 39]
   });
 
   // Don't use 'blue' not visible on cmd.exe
   define.properties(inspectIt.styles, {
-    'special': 'cyan',
-    'number': 'yellow',
+    special: 'cyan',
+    number: 'yellow',
     'boolean': 'yellow',
-    'undefined': 'grey',
+    undefined: 'grey',
     'null': 'bold',
-    'string': 'green',
-    'symbol': 'green',
-    'date': 'magenta',
+    string: 'green',
+    symbol: 'green',
+    date: 'magenta',
     // "name": intentionally not styling
-    'regexp': 'red'
+    regexp: 'red'
   });
 }());

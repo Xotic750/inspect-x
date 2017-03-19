@@ -719,7 +719,7 @@
       if (hasSymbol) {
         str = '{ a: 123, [Symbol(inspect.custom)]: [Function] }';
       } else {
-        str = '{ a: 123, _inspect.custom_: [Function] }';
+        str = '{ a: 123, \'_inspect.custom_\': [Function] }';
       }
 
       expect(inspect(subject)).toBe(str);

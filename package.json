@@ -71,7 +71,7 @@
     "jsdoc-to-markdown": "^3.0.0",
     "json3": "^3.3.2",
     "nsp": "^2.6.3",
-    "uglify-js": "^2.8.13"
+    "uglify-js": "^2.8.14"
   },
   "scripts": {
     "test": "jasmine-node --matchall tests/spec/",

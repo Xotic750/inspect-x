@@ -7,7 +7,7 @@
    maxstatements:12, maxcomplexity:4 */
 
 /* eslint strict: 1, max-lines: 1, symbol-description: 1, max-nested-callbacks: 1,
-   max-statements: 1, id-length: 1, complexity: 1 */
+   max-statements: 1, id-length: 1, complexity: 1, max-statements-per-line: 1 */
 
 /* global expect, module, require, describe, xit, it, returnExports,
    Promise:true, JSON:true, ArrayBuffer, DataView, Int8Array, Uint8ClampedArray,
@@ -60,16 +60,6 @@
     var ab = new ArrayBuffer(4);
     ab.x = true;
     return Object.keys(ab).indexOf('x') > -1;
-  }());
-
-  var oldIEerror = (function () {
-    try {
-      /* jshint undef:false */
-      undef(); // eslint-disable-line no-undef
-      return false;
-    } catch (e) {
-      return e.name !== 'ReferenceError';
-    }
   }());
 
   var getSupport = (function () {
@@ -400,6 +390,13 @@
       expect(inspect(value)).toBe(supportsInferredName ? '{ [Function: value] aprop: 42 }' : '{ [Function] aprop: 42 }');
     });
 
+    ifArrowSupportedIt('Anonymous function with properties', function () {
+      // Anonymous function with properties
+      var value = new Function('return (() => function() {})()')(); // eslint-disable-line no-new-func
+      value.aprop = 42;
+      expect(inspect(value)).toBe('{ [Function] aprop: 42 }');
+    });
+
     it('Regular expressions with properties', function () {
       // Regular expressions with properties
       var value = /123/mig;
@@ -498,6 +495,17 @@
         expect(name).toBe('name: \'Error\'');
       }
       */
+    });
+
+    it('Doesn\'t capture stack trace', function () {
+      // Doesn't capture stack trace
+      var BadCustomError = function (msg) {
+        Error.call(this);
+        Object.defineProperty(this, 'message', { enumerable: false, value: msg });
+        Object.defineProperty(this, 'name', { enumerable: false, value: 'BadCustomError' });
+      };
+      BadCustomError.prototype = Error.prototype;
+      expect(inspect(new BadCustomError('foo'))).toBe('[BadCustomError: foo]');
     });
 
     it('GH-1941', function () {
@@ -653,6 +661,66 @@
       inspect(subject, { customInspectOptions: true });
     });
 
+    it('"customInspect" option can enable/disable calling [inspect.custom]()', function () {
+      // "customInspect" option can enable/disable calling [inspect.custom]()
+      var subject = {};
+      subject[inspect.custom] = function () {
+        return 123;
+      };
+
+      expect(inspect(subject, { customInspect: true }).includes('123')).toBe(true);
+      expect(inspect(subject, { customInspect: false }).includes('123')).toBe(false);
+
+      // a custom [inspect.custom]() should be able to return other Objects
+      subject[inspect.custom] = function () {
+        return { foo: 'bar' };
+      };
+
+      expect(inspect(subject), '{ foo: \'bar\' }');
+
+      subject[inspect.custom] = function (depth, opts) {
+        expect(opts.customInspectOptions).toBe(true);
+      };
+
+      inspect(subject, { customInspectOptions: true });
+    });
+
+    it('[inspect.custom] takes precedence over inspect', function () {
+      // [inspect.custom] takes precedence over inspect
+      var subject = {};
+      subject[inspect.custom] = function () {
+        return 123;
+      };
+      subject.inspect = function () {
+        return 456;
+      };
+
+      expect(inspect(subject, { customInspect: true }).includes('123')).toBe(true);
+      expect(inspect(subject, { customInspect: false }).includes('123')).toBe(false);
+      expect(inspect(subject, { customInspect: true }).includes('456')).toBe(false);
+      expect(inspect(subject, { customInspect: false }).includes('456')).toBe(false);
+    });
+
+    it('Returning `this` from a custom inspection function works', function () {
+      // Returning `this` from a custom inspection function works.
+      var subject = { a: 123, inspect: function () { return this; } };
+      expect(inspect(subject)).toBe('{ a: 123, inspect: [Function: inspect] }');
+
+      subject = { a: 123 };
+      subject[inspect.custom] = function () {
+        return this;
+      };
+
+      var str;
+      if (hasSymbol) {
+        str = '{ a: 123, [Symbol(inspect.custom)]: [Function] }';
+      } else {
+        str = '{ a: 123, _inspect.custom_: [Function] }';
+      }
+
+      expect(inspect(subject)).toBe(str);
+    });
+
     it('inspect with "colors" option should produce as many lines as without it', function () {
       // inspect with "colors" option should produce as many lines as without it
       var testLines = function (input) {
@@ -726,16 +794,17 @@
 
       subject[Symbol('symbol')] = 42;
 
-      expect(inspect(subject)).toBe('{}');
+      expect(inspect(subject)).toBe('{ [Symbol(symbol)]: 42 }');
       expect(inspect(subject, options)).toBe('{ [Symbol(symbol)]: 42 }');
+
+      Object.defineProperty(subject, Symbol(), { enumerable: false, value: 'non-enum' });
+      expect(inspect(subject)).toBe('{ [Symbol(symbol)]: 42 }');
+      expect(inspect(subject, options)).toBe('{ [Symbol(symbol)]: 42, [Symbol()]: \'non-enum\' }');
 
       subject = [1, 2, 3];
       subject[Symbol('symbol')] = 42;
 
-      expect(inspect(subject)).toBe('[ 1, 2, 3 ]');
-      expect(inspect(subject, options))
-        .toBe('[ 1, 2, 3, [length]: 3, [Symbol(symbol)]: 42 ]');
-      expect(inspect(Object(Symbol('object')))).toBe('[Symbol: Symbol(object)]');
+      expect(inspect(subject)).toBe('[ 1, 2, 3, [Symbol(symbol)]: 42 ]');
     });
 
     ifHasSetIt('Set', function () {
@@ -788,7 +857,9 @@
       var ex = inspect(Promise.resolve(3));
       expect(ex.slice(0, 9)).toBe('Promise {');
       expect(ex.slice(-1)).toBe('}');
-      ex = inspect(Promise.reject(new Error()).catch(function () {}));
+      var rejected = Promise.reject(3); // eslint-disable-line prefer-promise-reject-errors
+      ex = inspect(rejected);
+      rejected.catch(function () {});
       expect(ex.slice(0, 9)).toBe('Promise {');
       expect(ex.slice(-1)).toBe('}');
       ex = inspect(new Promise(function () {}));
@@ -805,8 +876,8 @@
     });
 
     ifHasMapIt('MapIterator', function () {
-      var m = new Map(),
-        ex;
+      var m = new Map();
+      var ex;
       m.set('foo', 'bar');
       if (m.keys) {
         ex = inspect(m.keys());
@@ -826,8 +897,8 @@
     });
 
     ifHasSetIt('SetIterator', function () {
-      var s = new Set(),
-        ex;
+      var s = new Set();
+      var ex;
       s.add(1);
       s.add(3);
       if (s.keys) {

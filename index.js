@@ -127,7 +127,7 @@
    maxstatements:3, maxcomplexity:2 */
 
 /* eslint strict: 1, max-statements: 1, max-lines: 1, id-length: 1,
-   complexity: 1, sort-keys: 1, no-multi-assign: 1 */
+   complexity: 1, sort-keys: 1, no-multi-assign: 1, max-depth: 1 */
 
 /* global require, module */
 
@@ -145,7 +145,6 @@
   var isMap = require('is-map-x');
   var isTypedArray = require('is-typed-array');
   var isDataView = require('is-data-view-x');
-  var isPrimitive = require('is-primitive');
   var isUndefined = require('validate.io-undefined');
   var isNil = require('is-nil-x');
   var isNull = require('lodash.isnull');
@@ -161,6 +160,7 @@
   var hasSymbolSupport = require('has-symbol-support-x');
   var hasOwnProperty = require('has-own-property-x');
   var toStringTag = require('to-string-tag-x');
+  var collections = require('collections-x');
   var reSingle = new RegExp('\\{[' + require('white-space-x').ws + ']+\\}');
   var hasSet = typeof Set === 'function' && isSet(new Set());
   var testSet = hasSet && new Set(['SetSentinel']);
@@ -170,6 +170,7 @@
   var testMap = hasMap && new Map([[1, 'MapSentinel']]);
   var mForEach = hasMap && Map.prototype.forEach;
   var mValues = hasMap && Map.prototype.values;
+  var MapObject = hasMap ? Map : collections.Map;
   var pSymToStr = hasSymbolSupport && Symbol.prototype.toString;
   var pSymValOf = hasSymbolSupport && Symbol.prototype.valueOf;
   var eToStr = Error.prototype.toString;
@@ -189,8 +190,8 @@
   var pReduce = Array.prototype.reduce;
   var pJoin = Array.prototype.join;
   var pForEach = Array.prototype.forEach;
+  var pFilter = Array.prototype.filter;
   var pSplice = Array.prototype.splice;
-  var aSlice = Array.prototype.slice;
   var pConcat = Array.prototype.concat;
   var pReplace = String.prototype.replace;
   var pTest = RegExp.prototype.test;
@@ -202,6 +203,7 @@
   var $getPrototypeOf = Object.getPrototypeOf;
   var $getOwnPropertyNames = Object.getOwnPropertyNames;
   var $getOwnPropertySymbols = hasSymbolSupport && Object.getOwnPropertySymbols;
+  var $propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
   var $isArray = Array.isArray;
   var $String = String;
   var $Object = Object;
@@ -214,6 +216,8 @@
   var bpe = 'BYTES_PER_ELEMENT';
   var inspect;
   var fmtValue;
+
+  var customInspectSymbol = hasSymbolSupport ? Symbol('inspect.custom') : '_inspect.custom_';
 
   var supportsGetSet;
   try {
@@ -231,7 +235,7 @@
     supportsGetSet = testVar === 'test';
   } catch (ignore) {}
 
-  var inspectDefaultOptions = $assign($create(null), {
+  var inspectDefaultOptions = Object.seal($assign($create(null), {
     showHidden: false,
     depth: 2,
     colors: false,
@@ -239,7 +243,7 @@
     showProxy: false,
     maxArrayLength: 100,
     breakLength: 60
-  });
+  }));
 
   var isBooleanType = function (arg) {
     return typeof arg === 'boolean';
@@ -312,7 +316,7 @@
     var i = keys.length - 1;
     while (i > -1) {
       var key = keys[i];
-      if (key > -1 && key % 1 === 0 && key < length) {
+      if (key > -1 && key % 1 === 0 && key < length && !isSymbolType(key)) {
         pSplice.call(keys, i, 1);
       }
       i -= 1;
@@ -568,11 +572,11 @@
     }, 0);
     var result;
     if (length > 60) {
-      result = braces[0] +
-        // If the opening "brace" is too large, like in the case of "Set {",
-        // we need to force the first item to be on the next line or the
-        // items will not line up correctly.
-        (base === '' && braces[0].length === 1 ? '' : base + '\n ') + ' ' + pJoin.call(out, ',\n  ') + ' ' + braces[1];
+      // If the opening "brace" is too large, like in the case of "Set {",
+      // we need to force the first item to be on the next line or the
+      // items will not line up correctly.
+      var layoutBase = base === '' && braces[0].length === 1 ? '' : base + '\n ';
+      result = braces[0] + layoutBase + ' ' + pJoin.call(out, ',\n  ') + ' ' + braces[1];
     } else {
       result = braces[0] + base + ' ' + pJoin.call(out, ', ') + ' ' + braces[1];
     }
@@ -587,34 +591,90 @@
     return value.stack || '[' + eToStr.call(value) + ']';
   };
 
-  var fmtValue = function (ctx, value, depth) {
+  fmtValue = function (ctx, value, depth) {
+    if (ctx.showProxy && (isObjectLike(value) || isFunction(value))) {
+      var proxy;
+      var proxyCache = ctx.proxyCache;
+      if (!proxyCache) {
+        proxyCache = ctx.proxyCache = new MapObject();
+      }
+      // Determine if we've already seen this object and have
+      // determined that it either is or is not a proxy.
+      if (proxyCache.has(value)) {
+        // We've seen it, if the value is not undefined, it's a Proxy.
+        proxy = proxyCache.get(value);
+      } else {
+        /*
+        // Haven't seen it. Need to check.
+        // If it's not a Proxy, this will return undefined.
+        // Otherwise, it'll return an array. The first item
+        // is the target, the second item is the handler.
+        // We ignore (and do not return) the Proxy isRevoked property.
+        proxy = binding.getProxyDetails(value);
+        if (proxy) {
+          // We know for a fact that this isn't a Proxy.
+          // Mark it as having already been evaluated.
+          // We do this because this object is passed
+          // recursively to formatValue below in order
+          // for it to get proper formatting, and because
+          // the target and handle objects also might be
+          // proxies... it's unfortunate but necessary.
+          proxyCache.set(proxy, void 0);
+        }
+        */
+        // If the object is not a Proxy, then this stores undefined.
+        // This tells the code above that we've already checked and
+        // ruled it out. If the object is a proxy, this caches the
+        // results of the getProxyDetails call.
+        proxyCache.set(value, proxy);
+      }
+      if (proxy) {
+        return 'Proxy ' + fmtValue(ctx, proxy, depth);
+      }
+    }
+
     // Provide a hook for user-specified inspect functions.
     // Check that value is an object with an inspect function on it
-    if (ctx.customInspect && !isPrimitive(value) && isFunction(value.inspect) &&
-      // Filter out the util module, it's inspect function is special
-      value.inspect !== inspect &&
-      // Also filter out any prototype objects using the circular check.
-      !(value.constructor && value.constructor.prototype === value)) {
+    if (ctx.customInspect && value) {
+      var maybeCustomInspect = value[customInspectSymbol] || value.inspect;
 
-      var ret = value.inspect(depth, ctx);
-      if (!isStringType(ret)) {
-        return fmtValue(ctx, ret, depth);
+      if (isFunction(maybeCustomInspect)) {
+        // Filter out the util module, its inspect function is special
+        if (maybeCustomInspect !== inspect) {
+          // Also filter out any prototype objects using the circular check.
+          if (!(value.constructor && value.constructor.prototype === value)) {
+            var ret = maybeCustomInspect.call(value, depth, ctx);
+
+            // If the custom inspection method returned `this`, don't go into
+            // infinite recursion.
+            if (ret !== value) {
+              if (!isStringType(ret)) {
+                ret = fmtValue(ctx, ret, depth);
+              }
+              return ret;
+            }
+          }
+        }
       }
-      return ret;
     }
+
     // Primitive types cannot have properties
     var primitive = fmtPrimitive(ctx, value);
     if (primitive) {
       return primitive;
     }
+
     // Look up the keys of the object.
-    var visibleKeys = $keys(value);
-    var keys;
+    var keys = $keys(value);
+    var visibleKeys = keys;
+    var symbolKeys = $getOwnPropertySymbols ? $getOwnPropertySymbols(value) : [];
+    var enumSymbolKeys = pFilter.call(symbolKeys, function (key) {
+      return $propertyIsEnumerable.call(value, key);
+    });
+    keys = pConcat.call(keys, enumSymbolKeys);
+
     if (ctx.showHidden) {
-      keys = $getOwnPropertyNames(value);
-      if ($getOwnPropertySymbols) {
-        keys = pConcat.call(keys, $getOwnPropertySymbols(value));
-      }
+      keys = pConcat.call($getOwnPropertyNames(value), symbolKeys);
       if (isError(value)) {
         if (!$includes.call(visibleKeys, 'message') && !$includes.call(keys, 'message')) {
           unshiftUniq(keys, 'message');
@@ -625,9 +685,8 @@
         }
         */
       }
-    } else {
-      keys = aSlice.call(visibleKeys);
     }
+
     if (isString(value)) {
       // for boxed Strings, we have to remove the 0-n indexed entries,
       // since they just noisey up the out and are redundant
@@ -637,6 +696,7 @@
       filterIndexes(keys, value.byteLength);
       filterIndexes(visibleKeys, value.byteLength);
     }
+
     // Some type of object without properties can be shortcutted.
     if (keys.length === 0) {
       // This could be a boxed primitive (new String(), etc.)
@@ -903,6 +963,8 @@
   } else {
     define.property(inspect, 'defaultOptions', $assign($create(null), inspectDefaultOptions));
   }
+
+  define.property(inspect, 'custom', customInspectSymbol);
 
   // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
   define.property(inspect, 'colors', $assign($create(null), {

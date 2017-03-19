@@ -704,14 +704,18 @@
     it('Returning `this` from a custom inspection function works', function () {
       // Returning `this` from a custom inspection function works.
       var subject = { a: 123, inspect: function () { return this; } };
-      expect(inspect(subject)).toBe('{ a: 123, inspect: [Function: inspect] }');
-
+      var str;
+      if (supportsInferredName) {
+        str = '{ a: 123, inspect: [Function: inspect] }';
+      } else {
+        str = '{ a: 123, inspect: [Function] }';
+      }
+      expect(inspect(subject)).toBe(str);
       subject = { a: 123 };
       subject[inspect.custom] = function () {
         return this;
       };
 
-      var str;
       if (hasSymbol) {
         str = '{ a: 123, [Symbol(inspect.custom)]: [Function] }';
       } else {

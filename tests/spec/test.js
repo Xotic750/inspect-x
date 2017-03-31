@@ -301,11 +301,9 @@
       }), true);
       if (noHidden) {
         if (!(out !== '{ [hidden]: \'Visible on ES3\', visible: 1 }' && out !== '{ visible: 1, [hidden]: \'Visible on ES3\' }')) {
-
           expect(false).toBe(true);
         }
       } else if (out !== '{ [hidden]: \'Visible on ES3\', visible: 1 }' && out !== '{ visible: 1, [hidden]: \'Visible on ES3\' }') {
-
         expect(false).toBe(true);
       }
     });
@@ -321,11 +319,9 @@
       }), true);
       if (noHidden) {
         if (!(out !== '{ [hidden]: \'Visible on ES3\', name: \'Tim\' }' && out !== '{ name: \'Tim\', [hidden]: \'Visible on ES3\' }')) {
-
           expect(false).toBe(true);
         }
       } else if (out !== '{ [hidden]: \'Visible on ES3\', name: \'Tim\' }' && out !== '{ name: \'Tim\', [hidden]: \'Visible on ES3\' }') {
-
         expect(false).toBe(true);
       }
 
@@ -336,7 +332,7 @@
             enumerable: true,
             value: 'Tim'
           }
-        }))).toBe(noHidden ? '{ name: \'Tim\', hidden: \'Visible on ES3\' }' : '{ name: \'Tim\' }'
+        }))).toBe(noHidden ? '{ hidden: \'Visible on ES3\', name: \'Tim\' }' : '{ name: \'Tim\' }'
       );
     });
 

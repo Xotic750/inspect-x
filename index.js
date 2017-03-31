@@ -920,7 +920,7 @@
     string: 'green',
     symbol: 'green',
     date: 'magenta',
-    // "name": intentionally not styling
+    // name: intentionally not styling
     regexp: 'red'
   }));
 }());

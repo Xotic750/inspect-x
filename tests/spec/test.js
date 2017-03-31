@@ -139,7 +139,7 @@
       match = match ? match[0] : ex;
       expect(match).toBe('2010-02-14T11:48:40.000Z');
       subject = new Date('');
-      expect(inspect(subject)).toBe(subject.toString());
+      expect(inspect(subject)).toBe('Invalid Date');
       expect(inspect('\n\u0001')).toBe('\'\\n\\u0001\'');
 
       expect(inspect([])).toBe('[]');

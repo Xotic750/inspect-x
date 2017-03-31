@@ -82,7 +82,7 @@
     "nodemon": "^1.11.0",
     "nsp": "^2.6.3",
     "replace-x": "^1.1.1",
-    "uglify-js": "^2.8.20"
+    "uglify-js": "^2.6.1"
   },
   "scripts": {
     "build": "npm run build:setver && npm run security && npm run eslint && npm run browserify && npm run uglify && npm run docs && npm run build:jasmine && npm test",

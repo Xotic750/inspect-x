@@ -863,7 +863,7 @@
       expect(ex.slice(-1)).toBe('}');
       var rejected = Promise.reject(3); // eslint-disable-line prefer-promise-reject-errors
       ex = inspect(rejected);
-      rejected.catch(function () {});
+      rejected['catch'](function () {});  // eslint-disable-line dot-notation
       expect(ex.slice(0, 9)).toBe('Promise {');
       expect(ex.slice(-1)).toBe('}');
       ex = inspect(new Promise(function () {}));

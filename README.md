@@ -21,7 +21,7 @@ alt="devDependency status" height="18"/>
 alt="npm version" height="18">
 </a>
 
-An implementation of node's inspect module..
+An implementation of node's inspect module.
 
 **See**: https://nodejs.org/api/util.html#util_util_inspect_object_options  
 **Version**: 1.2.0  

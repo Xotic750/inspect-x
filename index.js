@@ -20,7 +20,7 @@
  * alt="npm version" height="18">
  * </a>
  *
- * An implementation of node's inspect module..
+ * An implementation of node's inspect module.
  *
  * @example
  * var util = require('inspect-x');
@@ -222,6 +222,13 @@
   var $seal = Object.seal || function seal(obj) {
     return obj;
   };
+
+  var errProps;
+  try {
+    throw new Error('test');
+  } catch (e) {
+    errProps = $keys(e);
+  }
 
   var inspectDefaultOptions = $seal($assign($create(null), {
     showHidden: false,
@@ -574,6 +581,12 @@
 
     // Look up the keys of the object.
     var keys = $keys(value);
+    if (errProps.length > 0 && isError(value)) {
+      keys = keys.filter(function (key) {
+        return !$includes(errProps, key);
+      });
+    }
+
     var visibleKeys = keys;
     var symbolKeys = $getOwnPropertySymbols ? $getOwnPropertySymbols(value) : [];
     var enumSymbolKeys = filter(symbolKeys, function (key) {

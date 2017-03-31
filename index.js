@@ -581,13 +581,13 @@
 
     // Look up the keys of the object.
     var keys = $keys(value);
-    var visibleKeys = keys;
-    if (visibleKeys.length && errProps.length && isError(value)) {
-      visibleKeys = filter(visibleKeys, function (key) {
+    if (keys.length && errProps.length && isError(value)) {
+      keys = filter(keys, function (key) {
         return !$includes(errProps, key);
       });
     }
 
+    var visibleKeys = keys;
     var symbolKeys = $getOwnPropertySymbols ? $getOwnPropertySymbols(value) : [];
     var enumSymbolKeys = filter(symbolKeys, function (key) {
       return $propertyIsEnumerable.call(value, key);

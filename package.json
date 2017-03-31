@@ -74,7 +74,7 @@
     "es5-shim": "^4.5.9",
     "es6-shim": "^0.35.3",
     "es7-shim": "^6.0.0",
-    "eslint": "^3.18.0",
+    "eslint": "^3.19.0",
     "eslint-plugin-import": "^2.2.0",
     "jasmine-node": "^1.14.5",
     "jsdoc-to-markdown": "^3.0.0",
@@ -82,7 +82,7 @@
     "nodemon": "^1.11.0",
     "nsp": "^2.6.3",
     "replace-x": "^1.1.1",
-    "uglify-js": "^2.6.1"
+    "uglify-js": "^2.8.20"
   },
   "scripts": {
     "build": "npm run build:setver && npm run security && npm run eslint && npm run browserify && npm run uglify && npm run docs && npm run build:jasmine && npm test",
@@ -95,6 +95,6 @@
     "test": "jasmine-node --matchall tests/spec/",
     "test:watch": "nodemon --watch tests/spec/test.js --exec 'npm test'",
     "browserify": "browserify -p browserify-derequire -e index.js -o lib/inspect-x.js -u 'crypto' -s returnExports",
-    "uglify": "uglifyjs lib/inspect-x.js -o lib/inspect-x.min.js --compress --keep-fnames --mangle --beautify ascii_only=true,beautify=false --source-map lib/inspect-x.map"
+    "uglify": "uglifyjs lib/inspect-x.js -o lib/inspect-x.min.js --support-ie8 --compress --keep-fnames --mangle --beautify ascii_only=true,beautify=false --source-map lib/inspect-x.map"
   }
 }

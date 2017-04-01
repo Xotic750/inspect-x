@@ -228,6 +228,8 @@
     throw new Error('test');
   } catch (e) {
     errProps = $keys(e);
+    /* eslint no-console: 1 */
+    console.log(errProps);
   }
 
   var inspectDefaultOptions = $seal($assign($create(null), {

@@ -228,14 +228,11 @@
     throw new Error('test');
   } catch (e) {
     errProps = $keys(e);
-    var ep = $keys(new Error());
-    forEach(ep, function (p) {
+    forEach($keys(new Error()), function (p) {
       if (!$includes(errProps, p)) {
         errProps.push(p);
       }
     });
-    /* eslint no-console: 1 */
-    console.log(errProps);
   }
 
   var inspectDefaultOptions = $seal($assign($create(null), {

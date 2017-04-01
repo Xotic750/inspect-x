@@ -501,7 +501,7 @@
         Object.defineProperty(this, 'name', { enumerable: false, value: 'BadCustomError' });
       };
       BadCustomError.prototype = Error.prototype;
-      var expected = noHidden ? '[BadCustomError: foo] name: \'BadCustomError\'' : '[BadCustomError: foo]';
+      var expected = noHidden ? '{ [BadCustomError: foo] name: \'BadCustomError\' }' : '[BadCustomError: foo]';
       expect(inspect(new BadCustomError('foo'))).toBe(expected);
     });
 

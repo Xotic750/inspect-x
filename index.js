@@ -40,20 +40,13 @@
  *
  * inspect(obj);
  *   // "{ bar: 'baz' }"
- * @version 1.2.0
+ * @version 1.3.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
  * @see https://nodejs.org/api/util.html#util_util_inspect_object_options
  * @module inspect-x
  */
-
-/* eslint strict: 1, max-statements: 1, max-lines: 1, id-length: 1,
-   complexity: 1, sort-keys: 1, no-multi-assign: 1, max-depth: 1 */
-
-/* global require, module */
-
-;(function () { // eslint-disable-line no-extra-semi
 
   'use strict';
 
@@ -97,7 +90,7 @@
   var pSymValOf = hasSymbolSupport && Symbol.prototype.valueOf;
   var indexOf = require('index-of-x');
   var reduce = require('reduce');
-  var forEach = require('foreach');
+  var forEach = require('for-each');
   var filter = require('lodash._arrayfilter');
   var $stringify = require('json3').stringify;
   var $keys = Object.keys || require('object-keys');
@@ -236,13 +229,13 @@
   }
 
   var inspectDefaultOptions = $seal($assign($create(null), {
-    showHidden: false,
-    depth: 2,
+    breakLength: 60,
     colors: false,
     customInspect: true,
-    showProxy: false,
+    depth: 2,
     maxArrayLength: 100,
-    breakLength: 60
+    showHidden: false,
+    showProxy: false
   }));
 
   var isBooleanType = function (arg) {
@@ -396,6 +389,7 @@
     return (/^\d+$/).test(key);
   };
 
+  // eslint-disable-next-line max-params
   var fmtProp = function (ctx, value, depth, visibleKeys, key, arr) {
     var desc = $getOwnPropertyDescriptor(value, key) || { value: value[key] };
 
@@ -451,6 +445,7 @@
     return name + ': ' + str;
   };
 
+  // eslint-disable-next-line max-params
   var fmtObject = function (ctx, value, depth, visibleKeys, keys) {
     var out = [];
     forEach(keys, function (key) {
@@ -459,6 +454,7 @@
     return out;
   };
 
+  // eslint-disable-next-line max-params
   var fmtArray = function (ctx, value, depth, visibleKeys, keys) {
     var output = [];
     var visibleLength = 0;
@@ -491,6 +487,7 @@
     return output;
   };
 
+  // eslint-disable-next-line max-params
   var fmtTypedArray = function (ctx, value, depth, visibleKeys, keys) {
     var maxLength = Math.min(Math.max(0, ctx.maxArrayLength), value.length);
     var remaining = value.length - maxLength;
@@ -509,6 +506,7 @@
     return output;
   };
 
+  // eslint-disable-next-line max-params
   var fmtSet = function (ctx, value, depth, visibleKeys, keys) {
     var out = [];
     collectionEach(value, function (v) {
@@ -520,6 +518,7 @@
     return out;
   };
 
+  // eslint-disable-next-line max-params
   var fmtMap = function (ctx, value, depth, visibleKeys, keys) {
     var out = [];
     collectionEach(value, function (v, k) {
@@ -557,6 +556,7 @@
     return value.stack || '[' + pErrorToString.call(value) + ']';
   };
 
+  // eslint-disable-next-line complexity
   fmtValue = function (ctx, value, depth) {
     // Provide a hook for user-specified inspect functions.
     // Check that value is an object with an inspect function on it
@@ -570,6 +570,7 @@
             var ret = maybeCustomInspect.call(value, depth, ctx);
             // If the custom inspection method returned `this`, don't go into
             // infinite recursion.
+            // eslint-disable-next-line max-depth
             if (ret !== value) {
               return isStringType(ret) ? ret : fmtValue(ctx, ret, depth);
             }
@@ -805,50 +806,7 @@
     return reduceToSingleString(out, base, braces);
   };
 
-  /**
-   * Echos the value of a value. Trys to print the value out
-   * in the best way possible given the different types.
-   * Values may supply their own custom `inspect(depth, opts)` functions,
-   * when called they receive the current depth in the recursive inspection,
-   * as well as the options object passed to `inspect`.
-   *
-   * @param {Object} obj The object to print out.
-   * @param {Object} [opts] Options object that alters the out.
-   * @return {string} The string representation.
-   * @example
-   * var inspect = require('inspect-x');
-   *
-   * console.log(inspect(inspect, { showHidden: true, depth: null }));
-   * //{ [Function: inspect]
-   * //  [length]: 2,
-   * //  [name]: 'inspect',
-   * //  [prototype]: inspect { [constructor]: [Circular] },
-   * //  [colors]:
-   * //   { [bold]: [ 1, 22, [length]: 2 ],
-   * //     [italic]: [ 3, 23, [length]: 2 ],
-   * //     [underline]: [ 4, 24, [length]: 2 ],
-   * //     [inverse]: [ 7, 27, [length]: 2 ],
-   * //     [white]: [ 37, 39, [length]: 2 ],
-   * //     [grey]: [ 90, 39, [length]: 2 ],
-   * //     [black]: [ 30, 39, [length]: 2 ],
-   * //     [blue]: [ 34, 39, [length]: 2 ],
-   * //     [cyan]: [ 36, 39, [length]: 2 ],
-   * //     [green]: [ 32, 39, [length]: 2 ],
-   * //     [magenta]: [ 35, 39, [length]: 2 ],
-   * //     [red]: [ 31, 39, [length]: 2 ],
-   * //     [yellow]: [ 33, 39, [length]: 2 ] },
-   * //  [styles]:
-   * //   { [special]: 'cyan',
-   * //     [number]: 'yellow',
-   * //     [boolean]: 'yellow',
-   * //     [undefined]: 'grey',
-   * //     [null]: 'bold',
-   * //     [string]: 'green',
-   * //     [symbol]: 'green',
-   * //     [date]: 'magenta',
-   * //     [regexp]: 'red' } }
-   */
-  module.exports = inspect = function (obj, opts) {
+  inspect = function (obj, opts) {
     // default options
     var ctx = {
       seen: [],
@@ -900,32 +858,76 @@
 
   // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
   define.property(inspect, 'colors', $assign($create(null), {
-    bold: [1, 22],
-    italic: [3, 23],
-    underline: [4, 24],
-    inverse: [7, 27],
-    white: [37, 39],
-    grey: [90, 39],
     black: [30, 39],
     blue: [34, 39],
+    bold: [1, 22],
     cyan: [36, 39],
     green: [32, 39],
+    grey: [90, 39],
+    inverse: [7, 27],
+    italic: [3, 23],
     magenta: [35, 39],
     red: [31, 39],
+    underline: [4, 24],
+    white: [37, 39],
     yellow: [33, 39]
   }));
 
   // Don't use 'blue' not visible on cmd.exe
   define.property(inspect, 'styles', $assign($create(null), {
-    special: 'cyan',
-    number: 'yellow',
     'boolean': 'yellow',
-    undefined: 'grey',
-    'null': 'bold',
-    string: 'green',
-    symbol: 'green',
     date: 'magenta',
     // name: intentionally not styling
-    regexp: 'red'
+    'null': 'bold',
+    number: 'yellow',
+    regexp: 'red',
+    special: 'cyan',
+    string: 'green',
+    symbol: 'green',
+    undefined: 'grey'
   }));
-}());
+
+  /**
+   * Echos the value of a value. Trys to print the value out
+   * in the best way possible given the different types.
+   * Values may supply their own custom `inspect(depth, opts)` functions,
+   * when called they receive the current depth in the recursive inspection,
+   * as well as the options object passed to `inspect`.
+   *
+   * @param {Object} obj The object to print out.
+   * @param {Object} [opts] Options object that alters the out.
+   * @return {string} The string representation.
+   * @example
+   * var inspect = require('inspect-x');
+   *
+   * console.log(inspect(inspect, { showHidden: true, depth: null }));
+   * //{ [Function: inspect]
+   * //  [length]: 2,
+   * //  [name]: 'inspect',
+   * //  [prototype]: inspect { [constructor]: [Circular] },
+   * //  [colors]:
+   * //   { [bold]: [ 1, 22, [length]: 2 ],
+   * //     [italic]: [ 3, 23, [length]: 2 ],
+   * //     [underline]: [ 4, 24, [length]: 2 ],
+   * //     [inverse]: [ 7, 27, [length]: 2 ],
+   * //     [white]: [ 37, 39, [length]: 2 ],
+   * //     [grey]: [ 90, 39, [length]: 2 ],
+   * //     [black]: [ 30, 39, [length]: 2 ],
+   * //     [blue]: [ 34, 39, [length]: 2 ],
+   * //     [cyan]: [ 36, 39, [length]: 2 ],
+   * //     [green]: [ 32, 39, [length]: 2 ],
+   * //     [magenta]: [ 35, 39, [length]: 2 ],
+   * //     [red]: [ 31, 39, [length]: 2 ],
+   * //     [yellow]: [ 33, 39, [length]: 2 ] },
+   * //  [styles]:
+   * //   { [special]: 'cyan',
+   * //     [number]: 'yellow',
+   * //     [boolean]: 'yellow',
+   * //     [undefined]: 'grey',
+   * //     [null]: 'bold',
+   * //     [string]: 'green',
+   * //     [symbol]: 'green',
+   * //     [date]: 'magenta',
+   * //     [regexp]: 'red' } }
+   */
+  module.exports = inspect;

@@ -24,7 +24,7 @@ alt="npm version" height="18">
 An implementation of node's inspect module.
 
 **See**: https://nodejs.org/api/util.html#util_util_inspect_object_options  
-**Version**: 1.3.0  
+**Version**: 1.4.0  
 **Author**: Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  
@@ -37,16 +37,14 @@ obj.inspect = function(depth) {
   return '{' + this.name + '}';
 };
 
-inspect(obj);
-  // "{nate}"
+inspect(obj); // "{nate}"
 
 var obj = { foo: 'this will not show up in the inspect() out' };
 obj.inspect = function(depth) {
   return { bar: 'baz' };
 };
 
-inspect(obj);
-  // "{ bar: 'baz' }"
+inspect(obj); // "{ bar: 'baz' }"
 ```
 <a name="exp_module_inspect-x--module.exports"></a>
 

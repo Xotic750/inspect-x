@@ -49,7 +49,7 @@ var propVisibleOnArrayBuffer = hasArrayBuffer && (function () {
 }());
 
 var getSupport = (function () {
-    /* jshint unused:false */
+  /* jshint unused:false */
   try {
     eval('var x={get prop(){return;}};'); // eslint-disable-line no-eval
     return true;
@@ -144,7 +144,11 @@ describe('inspect', function () {
     expect(inspect({ a: { b: 2 } })).toBe('{ a: { b: 2 } }');
     expect(inspect({ a: { b: { c: { d: 2 } } } })).toBe('{ a: { b: { c: [Object] } } }');
     expect(inspect({ a: { b: { c: { d: 2 } } } }, false, null)).toBe('{ a: { b: { c: { d: 2 } } } }');
-    expect(inspect([1, 2, 3], true)).toBe('[ 1, 2, 3, [length]: 3 ]');
+    expect(inspect([
+      1,
+      2,
+      3
+    ], true)).toBe('[ 1, 2, 3, [length]: 3 ]');
     expect(inspect({ a: { b: { c: 2 } } }, false, 0)).toBe('{ a: [Object] }');
     expect(inspect({ a: { b: { c: 2 } } }, false, 1)).toBe('{ a: { b: [Object] } }');
   });
@@ -216,28 +220,36 @@ describe('inspect', function () {
   });
 
   ifHasArrayBuffer('TypedArrays', function () {
-    var arrays = [{
-      Ctr: Float32Array,
-      name: 'Float32Array'
-    }, {
-      Ctr: Float64Array,
-      name: 'Float64Array'
-    }, {
-      Ctr: Int16Array,
-      name: 'Int16Array'
-    }, {
-      Ctr: Int32Array,
-      name: 'Int32Array'
-    }, {
-      Ctr: Uint16Array,
-      name: 'Uint16Array'
-    }, {
-      Ctr: Uint32Array,
-      name: 'Uint32Array'
-    }, {
-      Ctr: Uint8Array,
-      name: 'Uint8Array'
-    }];
+    var arrays = [
+      {
+        Ctr: Float32Array,
+        name: 'Float32Array'
+      },
+      {
+        Ctr: Float64Array,
+        name: 'Float64Array'
+      },
+      {
+        Ctr: Int16Array,
+        name: 'Int16Array'
+      },
+      {
+        Ctr: Int32Array,
+        name: 'Int32Array'
+      },
+      {
+        Ctr: Uint16Array,
+        name: 'Uint16Array'
+      },
+      {
+        Ctr: Uint32Array,
+        name: 'Uint32Array'
+      },
+      {
+        Ctr: Uint8Array,
+        name: 'Uint8Array'
+      }
+    ];
     if (hasUint8ClampedArray) {
       arrays.push({
         Ctr: Uint8ClampedArray,
@@ -311,14 +323,14 @@ describe('inspect', function () {
     }
 
     expect(
-        inspect(Object.create(null, {
-          hidden: { value: 'Visible on ES3' },
-          name: {
-            enumerable: true,
-            value: 'Tim'
-          }
-        }))).toBe(noHidden ? '{ hidden: \'Visible on ES3\', name: \'Tim\' }' : '{ name: \'Tim\' }'
-      );
+      inspect(Object.create(null, {
+        hidden: { value: 'Visible on ES3' },
+        name: {
+          enumerable: true,
+          value: 'Tim'
+        }
+      }))).toBe(noHidden ? '{ hidden: \'Visible on ES3\', name: \'Tim\' }' : '{ name: \'Tim\' }'
+    );
   });
 
   ifGetSupportIt('Dynamic properties', function () {
@@ -352,7 +364,11 @@ describe('inspect', function () {
 
   ifGetSupportIt('Array with dynamic properties', function () {
     // Array with dynamic properties
-    var value = [1, 2, 3];
+    var value = [
+      1,
+      2,
+      3
+    ];
     Object.defineProperty(value, 'growingLength', {
       enumerable: true,
       get: function () {
@@ -404,7 +420,11 @@ describe('inspect', function () {
 
   it('sparse array', function () {
     // test for sparse array
-    var a = ['foo', 'bar', 'baz'];
+    var a = [
+      'foo',
+      'bar',
+      'baz'
+    ];
     expect(inspect(a)).toBe('[ \'foo\', \'bar\', \'baz\' ]');
     delete a[1];
     expect(inspect(a)).toBe('[ \'foo\', <1 empty item>, \'baz\' ]');
@@ -521,11 +541,13 @@ describe('inspect', function () {
   it('bug with user-supplied inspect function returns non-string', function () {
     // bug with user-supplied inspect function returns non-string
     expect(function () {
-      inspect([{
-        inspect: function () {
-          return 123;
+      inspect([
+        {
+          inspect: function () {
+            return 123;
+          }
         }
-      }]);
+      ]);
     }).not.toThrow();
   });
 
@@ -544,11 +566,15 @@ describe('inspect', function () {
       '\\\\\\\\': 4
     };
 
-    var y = ['a', 'b', 'c'];
+    var y = [
+      'a',
+      'b',
+      'c'
+    ];
     y['\\\\\\'] = 'd';
 
     expect(inspect(w))
-        .toBe('{ \'\\\': 1, \'\\\\\': 2, \'\\\\\\\': 3, \'\\\\\\\\\': 4 }');
+      .toBe('{ \'\\\': 1, \'\\\\\': 2, \'\\\\\\\': 3, \'\\\\\\\\\': 4 }');
     expect(inspect(y)).toBe('[ \'a\', \'b\', \'c\', \'\\\\\\\': \'d\' ]');
   });
 
@@ -720,7 +746,15 @@ describe('inspect', function () {
       expect(countLines(withoutColor)).toBe(countLines(withColor));
     };
 
-    testLines([1, 2, 3, 4, 5, 6, 7]);
+    testLines([
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ]);
     testLines(function () {
       var bigArray = [];
       for (var i = 0; i < 100; i += 1) {
@@ -788,7 +822,11 @@ describe('inspect', function () {
     expect(inspect(subject)).toBe('{ [Symbol(symbol)]: 42 }');
     expect(inspect(subject, options)).toBe('{ [Symbol(symbol)]: 42, [Symbol()]: \'non-enum\' }');
 
-    subject = [1, 2, 3];
+    subject = [
+      1,
+      2,
+      3
+    ];
     subject[Symbol('symbol')] = 42;
 
     expect(inspect(subject)).toBe('[ 1, 2, 3, [Symbol(symbol)]: 42 ]');
@@ -846,7 +884,7 @@ describe('inspect', function () {
     expect(ex.slice(-1)).toBe('}');
     var rejected = Promise.reject(3); // eslint-disable-line prefer-promise-reject-errors
     ex = inspect(rejected);
-    rejected['catch'](function () {});  // eslint-disable-line dot-notation
+    rejected['catch'](function () {}); // eslint-disable-line dot-notation
     expect(ex.slice(0, 9)).toBe('Promise {');
     expect(ex.slice(-1)).toBe('}');
     ex = inspect(new Promise(function () {}));

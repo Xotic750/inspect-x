@@ -1,4 +1,11 @@
+sudo: false
 language: node_js
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/
+notifications:
+  email: false
 node_js:
   - "8.0"
   - "7.10"
@@ -73,7 +80,6 @@ install:
   - 'if [ "${TRAVIS_NODE_VERSION}" = "0.6" ]; then nvm install 0.8 && npm install -g npm@1.3 && npm install -g npm@1.4.28 && npm install -g npm@2 && npm install && nvm use --delete-prefix "${TRAVIS_NODE_VERSION}"; else npm install; fi;'
 script:
   - 'npm test'
-sudo: false
 matrix:
   fast_finish: true
   allow_failures:

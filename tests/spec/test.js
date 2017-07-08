@@ -49,7 +49,6 @@ var propVisibleOnArrayBuffer = hasArrayBuffer && (function () {
 }());
 
 var getSupport = (function () {
-  /* jshint unused:false */
   try {
     eval('var x={get prop(){return;}};'); // eslint-disable-line no-eval
     return true;

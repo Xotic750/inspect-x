@@ -24,7 +24,7 @@ alt="npm version" height="18">
 An implementation of node's inspect module.
 
 **See**: https://nodejs.org/api/util.html#util_util_inspect_object_options  
-**Version**: 1.4.0  
+**Version**: 1.5.0  
 **Author**: Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  

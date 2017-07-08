@@ -39,7 +39,7 @@
  *
  * inspect(obj); // "{ bar: 'baz' }"
  *
- * @version 1.4.0
+ * @version 1.5.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -105,7 +105,7 @@ var pRegExpToString = RegExp.prototype.toString;
 var pErrorToString = Error.prototype.toString;
 var pNumberToString = Number.prototype.toString;
 var pBooleanToString = Boolean.prototype.toString;
-var toISOString = require('to-iso-string');
+var toISOString = require('to-iso-string-x');
 var $defineProperty = Object.defineProperty;
 var bpe = 'BYTES_PER_ELEMENT';
 var inspect;

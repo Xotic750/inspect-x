@@ -1,45 +1,6 @@
 /**
- * @file
- * <a href="https://travis-ci.org/Xotic750/inspect-x"
- * title="Travis status">
- * <img src="https://travis-ci.org/Xotic750/inspect-x.svg?branch=master"
- * alt="Travis status" height="18">
- * </a>
- * <a href="https://david-dm.org/Xotic750/inspect-x"
- * title="Dependency status">
- * <img src="https://david-dm.org/Xotic750/inspect-x.svg"
- * alt="Dependency status" height="18"/>
- * </a>
- * <a href="https://david-dm.org/Xotic750/inspect-x#info=devDependencies"
- * title="devDependency status">
- * <img src="https://david-dm.org/Xotic750/inspect-x/dev-status.svg"
- * alt="devDependency status" height="18"/>
- * </a>
- * <a href="https://badge.fury.io/js/inspect-x" title="npm version">
- * <img src="https://badge.fury.io/js/inspect-x.svg"
- * alt="npm version" height="18">
- * </a>
- *
- * An implementation of node's inspect module.
- *
- * @example
- * var util = require('inspect-x');
- *
- * var obj = { name: 'nate' };
- * obj.inspect = function(depth) {
- *   return '{' + this.name + '}';
- * };
- *
- * inspect(obj); // "{nate}"
- *
- * var obj = { foo: 'this will not show up in the inspect() out' };
- * obj.inspect = function(depth) {
- *   return { bar: 'baz' };
- * };
- *
- * inspect(obj); // "{ bar: 'baz' }"
- *
- * @version 1.5.0
+ * @file An implementation of node's ES6 inspect module.
+ * @version 1.6.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -53,7 +14,7 @@ var isFunction = require('is-function-x');
 var isGeneratorFunction = require('is-generator-function');
 var isAsyncFunction = require('is-async-function-x');
 var isRegExp = require('is-regex');
-var define = require('define-properties-x');
+var defineProperties = require('object-define-properties-x');
 var isDate = require('is-date-object');
 var isArrayBuffer = require('is-array-buffer-x');
 var isSet = require('is-set-x');
@@ -73,8 +34,9 @@ var isNegZero = require('is-negative-zero');
 var isSymbol = require('is-symbol');
 var getFunctionName = require('get-function-name-x');
 var hasSymbolSupport = require('has-symbol-support-x');
-var hasOwnProperty = require('has-own-property-x');
-var reSingle = new RegExp('\\{[' + require('white-space-x').ws + ']+\\}');
+var hasOwn = require('has-own-property-x');
+var whiteSpace = require('white-space-x');
+var reSingle = new RegExp('\\{[' + whiteSpace.string + ']+\\}');
 var hasSet = typeof Set === 'function' && isSet(new Set());
 var testSet = hasSet && new Set(['SetSentinel']);
 var sForEach = hasSet && Set.prototype.forEach;
@@ -90,7 +52,7 @@ var reduce = require('reduce');
 var forEach = require('for-each');
 var filter = require('lodash._arrayfilter');
 var $stringify = require('json3').stringify;
-var $keys = Object.keys || require('object-keys');
+var $keys = require('object-keys-x');
 var $getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
 var $getPrototypeOf = require('get-prototype-of-x');
 var $getOwnPropertyNames = Object.getOwnPropertyNames;
@@ -98,7 +60,6 @@ var $getOwnPropertySymbols = hasSymbolSupport && Object.getOwnPropertySymbols;
 var $propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
 var $isArray = require('validate.io-array');
 var $includes = require('array-includes');
-var $create = require('object-create-x');
 var $assign = require('object.assign');
 var $isNaN = require('is-nan');
 var pRegExpToString = RegExp.prototype.toString;
@@ -117,7 +78,7 @@ var supportsGetSet;
 if ($defineProperty) {
   try {
     var testVar;
-    var testObject = $defineProperty($create(null), 'defaultOptions', {
+    var testObject = $defineProperty({}, 'defaultOptions', {
       get: function _get() {
         return testVar;
       },
@@ -148,7 +109,7 @@ try {
   });
 }
 
-var inspectDefaultOptions = $seal($assign($create(null), {
+var inspectDefaultOptions = $seal({
   breakLength: 60,
   colors: false,
   customInspect: true,
@@ -156,7 +117,7 @@ var inspectDefaultOptions = $seal($assign($create(null), {
   maxArrayLength: 100,
   showHidden: false,
   showProxy: false
-}));
+});
 
 var isBooleanType = function _isBooleanType(arg) {
   return typeof arg === 'boolean';
@@ -398,7 +359,7 @@ var fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
   var index = 0;
   while (index < value.length && visibleLength < ctx.maxArrayLength) {
     var emptyItems = 0;
-    while (index < value.length && hasOwnProperty(value, pNumberToString.call(index)) === false) {
+    while (index < value.length && hasOwn(value, pNumberToString.call(index)) === false) {
       emptyItems += 1;
       index += 1;
     }
@@ -803,9 +764,9 @@ inspect = function _inspect(obj, opts) {
 
   // Set default and user-specified options
   if (supportsGetSet) {
-    ctx = $assign($create(null), inspect.defaultOptions, ctx, opts);
+    ctx = $assign({}, inspect.defaultOptions, ctx, opts);
   } else {
-    ctx = $assign($create(null), inspectDefaultOptions, inspect.defaultOptions, ctx, opts);
+    ctx = $assign({}, inspectDefaultOptions, inspect.defaultOptions, ctx, opts);
   }
 
   if (ctx.colors) {
@@ -833,41 +794,52 @@ if (supportsGetSet) {
     }
   });
 } else {
-  define.property(inspect, 'defaultOptions', $assign($create(null), inspectDefaultOptions));
+  defineProperties(inspect, {
+    defaultOptions: {
+      value: $assign({}, inspectDefaultOptions),
+      writable: true
+    }
+  });
 }
 
-define.property(inspect, 'custom', customInspectSymbol);
-
-// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-define.property(inspect, 'colors', $assign($create(null), {
-  black: [30, 39],
-  blue: [34, 39],
-  bold: [1, 22],
-  cyan: [36, 39],
-  green: [32, 39],
-  grey: [90, 39],
-  inverse: [7, 27],
-  italic: [3, 23],
-  magenta: [35, 39],
-  red: [31, 39],
-  underline: [4, 24],
-  white: [37, 39],
-  yellow: [33, 39]
-}));
-
-// Don't use 'blue' not visible on cmd.exe
-define.property(inspect, 'styles', $assign($create(null), {
-  'boolean': 'yellow',
-  date: 'magenta',
-  // name: intentionally not styling
-  'null': 'bold',
-  number: 'yellow',
-  regexp: 'red',
-  special: 'cyan',
-  string: 'green',
-  symbol: 'green',
-  undefined: 'grey'
-}));
+defineProperties(inspect, {
+  // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+  colors: {
+    value: {
+      black: [30, 39],
+      blue: [34, 39],
+      bold: [1, 22],
+      cyan: [36, 39],
+      green: [32, 39],
+      grey: [90, 39],
+      inverse: [7, 27],
+      italic: [3, 23],
+      magenta: [35, 39],
+      red: [31, 39],
+      underline: [4, 24],
+      white: [37, 39],
+      yellow: [33, 39]
+    }
+  },
+  custom: {
+    value: customInspectSymbol
+  },
+  // Don't use 'blue' not visible on cmd.exe
+  styles: {
+    value: {
+      'boolean': 'yellow',
+      date: 'magenta',
+      // name: intentionally not styling
+      'null': 'bold',
+      number: 'yellow',
+      regexp: 'red',
+      special: 'cyan',
+      string: 'green',
+      symbol: 'green',
+      undefined: 'grey'
+    }
+  }
+});
 
 /**
  * Echos the value of a value. Trys to print the value out
@@ -876,9 +848,9 @@ define.property(inspect, 'styles', $assign($create(null), {
  * when called they receive the current depth in the recursive inspection,
  * as well as the options object passed to `inspect`.
  *
- * @param {Object} obj The object to print out.
- * @param {Object} [opts] Options object that alters the out.
- * @return {string} The string representation.
+ * @param {Object} obj - The object to print out.
+ * @param {Object} [opts] - Options object that alters the out.
+ * @returns {string} The string representation.
  * @example
  * var inspect = require('inspect-x');
  *

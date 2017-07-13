@@ -337,14 +337,18 @@ describe('inspect', function () {
     var subject = {};
     Object.defineProperty(subject, 'readonly', {
       enumerable: true,
-      get: function () {}
+      get: function () {
+        return void 0;
+      }
     });
     expect(inspect(subject)).toBe('{ readonly: [Getter] }');
 
     subject = {};
     Object.defineProperty(subject, 'readwrite', {
       enumerable: true,
-      get: function () {},
+      get: function () {
+        return void 0;
+      },
       set: function (val) {} // eslint-disable-line no-unused-vars
     });
     expect(inspect(subject)).toBe('{ readwrite: [Getter/Setter] }');
@@ -881,9 +885,10 @@ describe('inspect', function () {
     var ex = inspect(Promise.resolve(3));
     expect(ex.slice(0, 9)).toBe('Promise {');
     expect(ex.slice(-1)).toBe('}');
-    var rejected = Promise.reject(3); // eslint-disable-line prefer-promise-reject-errors
+    // eslint-disable-next-line prefer-promise-reject-errors
+    var rejected = Promise.reject(3);
     ex = inspect(rejected);
-    rejected['catch'](function () {}); // eslint-disable-line dot-notation
+    rejected['catch'](function () {});
     expect(ex.slice(0, 9)).toBe('Promise {');
     expect(ex.slice(-1)).toBe('}');
     ex = inspect(new Promise(function () {}));

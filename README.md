@@ -24,7 +24,7 @@
 An implementation of node's ES6 inspect module.
 
 **See**: https://nodejs.org/api/util.html#util_util_inspect_object_options  
-**Version**: 1.6.0  
+**Version**: 1.7.0  
 **Author**: Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  

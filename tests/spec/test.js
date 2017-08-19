@@ -5,7 +5,6 @@
 'use strict';
 
 var inspect;
-
 if (typeof module === 'object' && module.exports) {
   require('es5-shim');
   require('es5-shim/es5-sham');
@@ -50,7 +49,8 @@ var propVisibleOnArrayBuffer = hasArrayBuffer && (function () {
 
 var getSupport = (function () {
   try {
-    eval('var x={get prop(){return;}};'); // eslint-disable-line no-eval
+    // eslint-disable-next-line no-eval
+    eval('var x={get prop(){return;}};');
     return true;
   } catch (ignore) {}
   return false;
@@ -72,6 +72,7 @@ if (function test1() {}.name === 'test1') {
 }
 
 var supportsGetSetIt = xit;
+var isGetSetEnumerable;
 try {
   var testVar;
   var testObject = Object.defineProperty(Object.create(null), 'defaultOptions', {
@@ -85,25 +86,84 @@ try {
   });
   testObject.defaultOptions = 'test';
   supportsGetSetIt = testVar === 'test' ? it : xit;
+  isGetSetEnumerable = Object.prototype.propertyIsEnumerable.call(testObject, 'defaultOptions');
 } catch (ignore) {}
 
 var ifGenSupportedIt = xit;
 try {
-  new Function('return function*() {}')(); // eslint-disable-line no-new-func
+  // eslint-disable-next-line no-new-func
+  new Function('return function*() {}')();
   ifGenSupportedIt = it;
 } catch (e) {}
 
 var ifArrowSupportedIt = xit;
 try {
-  new Function('return () => {}')(); // eslint-disable-line no-new-func
+  // eslint-disable-next-line no-new-func
+  new Function('return () => {}')();
   ifArrowSupportedIt = it;
 } catch (e) {}
 
 var ifAsyncSupportedIt = xit;
 try {
-  new Function('return async function() {}')(); // eslint-disable-line no-new-func
+  // eslint-disable-next-line no-new-func
+  new Function('return async function() {}')();
   ifAsyncSupportedIt = it;
 } catch (e) {}
+
+var ifClassSupportedIt = xit;
+try {
+  // eslint-disable-next-line no-new-func
+  new Function('return class My {}')();
+  ifClassSupportedIt = it;
+} catch (e) {}
+
+var missingError;
+try {
+  throw new Error('test');
+} catch (e) {
+  var errorString = e.toString();
+  var errorStack = e.stack;
+  if (errorStack) {
+    var errorRx = new RegExp('^' + errorString);
+    if (errorRx.test(errorStack) === false) {
+      missingError = true;
+    }
+  }
+}
+
+var splitEs6Shim;
+var sliceEs6Shim;
+if (hasSet || hasMap) {
+  splitEs6Shim = function _splitEs6Shim(value) {
+    var insStr = inspect(value);
+    // eslint-disable-next-line no-underscore-dangle
+    if (value._es6map || value._es6set) {
+      insStr = insStr.split(/\n /).join('');
+    }
+
+    return insStr;
+  };
+
+  sliceEs6Shim = function _sliceEs6Shim(value) {
+    var insStr = inspect(value);
+    // eslint-disable-next-line no-underscore-dangle
+    if (value._es6map || value._es6set) {
+      insStr = insStr.split(/\n /);
+      insStr = insStr.slice(0, 2).join('').split(/( })|,/).shift() + ' ' + insStr.pop().slice(-1);
+    }
+
+    return insStr;
+  };
+}
+
+var fmtError = function (er) {
+  var stack = er.stack;
+  if (missingError && stack) {
+    return er.toString() + '\n' + stack;
+  }
+
+  return stack || '[' + er.toString() + ']';
+};
 
 describe('inspect', function () {
   it('basic', function () {
@@ -153,16 +213,20 @@ describe('inspect', function () {
   });
 
   ifArrowSupportedIt('arrow functions', function () {
-    expect(inspect(new Function('return () => {}')())).toBe('[Function]'); // eslint-disable-line no-new-func
+    // eslint-disable-next-line no-new-func
+    expect(inspect(new Function('return () => {}')())).toBe('[Function]');
   });
 
   ifGenSupportedIt('generator functions', function () {
-    expect(inspect(new Function('return function*() {}')())).toBe('[GeneratorFunction]'); // eslint-disable-line no-new-func
+    // eslint-disable-next-line no-new-func
+    expect(inspect(new Function('return function*() {}')())).toBe('[GeneratorFunction]');
   });
 
   ifAsyncSupportedIt('async functions', function () {
-    expect(inspect(new Function('return async function() {}')())).toBe('[AsyncFunction]'); // eslint-disable-line no-new-func
-    expect(inspect(new Function('return async () => {}')())).toBe('[AsyncFunction]'); // eslint-disable-line no-new-func
+    // eslint-disable-next-line no-new-func
+    expect(inspect(new Function('return async function() {}')())).toBe('[AsyncFunction]');
+    // eslint-disable-next-line no-new-func
+    expect(inspect(new Function('return async () => {}')())).toBe('[AsyncFunction]');
   });
 
   ifHasArrayBuffer('ArrayBuffer', function () {
@@ -391,7 +455,8 @@ describe('inspect', function () {
 
   ifArrowSupportedIt('Anonymous function with properties', function () {
     // Anonymous function with properties
-    var value = new Function('return (() => function() {})()')(); // eslint-disable-line no-new-func
+    // eslint-disable-next-line no-new-func
+    var value = new Function('return (() => function() {})()')();
     value.aprop = 42;
     expect(inspect(value)).toBe('{ [Function] aprop: 42 }');
   });
@@ -447,7 +512,8 @@ describe('inspect', function () {
         }
       }
     });
-    var setter = Object.create(null, { b: { set: function () {} } }); // eslint-disable-line accessor-pairs
+    // eslint-disable-next-line accessor-pairs
+    var setter = Object.create(null, { b: { set: function () {} } });
     var getterAndSetter = Object.create(null, {
       c: {
         get: function () {
@@ -456,26 +522,37 @@ describe('inspect', function () {
         set: function () {}
       }
     });
-    expect(inspect(getter, true)).toBe('{ [a]: [Getter] }');
-    expect(inspect(setter, true)).toBe('{ [b]: [Setter] }');
-    expect(inspect(getterAndSetter, true)).toBe('{ [c]: [Getter/Setter] }');
+
+    if (isGetSetEnumerable) {
+      expect(inspect(getter, true)).toBe('{ a: [Getter] }');
+      expect(inspect(setter, true)).toBe('{ b: [Setter] }');
+      expect(inspect(getterAndSetter, true)).toBe('{ c: [Getter/Setter] }');
+    } else {
+      expect(inspect(getter, true)).toBe('{ [a]: [Getter] }');
+      expect(inspect(setter, true)).toBe('{ [b]: [Setter] }');
+      expect(inspect(getterAndSetter, true)).toBe('{ [c]: [Getter/Setter] }');
+    }
   });
 
   it('exceptions should print the error message, not \'{}\'', function () {
     // exceptions should print the error message, not '{}'
-    var errors = [];
-    errors.push(new Error());
-    errors.push(new Error('FAIL'));
-    errors.push(new TypeError('FAIL'));
-    errors.push(new SyntaxError('FAIL'));
+    var errors = [
+      new Error(),
+      new Error('FAIL'),
+      new TypeError('FAIL'),
+      new SyntaxError('FAIL')
+    ];
+
     errors.forEach(function (err) {
-      expect(inspect(err)).toBe(err.stack || '[' + err.toString() + ']');
+      expect(inspect(err)).toEqual(fmtError(err));
+      return inspect(err);
     });
 
     try {
-      undef(); // eslint-disable-line no-undef
+      // eslint-disable-next-line no-undef
+      undef();
     } catch (e) {
-      expect(inspect(e)).toBe(e.stack || '[' + e.toString() + ']');
+      expect(inspect(e)).toBe(fmtError(e));
     }
     var err = new Error('FAILURE');
     var ex = inspect(err, true);
@@ -845,10 +922,10 @@ describe('inspect', function () {
     set.add(2);
     set.add(3);
     set.add(4);
-    ex = inspect(set);
-    var match = ex.match(/1, 2, 3/);
+    ex = splitEs6Shim(set);
+    var match = ex.match(/1, 2, 3, 4/);
     match = match ? match[0] : ex;
-    expect(match).toBe('1, 2, 3');
+    expect(match).toBe('1, 2, 3, 4');
     set = new Set();
     set.add('foo');
     set.bar = 42;
@@ -856,6 +933,11 @@ describe('inspect', function () {
     match = ex.match(/('foo',)[\s\S]+(\[size\]: 1,)[\s\S]+(bar: 42)/);
     match = match ? match.slice(1).join(' ') : ex;
     expect(match).toBe('\'foo\', [size]: 1, bar: 42');
+
+    set = new Set();
+    set.add(set);
+    ex = sliceEs6Shim(set);
+    expect(ex).toBe('Set { [Circular] }');
   });
 
   ifHasMapIt('Map', function () {
@@ -867,7 +949,7 @@ describe('inspect', function () {
     map.set(1, 'a');
     map.set(2, 'b');
     map.set(3, 'c');
-    ex = inspect(map);
+    ex = splitEs6Shim(map);
     var match = ex.match(/1 => 'a', 2 => 'b', 3 => 'c'/);
     match = match ? match[0] : ex;
     expect(match).toBe('1 => \'a\', 2 => \'b\', 3 => \'c\'');
@@ -878,6 +960,20 @@ describe('inspect', function () {
     match = ex.match(/('foo' => null,)[\s\S]+(\[size\]: 1,)[\s\S]+(bar: 42)/);
     match = match ? match.slice(1).join(' ') : ex;
     expect(match).toBe('\'foo\' => null, [size]: 1, bar: 42');
+
+    map = new Map();
+    map.set(map, 'map');
+    ex = sliceEs6Shim(map);
+    expect(ex).toBe("Map { [Circular] => 'map' }");
+
+    map.set(map, map);
+    ex = sliceEs6Shim(map);
+    expect(ex).toBe('Map { [Circular] => [Circular] }');
+
+    map['delete'](map);
+    map.set('map', map);
+    ex = sliceEs6Shim(map);
+    expect(ex).toBe("Map { 'map' => [Circular] }");
   });
 
   ifHasPromiseIt('Promise', function () {
@@ -980,17 +1076,23 @@ describe('inspect', function () {
     }());
     if (hasSet) {
       var s = new Set();
-      bigArray.forEach(function (item) {
-        s.add(item);
-      });
-      checkAlignment(s);
+      // eslint-disable-next-line no-underscore-dangle
+      if (s._es6set !== true) {
+        bigArray.forEach(function (item) {
+          s.add(item);
+        });
+        checkAlignment(s);
+      }
     }
     if (hasMap) {
       var m = new Map();
-      bigArray.forEach(function (item, index) {
-        m.set(index, item);
-      });
-      checkAlignment(m);
+      // eslint-disable-next-line no-underscore-dangle
+      if (m._es6map !== true) {
+        bigArray.forEach(function (item, index) {
+          m.set(index, item);
+        });
+        checkAlignment(m);
+      }
     }
   });
 
@@ -1044,7 +1146,6 @@ describe('inspect', function () {
     expect(reMore.test(inspect(arr))).toBe(true);
     expect(reObject.test(inspect(obj))).toBe(true);
     expect(JSON.stringify(inspect.defaultOptions)).toBe(JSON.stringify(oldOptions));
-
   });
 
   supportsGetSetIt('inspect.defaultOptions getter setter error', function () {
@@ -1055,5 +1156,54 @@ describe('inspect', function () {
     expect(function () {
       inspect.defaultOptions = 'bad';
     }).toThrow('"options" must be an object');
+  });
+
+  ifClassSupportedIt('classes', function () {
+    // eslint-disable-next-line no-new-func
+    var classFn = new Function('return class My {}')();
+    expect(inspect(classFn)).toBe('[Class: My]');
+
+    // eslint-disable-next-line no-new-func
+    var ObjectSubclass = new Function('return class ObjectSubclass {}')();
+    // eslint-disable-next-line no-new-func
+    var ArraySubclass = new Function('return class ArraySubclass extends Array {}')();
+    // eslint-disable-next-line no-new-func
+    var SetSubclass = new Function('return class SetSubclass extends Set {}')();
+    // eslint-disable-next-line no-new-func
+    var MapSubclass = new Function('return class MapSubclass extends Map {}')();
+    // eslint-disable-next-line no-new-func
+    var PromiseSubclass = new Function('return class PromiseSubclass extends Promise {}')();
+    // eslint-disable-next-line no-new-func
+    var StringSubclass = new Function('return class StringSubclass extends String {}')();
+    // eslint-disable-next-line no-new-func
+    var BooleanSubclass = new Function('return class BooleanSubclass extends Boolean {}')();
+    // eslint-disable-next-line no-new-func
+    var NumberSubclass = new Function('return class NumberSubclass extends Number {}')();
+
+    var x = new ObjectSubclass();
+    x.foo = 42;
+    expect(inspect(x)).toBe('ObjectSubclass { foo: 42 }');
+    expect(inspect(new ArraySubclass(1, 2, 3))).toBe('ArraySubclass [ 1, 2, 3 ]');
+    expect(inspect(new SetSubclass([
+      1,
+      2,
+      3
+    ]))).toBe('SetSubclass { 1, 2, 3 }');
+    expect(inspect(new MapSubclass([['foo', 42]]))).toBe('MapSubclass { \'foo\' => 42 }');
+    expect(inspect(new PromiseSubclass(function _cb() {}))).toBe('PromiseSubclass {}');
+    if (Date.toString().includes('Date() { [native code] }')) {
+      // eslint-disable-next-line no-new-func
+      var DateSubclass = new Function('return class DateSubclass extends Date {}')();
+      expect(inspect(new DateSubclass(0))).toBe('[DateSubclass: 1970-01-01T00:00:00.000Z]');
+    }
+
+    expect(inspect(new StringSubclass('abc'))).toBe('[StringSubclass: \'abc\']');
+    expect(inspect(new BooleanSubclass(true))).toBe('[BooleanSubclass: true]');
+    expect(inspect(new NumberSubclass(1))).toBe('[NumberSubclass: 1]');
+
+    // eslint-disable-next-line no-new-func
+    var ErrorSubclass = new Function('return class ErrorSubclass extends Error {}')();
+    x = inspect(new ErrorSubclass('test'));
+    expect(x.split('\n').shift()).toBe('ErrorSubclass: test');
   });
 });

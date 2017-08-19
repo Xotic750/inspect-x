@@ -1,6 +1,6 @@
 /**
  * @file An implementation of node's ES6 inspect module.
- * @version 1.7.0
+ * @version 1.8.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -32,6 +32,7 @@ var isNumber = require('is-number-object');
 var isBoolean = require('is-boolean-object');
 var isNegZero = require('is-negative-zero');
 var isSymbol = require('is-symbol');
+var isPrimitive = require('is-primitive');
 var getFunctionName = require('get-function-name-x');
 var hasSymbolSupport = require('has-symbol-support-x');
 var hasOwn = require('has-own-property-x');
@@ -48,9 +49,9 @@ var mValues = hasMap && Map.prototype.values;
 var pSymToStr = hasSymbolSupport && Symbol.prototype.toString;
 var pSymValOf = hasSymbolSupport && Symbol.prototype.valueOf;
 var indexOf = require('index-of-x');
-var reduce = require('reduce');
-var forEach = require('for-each');
-var filter = require('lodash._arrayfilter');
+var reduce = require('array-reduce-x');
+var forEach = require('array-for-each-x');
+var filter = require('array-filter-x');
 var $stringify = require('json3').stringify;
 var $keys = require('object-keys-x');
 var $getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
@@ -58,21 +59,30 @@ var $getPrototypeOf = require('get-prototype-of-x');
 var $getOwnPropertyNames = Object.getOwnPropertyNames;
 var $getOwnPropertySymbols = hasSymbolSupport && Object.getOwnPropertySymbols;
 var $propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
-var $isArray = require('validate.io-array');
-var $includes = require('array-includes');
-var $assign = require('object.assign');
+var $isArray = require('is-array-x');
+var $includes = require('array-includes-x');
+var $assign = require('object-assign-x');
 var $isNaN = require('is-nan');
 var pRegExpToString = RegExp.prototype.toString;
 var pErrorToString = Error.prototype.toString;
 var pNumberToString = Number.prototype.toString;
 var pBooleanToString = Boolean.prototype.toString;
 var toISOString = require('to-iso-string-x');
+var collections = require('collections-x');
 var $defineProperty = Object.defineProperty;
+// var hasToStringTag = hasSymbolSupport && typeof Symbol.toStringTag === 'symbol';
 var bpe = 'BYTES_PER_ELEMENT';
 var inspect;
 var fmtValue;
 
 var customInspectSymbol = hasSymbolSupport ? Symbol('inspect.custom') : '_inspect.custom_';
+
+var supportsClasses;
+try {
+  // eslint-disable-next-line no-new-func
+  new Function('return class My {}')();
+  supportsClasses = true;
+} catch (e) {}
 
 var supportsGetSet;
 if ($defineProperty) {
@@ -89,7 +99,7 @@ if ($defineProperty) {
     });
 
     testObject.defaultOptions = 'test';
-    supportsGetSet = testVar === 'test';
+    supportsGetSet = testVar === 'test' && testObject.defaultOptions === 'test';
   } catch (ignore) {}
 }
 
@@ -97,6 +107,7 @@ var $seal = Object.seal || function seal(obj) {
   return obj;
 };
 
+var missingError;
 var errProps;
 try {
   throw new Error('test');
@@ -107,6 +118,32 @@ try {
       errProps.push(p);
     }
   });
+
+  var errorString = pErrorToString.call(e);
+  var errorStack = e.stack;
+  if (errorStack) {
+    var errorRx = new RegExp('^' + errorString);
+    if (errorRx.test(errorStack) === false) {
+      missingError = true;
+    }
+  }
+}
+
+if (isDate(Date.prototype)) {
+  isDate = function _isDate(value) {
+    try {
+      value.getTime();
+      return true;
+    } catch (ignore) {
+      return false;
+    }
+  };
+}
+
+var dateProps = $keys(Date);
+var shimmedDate;
+if (dateProps.length && $includes(dateProps, 'now') && $includes(dateProps, 'UTC') && $includes(dateProps, 'parse')) {
+  shimmedDate = $includes($keys(new Date()), 'constructor');
 }
 
 var inspectDefaultOptions = $seal({
@@ -230,6 +267,26 @@ var getConstructorOf = function _getConstructorOf(obj) {
   return null;
 };
 
+var isSub = function _isSub(value) {
+  if (supportsClasses !== true || isPrimitive(value)) {
+    return false;
+  }
+
+  var constructor = getConstructorOf(value);
+  return isFunction(constructor) === false && isFunction(constructor, true);
+};
+
+var getSubName = function _getSubName(value, name) {
+  if (isSub(value)) {
+    var subName = getFunctionName(getConstructorOf(value));
+    if (subName && subName !== name) {
+      return subName;
+    }
+  }
+
+  return name ? name : getFunctionName(getConstructorOf(value));
+};
+
 var fmtNumber = function _fmtNumber(ctx, value) {
   // Format -0 as '-0'.
   return ctx.stylize(isNegZero(value) ? '-0' : pNumberToString.call(value), 'number');
@@ -314,8 +371,6 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
     str = ctx.stylize(desc.set ? '[Getter/Setter]' : '[Getter]', 'special');
   } else if (desc.set) {
     str = ctx.stylize('[Setter]', 'special');
-  } else if ($includes(ctx.seen, desc.value)) {
-    str = ctx.stylize('[Circular]', 'special');
   } else {
     str = fmtValue(ctx, desc.value, recurse(depth));
     if (str.indexOf('\n') > -1) {
@@ -465,7 +520,20 @@ var fmtDate = function _fmtDate(value) {
 };
 
 var fmtError = function _fmtError(value) {
-  return value.stack || '[' + pErrorToString.call(value) + ']';
+  var stack = value.stack;
+  if (stack) {
+    if (supportsClasses) {
+      var subName = getSubName(value);
+      if (subName && stack.startsWith(subName) === false) {
+        var msg = value.message;
+        return stack.replace(pErrorToString.call(value), subName + (msg ? ': ' + msg : ''));
+      }
+    } else if (missingError) {
+      return pErrorToString.call(value) + '\n' + stack;
+    }
+  }
+
+  return stack || '[' + pErrorToString.call(value) + ']';
 };
 
   // eslint-disable-next-line complexity
@@ -506,6 +574,14 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     });
   }
 
+  if (shimmedDate && keys.length && isDate(value)) {
+    if ($includes(keys, 'constructor')) {
+      keys = filter(keys, function _filterKeys(key) {
+        return key !== 'constructor';
+      });
+    }
+  }
+
   var visibleKeys = keys;
   var symbolKeys = $getOwnPropertySymbols ? $getOwnPropertySymbols(value) : [];
   var enumSymbolKeys = filter(symbolKeys, function _filterSymbolKeys(key) {
@@ -539,26 +615,28 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     filterIndexes(visibleKeys, value.byteLength);
   }
 
+  var name;
+  var formatted;
   // Some type of object without properties can be shortcutted.
   if (keys.length === 0) {
     // This could be a boxed primitive (new String(), etc.)
     if (isString(value)) {
       return ctx.stylize(
-        '[String: ' + fmtPrimNoColor(ctx, value.valueOf()) + ']',
+        '[' + getSubName(value, 'String') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']',
         'string'
       );
     }
 
     if (isNumber(value)) {
       return ctx.stylize(
-        '[Number: ' + fmtPrimNoColor(ctx, value.valueOf()) + ']',
+        '[' + getSubName(value, 'Number') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']',
         'number'
       );
     }
 
     if (isBoolean(value)) {
       return ctx.stylize(
-        '[Boolean: ' + fmtPrimNoColor(ctx, value.valueOf()) + ']',
+        '[' + getSubName(value, 'Boolean') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']',
         'boolean'
       );
     }
@@ -579,7 +657,11 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     }
 
     if (isFunction(value)) {
-      return ctx.stylize('[Function' + getNameSep(value) + ']', 'special');
+      return ctx.stylize('[' + getSubName(value, 'Function') + getNameSep(value) + ']', 'special');
+    }
+
+    if (supportsClasses && isFunction(value, true)) {
+      return ctx.stylize('[Class' + getNameSep(value) + ']', 'special');
     }
 
     if (isRegExp(value)) {
@@ -587,7 +669,13 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     }
 
     if (isDate(value)) {
-      return ctx.stylize(fmtDate(value), 'date');
+      name = getSubName(value);
+      formatted = ctx.stylize(fmtDate(value), 'date');
+      if (name === 'Date') {
+        return formatted;
+      }
+
+      return ctx.stylize('[' + name + ': ' + formatted + ']', 'date');
     }
 
     if (isError(value)) {
@@ -597,22 +685,22 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     // Fast path for ArrayBuffer. Can't do the same for DataView because it
     // has a non-primitive buffer property that we need to recurse for.
     if (isArrayBuffer(value)) {
-      return 'ArrayBuffer { byteLength: ' + fmtNumber(ctx, value.byteLength) + ' }';
+      return getSubName(value, 'ArrayBuffer') + ' { byteLength: ' + fmtNumber(ctx, value.byteLength) + ' }';
     }
 
     if (isMapIterator(value)) {
-      return 'MapIterator {}';
+      return getSubName(value, 'MapIterator') + ' {}';
     }
 
     if (isSetIterator(value)) {
-      return 'SetIterator {}';
+      return getSubName(value, 'SetIterator') + ' {}';
     }
 
     if (isPromise(value)) {
-      return 'Promise {}';
+      return getSubName(value, 'Promise') + ' {}';
     }
   }
-  var name = getFunctionName(getConstructorOf(value));
+
   var base = '';
   var empty = false;
   var braces = ['{', '}'];
@@ -624,28 +712,38 @@ fmtValue = function _fmtValue(ctx, value, depth) {
   // needed) to determine object types.
   if (isString(value)) {
     // Make boxed primitive Strings look like such
-    base = '[String: ' + fmtPrimNoColor(ctx, value.valueOf()) + ']';
+    base = '[' + getSubName(value, 'String') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']';
   } else if (isNumber(value)) {
     // Make boxed primitive Numbers look like such
-    base = '[Number: ' + fmtPrimNoColor(ctx, value.valueOf()) + ']';
+    base = '[' + getSubName(value, 'Number') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']';
   } else if (isBoolean(value)) {
     // Make boxed primitive Booleans look like such
-    base = '[Boolean: ' + fmtPrimNoColor(ctx, value.valueOf()) + ']';
+    base = '[' + getSubName(value, 'Boolean') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']';
   } else if (isFunction(value)) {
     // Make functions say that they are functions
-    base = '[Function' + getNameSep(value) + ']';
+    base = '[' + getSubName(value, 'Function') + getNameSep(value) + ']';
+  } else if (supportsClasses && isFunction(value, true)) {
+    // Make functions say that they are functions
+    base = '[Class' + getNameSep(value) + ']';
   } else if (isRegExp(value)) {
     // Make RegExps say that they are RegExps
-    name = 'RegExp';
+    // name = getSubName(value, 'RegExp');
     base = pRegExpToString.call(value);
   } else if (isDate(value)) {
     // Make dates with properties first say the date
-    name = 'Date';
-    base = fmtDate(value);
+    name = getSubName(value);
+    formatted = fmtDate(value);
+    if (name === 'Date') {
+      base = formatted;
+    } else {
+      base = '[' + name + ': ' + formatted + ']';
+    }
   } else if (isError(value)) {
+    name = getSubName(value);
     // Make error with message first say the error
     base = fmtError(value);
   } else if ($isArray(value)) {
+    name = getSubName(value);
     // Unset the constructor to prevent "Array [...]" for ordinary arrays.
     name = name === 'Array' ? '' : name;
     braces = ['[', ']'];
@@ -656,7 +754,7 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     empty = value.length === 0;
     fmtter = fmtArray;
   } else if (isSet(value)) {
-    name = 'Set';
+    name = getSubName(value, 'Set');
     fmtter = fmtSet;
     // With `showHidden`, `length` will display as a hidden property for
     // arrays. For consistency's sake, do the same for `size`, even though
@@ -667,7 +765,7 @@ fmtValue = function _fmtValue(ctx, value, depth) {
 
     empty = value.size === 0;
   } else if (isMap(value)) {
-    name = 'Map';
+    name = getSubName(value, 'Map');
     fmtter = fmtMap;
     // With `showHidden`, `length` will display as a hidden property for
     // arrays. For consistency's sake, do the same for `size`, even though
@@ -678,11 +776,11 @@ fmtValue = function _fmtValue(ctx, value, depth) {
 
     empty = value.size === 0;
   } else if (isArrayBuffer(value)) {
-    name = 'ArrayBuffer';
+    name = getSubName(value, 'ArrayBuffer');
     unshiftUniq(keys, 'byteLength');
     pushUniq(visibleKeys, 'byteLength');
   } else if (isDataView(value)) {
-    name = 'DataView';
+    name = getSubName(value, 'DataView');
     unshiftUniq(keys, 'buffer');
     unshiftUniq(keys, 'byteOffset');
     unshiftUniq(keys, 'byteLength');
@@ -690,6 +788,7 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     pushUniq(visibleKeys, 'byteOffset');
     pushUniq(visibleKeys, 'buffer');
   } else if (isTypedArray(value)) {
+    name = getSubName(value);
     braces = ['[', ']'];
     fmtter = fmtTypedArray;
     if (ctx.showHidden) {
@@ -700,20 +799,20 @@ fmtValue = function _fmtValue(ctx, value, depth) {
       unshiftUniq(keys, bpe);
     }
   } else if (isPromise(value)) {
-    name = 'Promise';
+    name = getSubName(value, 'Promise');
   } else if (isMapIterator(value)) {
-    name = 'MapIterator';
+    name = getSubName(value, 'MapIterator');
     empty = true;
   } else if (isSetIterator(value)) {
-    name = 'SetIterator';
+    name = getSubName(value, 'SetIterator');
     empty = true;
   } else {
+    name = getSubName(value);
     // Unset the constructor to prevent "Object {...}" for ordinary objects.
     name = name === 'Object' ? '' : name;
     empty = true; // No other data than keys.
   }
 
-  empty = empty === true && keys.length === 0;
   if (base) {
     base = ' ' + base;
   } else if (name) {
@@ -721,6 +820,7 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     braces[0] = name + ' ' + braces[0];
   }
 
+  empty = empty === true && keys.length === 0;
   if (empty) {
     return braces[0] + base + braces[1];
   }
@@ -735,16 +835,20 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     }
   }
 
-  ctx.seen.push(value);
+  if (ctx.seen.has(value)) {
+    return ctx.stylize('[Circular]', 'special');
+  }
+
+  ctx.seen.add(value);
   var out = fmtter(ctx, value, depth, visibleKeys, keys);
-  ctx.seen.pop();
+  ctx.seen['delete'](value);
   return reduceToSingleString(out, base, braces);
 };
 
 inspect = function _inspect(obj, opts) {
   // default options
   var ctx = {
-    seen: [],
+    seen: new collections.Set(),
     stylize: stylizeNoColor
   };
 

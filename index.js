@@ -1,6 +1,6 @@
 /**
  * @file An implementation of node's ES6 inspect module.
- * @version 1.8.0
+ * @version 1.9.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -52,12 +52,11 @@ var indexOf = require('index-of-x');
 var reduce = require('array-reduce-x');
 var forEach = require('array-for-each-x');
 var filter = require('array-filter-x');
+var reflectOwnKeys = require('reflect-own-keys-x');
 var $stringify = require('json3').stringify;
 var $keys = require('object-keys-x');
-var $getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+var getOwnPropertyDescriptor = require('object-get-own-property-descriptor-x');
 var $getPrototypeOf = require('get-prototype-of-x');
-var $getOwnPropertyNames = Object.getOwnPropertyNames;
-var $getOwnPropertySymbols = hasSymbolSupport && Object.getOwnPropertySymbols;
 var $propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
 var $isArray = require('is-array-x');
 var $includes = require('array-includes-x');
@@ -69,7 +68,7 @@ var pNumberToString = Number.prototype.toString;
 var pBooleanToString = Boolean.prototype.toString;
 var toISOString = require('to-iso-string-x');
 var collections = require('collections-x');
-var $defineProperty = Object.defineProperty;
+var defineProperty = require('object-define-property-x');
 // var hasToStringTag = hasSymbolSupport && typeof Symbol.toStringTag === 'symbol';
 var bpe = 'BYTES_PER_ELEMENT';
 var inspect;
@@ -85,27 +84,45 @@ try {
 } catch (e) {}
 
 var supportsGetSet;
-if ($defineProperty) {
-  try {
-    var testVar;
-    var testObject = $defineProperty({}, 'defaultOptions', {
-      get: function _get() {
-        return testVar;
-      },
-      set: function _set(val) {
-        testVar = val;
-        return testVar;
-      }
-    });
+try {
+  var testVar;
+  var testObject = defineProperty({}, 'defaultOptions', {
+    get: function _get() {
+      return testVar;
+    },
+    set: function _set(val) {
+      testVar = val;
+      return testVar;
+    }
+  });
 
-    testObject.defaultOptions = 'test';
-    supportsGetSet = testVar === 'test' && testObject.defaultOptions === 'test';
-  } catch (ignore) {}
-}
+  testObject.defaultOptions = 'test';
+  supportsGetSet = testVar === 'test' && testObject.defaultOptions === 'test';
+} catch (ignore) {}
 
-var $seal = Object.seal || function seal(obj) {
+var $seal = isFunction(Object.seal) ? Object.seal : function seal(obj) {
   return obj;
 };
+
+var $getOwnPropertySymbols = isFunction(Object.getOwnPropertySymbols) && Object.getOwnPropertySymbols;
+if ($getOwnPropertySymbols) {
+  try {
+    var gOPSymbol = hasSymbolSupport && Symbol('');
+    var gOPSObj = { a: 1 };
+    gOPSObj[gOPSymbol] = 2;
+
+    var gOPSymbols = $getOwnPropertySymbols(gOPSObj);
+    if (gOPSymbol) {
+      if (gOPSymbols.length !== 1 || gOPSymbols[0] !== gOPSymbol) {
+        throw new Error('Inavlid result');
+      }
+    } else if (gOPSymbols.length !== 0) {
+      throw new Error('Inavlid result');
+    }
+  } catch (ignore) {
+    $getOwnPropertySymbols = null;
+  }
+}
 
 var missingError;
 var errProps;
@@ -255,7 +272,7 @@ var getConstructorOf = function _getConstructorOf(obj) {
   var maxLoop = 100;
   while (isNil(o) === false && maxLoop > -1) {
     o = Object(o);
-    var descriptor = $getOwnPropertyDescriptor(o, 'constructor');
+    var descriptor = getOwnPropertyDescriptor(o, 'constructor');
     if (descriptor && descriptor.value) {
       return descriptor.value;
     }
@@ -343,7 +360,7 @@ var isDigits = function _isDigits(key) {
 
 // eslint-disable-next-line max-params
 var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
-  var desc = $getOwnPropertyDescriptor(value, key) || { value: value[key] };
+  var desc = getOwnPropertyDescriptor(value, key) || { value: value[key] };
 
   /*
   // this is a fix for broken FireFox, should not be needed with es6-shim
@@ -536,7 +553,40 @@ var fmtError = function _fmtError(value) {
   return stack || '[' + pErrorToString.call(value) + ']';
 };
 
-  // eslint-disable-next-line complexity
+var filterDateKeys = function _filterDateKeys(key) {
+  return key !== 'constructor';
+};
+
+var filterErrorKeys = function _filterErrorKeys(key) {
+  return $includes(errProps, key) === false;
+};
+
+var getVisibleKeys = function _getVisibleKeys(value) {
+  var keys = $keys(value);
+  if (keys.length > 0) {
+    if (shimmedDate && isDate(value)) {
+      return filter(keys, filterDateKeys);
+    }
+
+    if (errProps.length > 0 && isError(value)) {
+      return filter(keys, filterErrorKeys);
+    }
+  }
+
+  return keys;
+};
+
+var getEnumSymbols = function _getEnumSymbols(value) {
+  if ($getOwnPropertySymbols) {
+    return filter($getOwnPropertySymbols(value), function _filterEnumSymbolKeys(key) {
+      return $propertyIsEnumerable.call(value, key);
+    });
+  }
+
+  return [];
+};
+
+// eslint-disable-next-line complexity
 fmtValue = function _fmtValue(ctx, value, depth) {
   // Provide a hook for user-specified inspect functions.
   // Check that value is an object with an inspect function on it
@@ -545,8 +595,9 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     if (isFunction(maybeCustomInspect)) {
       // Filter out the util module, its inspect function is special
       if (maybeCustomInspect !== inspect) {
+        var constructor = getConstructorOf(value);
         // Also filter out any prototype objects using the circular check.
-        var isCircular = value.constructor && value.constructor.prototype === value;
+        var isCircular = constructor && constructor.prototype === value;
         if (isCircular === false) {
           var ret = maybeCustomInspect.call(value, depth, ctx);
           // If the custom inspection method returned `this`, don't go into
@@ -567,31 +618,10 @@ fmtValue = function _fmtValue(ctx, value, depth) {
   }
 
   // Look up the keys of the object.
-  var keys = $keys(value);
-  if (keys.length && errProps.length && isError(value)) {
-    keys = filter(keys, function _filterKeys(key) {
-      return $includes(errProps, key) === false;
-    });
-  }
-
-  if (shimmedDate && keys.length && isDate(value)) {
-    if ($includes(keys, 'constructor')) {
-      keys = filter(keys, function _filterKeys(key) {
-        return key !== 'constructor';
-      });
-    }
-  }
-
-  var visibleKeys = keys;
-  var symbolKeys = $getOwnPropertySymbols ? $getOwnPropertySymbols(value) : [];
-  var enumSymbolKeys = filter(symbolKeys, function _filterSymbolKeys(key) {
-    return $propertyIsEnumerable.call(value, key);
-  });
-
-  keys = keys.concat(enumSymbolKeys);
-
+  var visibleKeys = getVisibleKeys(value);
+  var keys;
   if (ctx.showHidden) {
-    keys = $getOwnPropertyNames(value).concat(symbolKeys);
+    keys = reflectOwnKeys(value);
     if (isError(value)) {
       if ($includes(visibleKeys, 'message') === false && $includes(keys, 'message') === false) {
         unshiftUniq(keys, 'message');
@@ -603,6 +633,8 @@ fmtValue = function _fmtValue(ctx, value, depth) {
       }
       */
     }
+  } else {
+    keys = visibleKeys.concat(getEnumSymbols(value));
   }
 
   if (isString(value)) {
@@ -885,7 +917,7 @@ inspect = function _inspect(obj, opts) {
 };
 
 if (supportsGetSet) {
-  $defineProperty(inspect, 'defaultOptions', {
+  defineProperty(inspect, 'defaultOptions', {
     get: function _get() {
       return inspectDefaultOptions;
     },

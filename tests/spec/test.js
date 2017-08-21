@@ -581,11 +581,39 @@ describe('inspect', function () {
     var BadCustomError = function (msg) {
       Error.call(this);
       Object.defineProperty(this, 'message', { enumerable: false, value: msg });
-      Object.defineProperty(this, 'name', { enumerable: false, value: 'BadCustomError' });
     };
-    BadCustomError.prototype = Error.prototype;
-    var expected = noHidden ? '{ [BadCustomError: foo] name: \'BadCustomError\' }' : '[BadCustomError: foo]';
-    expect(inspect(new BadCustomError('foo'))).toBe(expected);
+
+    BadCustomError.prototype = Object.create(Error.prototype);
+    Object.defineProperties(BadCustomError.prototype, {
+      constructor: {
+        value: BadCustomError
+      },
+      name: {
+        value: 'BadCustomError'
+      }
+    });
+
+    expect(inspect(new BadCustomError('foo'))).toBe('[BadCustomError: foo]');
+  });
+
+  it('Correct stack.trace', function () {
+    var CustomError = function (msg) {
+      Error.call(this);
+      Object.defineProperty(this, 'message', { enumerable: false, value: msg });
+    };
+
+    CustomError.prototype = Object.create(Error.prototype);
+    Object.defineProperties(CustomError.prototype, {
+      constructor: {
+        value: CustomError
+      },
+      name: {
+        value: 'CustomError'
+      }
+    });
+
+    var customError = new CustomError('bar');
+    expect(inspect(customError)).toBe(fmtError(customError));
   });
 
   it('GH-1941', function () {

@@ -1,6 +1,6 @@
 {
   "name": "inspect-x",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "description": "An implementation of node's ES6 inspect module.",
   "homepage": "https://github.com/Xotic750/inspect-x",
   "author": {

@@ -1,6 +1,6 @@
 /**
  * @file An implementation of node's ES6 inspect module.
- * @version 1.9.0
+ * @version 1.9.1
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}

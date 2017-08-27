@@ -65,11 +65,16 @@ var noHidden = (function () {
   return Object.keys(x).length !== 0;
 }());
 
+var fnSupportsFnName;
 var supportsInferredName;
 if (function test1() {}.name === 'test1') {
+  fnSupportsFnName = true;
   var xx = { yy: function () {} };
   supportsInferredName = xx.yy.name === 'yy';
 }
+
+var itSupportsFnName = fnSupportsFnName ? it : xit;
+var itDoesNotSupportsFnName = fnSupportsFnName ? xit : it;
 
 var supportsGetSetIt = xit;
 var isGetSetEnumerable;
@@ -210,6 +215,19 @@ describe('inspect', function () {
     ], true)).toBe('[ 1, 2, 3, [length]: 3 ]');
     expect(inspect({ a: { b: { c: 2 } } }, false, 0)).toBe('{ a: [Object] }');
     expect(inspect({ a: { b: { c: 2 } } }, false, 1)).toBe('{ a: { b: [Object] } }');
+  });
+
+  itSupportsFnName('Function - name - show hidden', function () {
+    expect(inspect(function f() {}, true)).toBe([
+      '{ [Function: f]',
+      '  [length]: 0,',
+      '  [name]: \'f\',',
+      '  [prototype]: f { [constructor]: [Circular] } }'
+    ].join('\n'));
+  });
+
+  itDoesNotSupportsFnName('Function - no name - show hidden', function () {
+    expect(inspect(function f() {}, true)).toBe('{ [Function: f] [length]: 0, [prototype]: f { [constructor]: [Circular] } }');
   });
 
   ifArrowSupportedIt('arrow functions', function () {

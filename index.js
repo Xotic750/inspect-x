@@ -1,6 +1,6 @@
 /**
  * @file An implementation of node's ES6 inspect module.
- * @version 1.9.1
+ * @version 2.0.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -10,6 +10,8 @@
 
 'use strict';
 
+var bind = require('bind-x');
+var call = Function.prototype.call;
 var isFunction = require('is-function-x');
 var isGeneratorFunction = require('is-generator-function');
 var isAsyncFunction = require('is-async-function-x');
@@ -30,67 +32,88 @@ var isPromise = require('is-promise');
 var isString = require('is-string');
 var isNumber = require('is-number-object');
 var isBoolean = require('is-boolean-object');
-var isNegZero = require('is-negative-zero');
+var objectIs = require('object-is');
 var isSymbol = require('is-symbol');
 var isPrimitive = require('is-primitive');
+var isArray = require('is-array-x');
+var isNumberNaN = require('is-nan');
+var toStr = require('to-string-x');
 var getFunctionName = require('get-function-name-x');
 var hasSymbolSupport = require('has-symbol-support-x');
-var hasOwn = require('has-own-property-x');
 var whiteSpace = require('white-space-x');
-var reSingle = new RegExp('\\{[' + whiteSpace.string + ']+\\}');
 var hasSet = typeof Set === 'function' && isSet(new Set());
 var testSet = hasSet && new Set(['SetSentinel']);
-var sForEach = hasSet && Set.prototype.forEach;
-var sValues = hasSet && Set.prototype.values;
+var setForEach = hasSet && bind(call, Set.prototype.forEach);
+var setValues = hasSet && bind(call, Set.prototype.values);
 var hasMap = typeof Map === 'function' && isMap(new Map());
 var testMap = hasMap && new Map([[1, 'MapSentinel']]);
-var mForEach = hasMap && Map.prototype.forEach;
-var mValues = hasMap && Map.prototype.values;
-var pSymToStr = hasSymbolSupport && Symbol.prototype.toString;
-var pSymValOf = hasSymbolSupport && Symbol.prototype.valueOf;
-var indexOf = require('index-of-x');
+var mapForEach = hasMap && bind(call, Map.prototype.forEach);
+var mapValues = hasMap && bind(call, Map.prototype.values);
+var symbolToString = hasSymbolSupport && bind(call, Symbol.prototype.toString);
+var symbolValueOf = hasSymbolSupport && bind(call, Symbol.prototype.valueOf);
 var reduce = require('array-reduce-x');
-var forEach = require('array-for-each-x');
 var filter = require('array-filter-x');
+var some = require('array-some-x');
+var every = require('array-every-x');
+var map = require('array-map-x');
+var slice = require('array-slice-x');
 var reflectOwnKeys = require('reflect-own-keys-x');
-var $stringify = require('json3').stringify;
-var $keys = require('object-keys-x');
+var stringify = require('json3').stringify;
+var objectKeys = require('object-keys-x');
 var getOwnPropertyDescriptor = require('object-get-own-property-descriptor-x');
-var $getPrototypeOf = require('get-prototype-of-x');
-var $propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
-var $isArray = require('is-array-x');
-var $includes = require('array-includes-x');
-var $assign = require('object-assign-x');
-var $isNaN = require('is-nan');
-var pRegExpToString = RegExp.prototype.toString;
-var pErrorToString = Error.prototype.toString;
-var pNumberToString = Number.prototype.toString;
-var pBooleanToString = Boolean.prototype.toString;
+var getPrototypeOf = require('get-prototype-of-x');
+var objectSeal = isFunction(Object.seal) ? Object.seal : require('lodash.identity');
+var getOwnPropertySymbols = require('get-own-property-symbols-x');
+var arrayincludes = require('array-includes-x');
+var assign = require('object-assign-x');
 var toISOString = require('to-iso-string-x');
 var collections = require('collections-x');
 var defineProperty = require('object-define-property-x');
-// var hasToStringTag = hasSymbolSupport && typeof Symbol.toStringTag === 'symbol';
-var bpe = 'BYTES_PER_ELEMENT';
+var startsWith = require('string-starts-with-x');
+var strIncludes = require('string-includes-x');
+var clamp = require('math-clamp');
+var difference = require('array-difference-x');
+var intersection = require('array-intersection-x');
+var union = require('array-union-x');
+var regexpToString = bind(call, RegExp.prototype.toString);
+var regexpTest = bind(call, RegExp.prototype.test);
+var errorToString = bind(call, Error.prototype.toString);
+var numberToString = bind(call, Number.prototype.toString);
+var booleanToString = bind(call, Boolean.prototype.toString);
+var concat = bind(call, Array.prototype.concat, []);
+var join = bind(call, Array.prototype.join);
+var push = bind(call, Array.prototype.push);
+var getTime = bind(call, Date.prototype.getTime);
+var replace = bind(call, String.prototype.replace);
+var strSlice = bind(call, String.prototype.slice);
+var propertyIsEnumerable = bind(call, Object.prototype.propertyIsEnumerable);
+var customInspectSymbol = hasSymbolSupport ? Symbol('inspect.custom') : '_inspect.custom_';
 var inspect;
 var fmtValue;
 
-var customInspectSymbol = hasSymbolSupport ? Symbol('inspect.custom') : '_inspect.custom_';
+var isFalsey = function _isFalsey(value) {
+  return Boolean(value) === false;
+};
 
 var supportsClasses;
 try {
   // eslint-disable-next-line no-new-func
-  new Function('return class My {}')();
+  Function('return class My {}')();
   supportsClasses = true;
 } catch (e) {}
+
+var isClass = function _isClass(value) {
+  return supportsClasses ? isFunction(value, true) && isFunction(value) === false : false;
+};
 
 var supportsGetSet;
 try {
   var testVar;
   var testObject = defineProperty({}, 'defaultOptions', {
-    get: function _get() {
+    get: function () {
       return testVar;
     },
-    set: function _set(val) {
+    set: function (val) {
       testVar = val;
       return testVar;
     }
@@ -100,47 +123,33 @@ try {
   supportsGetSet = testVar === 'test' && testObject.defaultOptions === 'test';
 } catch (ignore) {}
 
-var $seal = isFunction(Object.seal) ? Object.seal : function seal(obj) {
-  return obj;
+var pluralEnding = function _pluralEnding(number) {
+  return number > 1 ? 's' : '';
 };
 
-var $getOwnPropertySymbols = isFunction(Object.getOwnPropertySymbols) && Object.getOwnPropertySymbols;
-if ($getOwnPropertySymbols) {
-  try {
-    var gOPSymbol = hasSymbolSupport && Symbol('');
-    var gOPSObj = { a: 1 };
-    gOPSObj[gOPSymbol] = 2;
+var isDigits = function _isDigits(key) {
+  return regexpTest(/^\d+$/, key);
+};
 
-    var gOPSymbols = $getOwnPropertySymbols(gOPSObj);
-    if (gOPSymbol) {
-      if (gOPSymbols.length !== 1 || gOPSymbols[0] !== gOPSymbol) {
-        throw new Error('Inavlid result');
-      }
-    } else if (gOPSymbols.length !== 0) {
-      throw new Error('Inavlid result');
-    }
-  } catch (ignore) {
-    $getOwnPropertySymbols = null;
-  }
-}
+var appendMissing = function _appendMissing(array, values) {
+  return concat(array, difference(values, array));
+};
+
+var promote = function _promote(array, values) {
+  return concat(values, difference(array, values));
+};
 
 var missingError;
 var errProps;
 try {
   throw new Error('test');
 } catch (e) {
-  errProps = $keys(e);
-  forEach($keys(new Error()), function _pusher(p) {
-    if ($includes(errProps, p) === false) {
-      errProps.push(p);
-    }
-  });
-
-  var errorString = pErrorToString.call(e);
+  errProps = union(objectKeys(new Error()), objectKeys(e));
+  var errorString = errorToString(e);
   var errorStack = e.stack;
   if (errorStack) {
     var errorRx = new RegExp('^' + errorString);
-    if (errorRx.test(errorStack) === false) {
+    if (regexpTest(errorRx, errorStack) === false) {
       missingError = true;
     }
   }
@@ -149,7 +158,7 @@ try {
 if (isDate(Date.prototype)) {
   isDate = function _isDate(value) {
     try {
-      value.getTime();
+      getTime(value);
       return true;
     } catch (ignore) {
       return false;
@@ -157,13 +166,43 @@ if (isDate(Date.prototype)) {
   };
 }
 
-var dateProps = $keys(Date);
 var shimmedDate;
-if (dateProps.length && $includes(dateProps, 'now') && $includes(dateProps, 'UTC') && $includes(dateProps, 'parse')) {
-  shimmedDate = $includes($keys(new Date()), 'constructor');
+var dateProps = objectKeys(Date);
+if (dateProps.length > 0) {
+  var datePropsCheck = [
+    'now',
+    'UTC',
+    'parse'
+  ];
+
+  shimmedDate = every(datePropsCheck, function (prop) {
+    return arrayincludes(dateProps, prop);
+  }) && arrayincludes(objectKeys(new Date()), 'constructor');
 }
 
-var inspectDefaultOptions = $seal({
+var testFunc1 = function test1() {};
+var fnSupportsName = testFunc1.name === 'test1';
+var hiddenFuncCtr = arrayincludes(reflectOwnKeys(testFunc1.prototype), 'constructor') === false;
+var wantedFnProps = [
+  'length',
+  'name',
+  'prototype'
+];
+
+var fnPropsCheck = fnSupportsName ? slice(wantedFnProps) : filter(wantedFnProps, function (prop) {
+  return prop !== 'name';
+});
+
+var funcKeys = reflectOwnKeys(testFunc1);
+var unwantedFnProps = intersection(['arguments', 'caller'], funcKeys);
+var mustFilterFnProps = difference(fnPropsCheck, funcKeys).length > 0;
+if (mustFilterFnProps === false) {
+  mustFilterFnProps = some(intersection(funcKeys, wantedFnProps), function (key, index) {
+    return wantedFnProps[index] !== key;
+  });
+}
+
+var inspectDefaultOptions = objectSeal({
   breakLength: 60,
   colors: false,
   customInspect: true,
@@ -195,7 +234,7 @@ var isMapIterator = function _isMapIterator(value) {
   }
 
   try {
-    return value.next.call(mValues.call(testMap)).value === 'MapSentinel';
+    return value.next.call(mapValues(testMap)).value === 'MapSentinel';
   } catch (ignore) {}
 
   return false;
@@ -207,37 +246,16 @@ var isSetIterator = function _isSetIterator(value) {
   }
 
   try {
-    return value.next.call(sValues.call(testSet)).value === 'SetSentinel';
+    return value.next.call(setValues(testSet)).value === 'SetSentinel';
   } catch (ignore) {}
 
   return false;
 };
 
 var filterIndexes = function _filterIndexes(keys, length) {
-  var i = keys.length - 1;
-  while (i > -1) {
-    var key = keys[i];
-    if (key > -1 && key % 1 === 0 && key < length && isSymbolType(key) === false) {
-      keys.splice(i, 1);
-    }
-
-    i -= 1;
-  }
-};
-
-var pushUniq = function _pushUniq(arr, value) {
-  if ($includes(arr, value) === false) {
-    arr.push(value);
-  }
-};
-
-var unshiftUniq = function _unshiftUniq(arr, value) {
-  var index = indexOf(arr, value);
-  if (index > -1) {
-    arr.splice(index, 1);
-  }
-
-  arr.unshift(value);
+  return filter(keys, function (key) {
+    return isSymbolType(key) || key < 0 || key > length || key % 1 !== 0;
+  });
 };
 
 var stylizeWithColor = function _stylizeWithColor(str, styleType) {
@@ -259,25 +277,17 @@ var getNameSep = function _getNameSep(obj) {
   return name ? ': ' + name : name;
 };
 
-var collectionEach = function _collectionEach(collection, callback) {
-  if (isMap(collection)) {
-    mForEach.call(collection, callback);
-  } else if (isSet(collection)) {
-    sForEach.call(collection, callback);
-  }
-};
-
 var getConstructorOf = function _getConstructorOf(obj) {
   var o = obj;
   var maxLoop = 100;
-  while (isNil(o) === false && maxLoop > -1) {
+  while (isNil(o) === false && maxLoop >= 0) {
     o = Object(o);
     var descriptor = getOwnPropertyDescriptor(o, 'constructor');
     if (descriptor && descriptor.value) {
       return descriptor.value;
     }
 
-    o = $getPrototypeOf(o);
+    o = getPrototypeOf(o);
     maxLoop -= 1;
   }
 
@@ -306,18 +316,30 @@ var getSubName = function _getSubName(value, name) {
 
 var fmtNumber = function _fmtNumber(ctx, value) {
   // Format -0 as '-0'.
-  return ctx.stylize(isNegZero(value) ? '-0' : pNumberToString.call(value), 'number');
+  return ctx.stylize(objectIs(value, -0) ? '-0' : numberToString(value), 'number');
+};
+
+var fmtPrimitiveReplacers = [
+  [/^"|"$/g, ''],
+  [/'/g, '\\\''],
+  [/\\"/g, '"']
+];
+
+var fmtPrimitiveReplace = function _fmtPrimitiveReplace(acc, pair) {
+  return replace(acc, pair[0], pair[1]);
 };
 
 var fmtPrimitive = function _fmtPrimitive(ctx, value) {
   if (isNil(value)) {
-    var str = String(value);
+    var str = toStr(value);
     return ctx.stylize(str, str);
   }
 
   if (isStringType(value)) {
-    var simple = $stringify(value).replace(/^"|"$/g, '').replace(/'/g, '\\\'').replace(/\\"/g, '"');
-    return ctx.stylize('\'' + simple + '\'', 'string');
+    return ctx.stylize(
+      '\'' + reduce(fmtPrimitiveReplacers, fmtPrimitiveReplace, stringify(value)) + '\'',
+      'string'
+    );
   }
 
   if (isNumberType(value)) {
@@ -325,12 +347,12 @@ var fmtPrimitive = function _fmtPrimitive(ctx, value) {
   }
 
   if (isBooleanType(value)) {
-    return ctx.stylize(pBooleanToString.call(value), 'boolean');
+    return ctx.stylize(booleanToString(value), 'boolean');
   }
 
   // es6 symbol primitive
   if (isSymbolType(value)) {
-    return ctx.stylize(pSymToStr.call(value), 'symbol');
+    return ctx.stylize(symbolToString(value), 'symbol');
   }
 
   return void 0;
@@ -348,15 +370,20 @@ var recurse = function _recurse(depth) {
   return isNull(depth) ? null : depth - 1;
 };
 
-/*
-var isCollection = function (value) {
-  return isSet(value) || isMap(value);
-};
-*/
+var fmtPropReplacers = [
+  [/'/g, '\\\''],
+  [/\\"/g, '"'],
+  [/(^"|"$)/g, '\''],
+  [/\\\\/g, '\\']
+];
 
-var isDigits = function _isDigits(key) {
-  return (/^\d+$/).test(key);
+var fmtPropReplace = function _fmtPropReplace(acc, pair) {
+  return replace(acc, pair[0], pair[1]);
 };
+
+var fmtPropReplacer1 = [/\n/g, '\n  '];
+var fmtPropReplacer2 = [/(^|\n)/g, '\n   '];
+var fmtPropTestRx = /^"[\w$]+"$/;
 
 // eslint-disable-next-line max-params
 var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
@@ -364,20 +391,20 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
 
   /*
   // this is a fix for broken FireFox, should not be needed with es6-shim
-  if (key === 'size' && isCollection(value) && isFunction(value.size)) {
+  if (key === 'size' && (isSet(value) || isMap(value) && isFunction(value.size)) {
     desc.value = value.size();
   }
   */
 
   var name;
-  if ($includes(visibleKeys, key) === false) {
-    if (key === bpe && Boolean(value[bpe]) === false && isTypedArray(value)) {
+  if (arrayincludes(visibleKeys, key) === false) {
+    if (key === 'BYTES_PER_ELEMENT' && isFalsey(value.BYTES_PER_ELEMENT) && isTypedArray(value)) {
       var constructor = getConstructorOf(value);
       if (constructor) {
-        desc.value = constructor[bpe];
+        desc.value = constructor.BYTES_PER_ELEMENT;
       }
     } else if (isSymbolType(key)) {
-      name = '[' + ctx.stylize(pSymToStr.call(key), 'symbol') + ']';
+      name = '[' + ctx.stylize(symbolToString(key), 'symbol') + ']';
     } else {
       name = '[' + key + ']';
     }
@@ -389,11 +416,12 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   } else if (desc.set) {
     str = ctx.stylize('[Setter]', 'special');
   } else {
-    str = fmtValue(ctx, desc.value, recurse(depth));
-    if (str.indexOf('\n') > -1) {
-      var rx = arr ? /\n/g : /(^|\n)/g;
-      var rStr = arr ? '\n  ' : '\n   ';
-      str = str.replace(rx, rStr);
+    var formattedStr = fmtValue(ctx, desc.value, recurse(depth), key === 'prototype');
+    if (strIncludes(formattedStr, '\n')) {
+      var replacer = arr ? fmtPropReplacer1 : fmtPropReplacer2;
+      str = replace(formattedStr, replacer[0], replacer[1]);
+    } else {
+      str = formattedStr;
     }
   }
 
@@ -402,12 +430,11 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
       return str;
     }
 
-    name = $stringify(key);
-    if (/^"[\w$]+"$/.test(name)) {
-      name = ctx.stylize(name.slice(1, -1), 'name');
+    var serialisedKey = stringify(key);
+    if (regexpTest(fmtPropTestRx, serialisedKey)) {
+      name = ctx.stylize(strSlice(serialisedKey, 1, -1), 'name');
     } else {
-      name = name.replace(/'/g, '\\\'').replace(/\\"/g, '"').replace(/(^"|"$)/g, '\'').replace(/\\\\/g, '\\');
-      name = ctx.stylize(name, 'string');
+      name = ctx.stylize(reduce(fmtPropReplacers, fmtPropReplace, serialisedKey), 'string');
     }
   }
 
@@ -416,124 +443,140 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
 
 // eslint-disable-next-line max-params
 var fmtObject = function _fmtObject(ctx, value, depth, visibleKeys, keys) {
-  var out = [];
-  forEach(keys, function _pusherFmObject(key) {
-    out.push(fmtProp(ctx, value, depth, visibleKeys, key, false));
+  return map(keys, function _mapFmObject(key) {
+    return fmtProp(ctx, value, depth, visibleKeys, key, false);
   });
+};
 
-  return out;
+var getMoreItemText = function _getMoreItemText(remaining) {
+  return '... ' + remaining + ' more item' + pluralEnding(remaining);
+};
+
+var getEmptyItemText = function _getEmptyItemText(emptyItems) {
+  return '<' + emptyItems + ' empty item' + pluralEnding(emptyItems) + '>';
+};
+
+var filterOutIndexes = function (keys) {
+  return filter(keys, function (key) {
+    return isSymbolType(key) || isDigits(key) === false;
+  });
 };
 
 // eslint-disable-next-line max-params
 var fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
+  var length = value.length;
+  var maxLength = clamp(length, 0, ctx.maxArrayLength);
+  var lastIndex = 0;
+  var nextIndex = 0;
   var output = [];
-  var visibleLength = 0;
-  var index = 0;
-  while (index < value.length && visibleLength < ctx.maxArrayLength) {
-    var emptyItems = 0;
-    while (index < value.length && hasOwn(value, pNumberToString.call(index)) === false) {
-      emptyItems += 1;
-      index += 1;
+
+  var moreItems = some(value, function (item, index) {
+    if (index !== nextIndex) {
+      push(output, ctx.stylize(getEmptyItemText(index - lastIndex - 1), 'undefined'));
     }
 
-    if (emptyItems > 0) {
-      var ending = emptyItems > 1 ? 's' : '';
-      var message = '<' + emptyItems + ' empty item' + ending + '>';
-      output.push(ctx.stylize(message, 'undefined'));
-    } else {
-      output.push(fmtProp(ctx, value, depth, visibleKeys, pNumberToString.call(index), true));
-      index += 1;
-    }
-
-    visibleLength += 1;
-  }
-
-  var remaining = value.length - index;
-  if (remaining > 0) {
-    output.push('... ' + remaining + ' more item' + (remaining > 1 ? 's' : ''));
-  }
-
-  forEach(keys, function _pusherFmtArray(key) {
-    if (isSymbolType(key) || isDigits(key) === false) {
-      output.push(fmtProp(ctx, value, depth, visibleKeys, key, true));
-    }
+    push(output, fmtProp(ctx, value, depth, visibleKeys, numberToString(index), true));
+    lastIndex = index;
+    nextIndex = index + 1;
+    return nextIndex >= maxLength;
   });
 
-  return output;
+  var remaining = length - nextIndex;
+  if (remaining > 0) {
+    if (moreItems) {
+      push(output, getMoreItemText(remaining));
+    } else {
+      push(output, ctx.stylize(getEmptyItemText(remaining), 'undefined'));
+    }
+  }
+
+  var fmtdProps = map(filterOutIndexes(keys), function (key) {
+    return fmtProp(ctx, value, depth, visibleKeys, key, true);
+  });
+
+  return concat(output, fmtdProps);
 };
 
 // eslint-disable-next-line max-params
 var fmtTypedArray = function _fmtTypedArray(ctx, value, depth, visibleKeys, keys) {
-  var maxLength = Math.min(Math.max(0, ctx.maxArrayLength), value.length);
-  var remaining = value.length - maxLength;
-  var output = new Array(maxLength);
-  for (var i = 0; i < maxLength; i += 1) {
-    output[i] = fmtNumber(ctx, value[i]);
-  }
-
-  if (remaining > 0) {
-    output.push('... ' + remaining + ' more item' + (remaining > 1 ? 's' : ''));
-  }
-
-  forEach(keys, function _pusherFmtTypedArray(key) {
-    if (isSymbolType(key) || isDigits(key) === false) {
-      output.push(fmtProp(ctx, value, depth, visibleKeys, key, true));
+  var length = value.length;
+  var maxLength = clamp(length, 0, ctx.maxArrayLength);
+  var output = [];
+  output.length = maxLength;
+  var moreItems = some(value, function (item, index) {
+    if (index >= maxLength) {
+      return true;
     }
+
+    output[index] = fmtNumber(ctx, value[index]);
+    return false;
   });
 
-  return output;
+  if (moreItems) {
+    push(output, getMoreItemText(length - maxLength));
+  }
+
+  var fmtdProps = map(filterOutIndexes(keys), function (key) {
+    return fmtProp(ctx, value, depth, visibleKeys, key, true);
+  });
+
+  return concat(output, fmtdProps);
 };
 
 // eslint-disable-next-line max-params
 var fmtSet = function _fmtSet(ctx, value, depth, visibleKeys, keys) {
-  var out = [];
-  collectionEach(value, function _pusherFmtSet1(v) {
-    out.push(fmtValue(ctx, v, recurse(depth)));
+  var output = [];
+  setForEach(value, function (v) {
+    push(output, fmtValue(ctx, v, recurse(depth)));
   });
 
-  forEach(keys, function _pusherFmtSet2(key) {
-    out.push(fmtProp(ctx, value, depth, visibleKeys, key, false));
+  var fmtdProps = map(keys, function (key) {
+    return fmtProp(ctx, value, depth, visibleKeys, key, false);
   });
 
-  return out;
+  return concat(output, fmtdProps);
 };
 
 // eslint-disable-next-line max-params
 var fmtMap = function (ctx, value, depth, visibleKeys, keys) {
-  var out = [];
-  collectionEach(value, function (v, k) {
-    var r = recurse(depth);
-    out.push(fmtValue(ctx, k, r) + ' => ' + fmtValue(ctx, v, r));
+  var r = recurse(depth);
+  var output = [];
+  mapForEach(value, function (v, k) {
+    push(output, fmtValue(ctx, k, r) + ' => ' + fmtValue(ctx, v, r));
   });
 
-  forEach(keys, function (key) {
-    out.push(fmtProp(ctx, value, depth, visibleKeys, key, false));
+  var fmtdProps = map(keys, function (key) {
+    return fmtProp(ctx, value, depth, visibleKeys, key, false);
   });
 
-  return out;
+  return concat(output, fmtdProps);
 };
 
-var reduceToSingleString = function _reduceToSingleString(out, base, braces) {
-  var length = reduce(out, function _reducer(prev, cur) {
-    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
-  }, 0);
+var reSingle = new RegExp('\\{[' + whiteSpace.string + ']+\\}');
+var lengthReduceRx = /\u001b\[\d\d?m/g;
 
+var lengthReduce = function _lengthReduce(prev, cur) {
+  return prev + replace(cur, lengthReduceRx, '').length + 1;
+};
+
+// eslint-disable-next-line max-params
+var reduceToSingleString = function _reduceToSingleString(out, base, braces, breakLength) {
   var result;
-  if (length > 60) {
+  if (reduce(out, lengthReduce, 0) > breakLength) {
     // If the opening "brace" is too large, like in the case of "Set {",
     // we need to force the first item to be on the next line or the
     // items will not line up correctly.
     var layoutBase = base === '' && braces[0].length === 1 ? '' : base + '\n ';
-    result = braces[0] + layoutBase + ' ' + out.join(',\n  ') + ' ' + braces[1];
+    result = braces[0] + layoutBase + ' ' + join(out, ',\n  ') + ' ' + braces[1];
   } else {
-    result = braces[0] + base + ' ' + out.join(', ') + ' ' + braces[1];
+    result = braces[0] + base + ' ' + join(out, ', ') + ' ' + braces[1];
   }
 
-  return result.replace(reSingle, '{}');
+  return replace(result, reSingle, '{}');
 };
 
 var fmtDate = function _fmtDate(value) {
-  return $isNaN(value.getTime()) ? 'Invalid Date' : toISOString(value);
+  return isNumberNaN(getTime(value)) ? 'Invalid Date' : toISOString(value);
 };
 
 var fmtError = function _fmtError(value) {
@@ -541,53 +584,39 @@ var fmtError = function _fmtError(value) {
   if (stack) {
     if (supportsClasses) {
       var subName = getSubName(value);
-      if (subName && stack.startsWith(subName) === false) {
+      if (subName && startsWith(stack, subName) === false) {
         var msg = value.message;
-        return stack.replace(pErrorToString.call(value), subName + (msg ? ': ' + msg : ''));
+        return replace(stack, errorToString(value), subName + (msg ? ': ' + msg : ''));
       }
     } else if (missingError) {
-      return pErrorToString.call(value) + '\n' + stack;
+      return errorToString(value) + '\n' + stack;
     }
   }
 
-  return stack || '[' + pErrorToString.call(value) + ']';
+  return stack || '[' + errorToString(value) + ']';
 };
 
-var filterDateKeys = function _filterDateKeys(key) {
-  return key !== 'constructor';
-};
+var typedArrayKeys = [
+  'BYTES_PER_ELEMENT',
+  'length',
+  'byteLength',
+  'byteOffset',
+  'buffer'
+];
 
-var filterErrorKeys = function _filterErrorKeys(key) {
-  return $includes(errProps, key) === false;
-};
+var dataViewKeys = [
+  'byteLength',
+  'byteOffset',
+  'buffer'
+];
 
-var getVisibleKeys = function _getVisibleKeys(value) {
-  var keys = $keys(value);
-  if (keys.length > 0) {
-    if (shimmedDate && isDate(value)) {
-      return filter(keys, filterDateKeys);
-    }
+var arrayBufferKeys = ['byteLength'];
+var collectionKeys = ['size'];
+var arrayKeys = ['length'];
+var errorKeys = ['message'];
 
-    if (errProps.length > 0 && isError(value)) {
-      return filter(keys, filterErrorKeys);
-    }
-  }
-
-  return keys;
-};
-
-var getEnumSymbols = function _getEnumSymbols(value) {
-  if ($getOwnPropertySymbols) {
-    return filter($getOwnPropertySymbols(value), function _filterEnumSymbolKeys(key) {
-      return $propertyIsEnumerable.call(value, key);
-    });
-  }
-
-  return [];
-};
-
-// eslint-disable-next-line complexity
-fmtValue = function _fmtValue(ctx, value, depth) {
+// eslint-disable-next-line complexity,max-params
+fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   // Provide a hook for user-specified inspect functions.
   // Check that value is an object with an inspect function on it
   if (ctx.customInspect && value) {
@@ -618,39 +647,63 @@ fmtValue = function _fmtValue(ctx, value, depth) {
   }
 
   // Look up the keys of the object.
-  var visibleKeys = getVisibleKeys(value);
+  var visibleKeys = objectKeys(value);
+  if (visibleKeys.length > 0) {
+    if (shimmedDate && isDate(value)) {
+      visibleKeys = filter(visibleKeys, function (key) {
+        return key !== 'constructor';
+      });
+    } else if (errProps.length > 0 && isError(value)) {
+      visibleKeys = filter(visibleKeys, function (key) {
+        return arrayincludes(errProps, key) === false;
+      });
+    }
+  }
+
   var keys;
   if (ctx.showHidden) {
     keys = reflectOwnKeys(value);
     if (isError(value)) {
-      if ($includes(visibleKeys, 'message') === false && $includes(keys, 'message') === false) {
-        unshiftUniq(keys, 'message');
+      if (arrayincludes(keys, 'message') === false) {
+        keys = promote(keys, errorKeys);
+      }
+    } else if ((unwantedFnProps.length > 0 || mustFilterFnProps) && isFunction(value)) {
+      if (unwantedFnProps.length > 0) {
+        keys = difference(keys, unwantedFnProps);
       }
 
-      /*
-      if (includes(visibleKeys, 'name') === false && includes(keys, 'name') === false) {
-        unshiftUniq(keys, 'name');
+      if (mustFilterFnProps) {
+        var keysDiff = difference(keys, fnPropsCheck);
+        var missingFnProps = difference(fnPropsCheck, visibleKeys, keysDiff);
+        keys = concat(missingFnProps, keysDiff);
       }
-      */
+    } else if (hiddenFuncCtr && isProto && isFunction(getConstructorOf(value))) {
+      if (arrayincludes(visibleKeys, 'constructor') === false && arrayincludes(keys, 'constructor') === false) {
+        keys = promote(keys, 'constructor');
+      }
     }
   } else {
-    keys = visibleKeys.concat(getEnumSymbols(value));
+    var enumSymbols = filter(getOwnPropertySymbols(value), function (key) {
+      return propertyIsEnumerable(value, key);
+    });
+
+    keys = concat(visibleKeys, enumSymbols);
   }
 
   if (isString(value)) {
     // for boxed Strings, we have to remove the 0-n indexed entries,
     // since they just noisey up the out and are redundant
-    filterIndexes(keys, value.length);
-    filterIndexes(visibleKeys, value.length);
+    keys = filterIndexes(keys, value.length);
+    visibleKeys = filterIndexes(visibleKeys, value.length);
   } else if (isArrayBuffer(value)) {
-    filterIndexes(keys, value.byteLength);
-    filterIndexes(visibleKeys, value.byteLength);
+    keys = filterIndexes(keys, value.byteLength);
+    visibleKeys = filterIndexes(visibleKeys, value.byteLength);
   }
 
   var name;
   var formatted;
   // Some type of object without properties can be shortcutted.
-  if (keys.length === 0) {
+  if (keys.length < 1) {
     // This could be a boxed primitive (new String(), etc.)
     if (isString(value)) {
       return ctx.stylize(
@@ -675,7 +728,7 @@ fmtValue = function _fmtValue(ctx, value, depth) {
 
     if (isSymbol(value)) {
       return ctx.stylize(
-        '[Symbol: ' + fmtPrimNoColor(ctx, pSymValOf.call(value)) + ']',
+        '[Symbol: ' + fmtPrimNoColor(ctx, symbolValueOf(value)) + ']',
         'symbol'
       );
     }
@@ -692,12 +745,12 @@ fmtValue = function _fmtValue(ctx, value, depth) {
       return ctx.stylize('[' + getSubName(value, 'Function') + getNameSep(value) + ']', 'special');
     }
 
-    if (supportsClasses && isFunction(value, true)) {
+    if (isClass(value)) {
       return ctx.stylize('[Class' + getNameSep(value) + ']', 'special');
     }
 
     if (isRegExp(value)) {
-      return ctx.stylize(pRegExpToString.call(value), 'regexp');
+      return ctx.stylize(regexpToString(value), 'regexp');
     }
 
     if (isDate(value)) {
@@ -754,13 +807,13 @@ fmtValue = function _fmtValue(ctx, value, depth) {
   } else if (isFunction(value)) {
     // Make functions say that they are functions
     base = '[' + getSubName(value, 'Function') + getNameSep(value) + ']';
-  } else if (supportsClasses && isFunction(value, true)) {
+  } else if (isClass(value)) {
     // Make functions say that they are functions
     base = '[Class' + getNameSep(value) + ']';
   } else if (isRegExp(value)) {
     // Make RegExps say that they are RegExps
     // name = getSubName(value, 'RegExp');
-    base = pRegExpToString.call(value);
+    base = regexpToString(value);
   } else if (isDate(value)) {
     // Make dates with properties first say the date
     name = getSubName(value);
@@ -774,16 +827,16 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     name = getSubName(value);
     // Make error with message first say the error
     base = fmtError(value);
-  } else if ($isArray(value)) {
+  } else if (isArray(value)) {
     name = getSubName(value);
     // Unset the constructor to prevent "Array [...]" for ordinary arrays.
     name = name === 'Array' ? '' : name;
     braces = ['[', ']'];
     if (ctx.showHidden) {
-      unshiftUniq(keys, 'length');
+      keys = promote(keys, arrayKeys);
     }
 
-    empty = value.length === 0;
+    empty = value.length < 1;
     fmtter = fmtArray;
   } else if (isSet(value)) {
     name = getSubName(value, 'Set');
@@ -792,10 +845,10 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     // arrays. For consistency's sake, do the same for `size`, even though
     // this property isn't selected by Object.getOwnPropertyNames().
     if (ctx.showHidden) {
-      unshiftUniq(keys, 'size');
+      keys = promote(keys, collectionKeys);
     }
 
-    empty = value.size === 0;
+    empty = value.size < 1;
   } else if (isMap(value)) {
     name = getSubName(value, 'Map');
     fmtter = fmtMap;
@@ -803,32 +856,24 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     // arrays. For consistency's sake, do the same for `size`, even though
     // this property isn't selected by Object.getOwnPropertyNames().
     if (ctx.showHidden) {
-      unshiftUniq(keys, 'size');
+      keys = promote(keys, collectionKeys);
     }
 
-    empty = value.size === 0;
+    empty = value.size < 1;
   } else if (isArrayBuffer(value)) {
     name = getSubName(value, 'ArrayBuffer');
-    unshiftUniq(keys, 'byteLength');
-    pushUniq(visibleKeys, 'byteLength');
+    keys = promote(keys, arrayBufferKeys);
+    visibleKeys = appendMissing(visibleKeys, arrayBufferKeys);
   } else if (isDataView(value)) {
     name = getSubName(value, 'DataView');
-    unshiftUniq(keys, 'buffer');
-    unshiftUniq(keys, 'byteOffset');
-    unshiftUniq(keys, 'byteLength');
-    pushUniq(visibleKeys, 'byteLength');
-    pushUniq(visibleKeys, 'byteOffset');
-    pushUniq(visibleKeys, 'buffer');
+    keys = promote(keys, dataViewKeys);
+    visibleKeys = appendMissing(visibleKeys, dataViewKeys);
   } else if (isTypedArray(value)) {
     name = getSubName(value);
     braces = ['[', ']'];
     fmtter = fmtTypedArray;
     if (ctx.showHidden) {
-      unshiftUniq(keys, 'buffer');
-      unshiftUniq(keys, 'byteOffset');
-      unshiftUniq(keys, 'byteLength');
-      unshiftUniq(keys, 'length');
-      unshiftUniq(keys, bpe);
+      keys = promote(keys, typedArrayKeys);
     }
   } else if (isPromise(value)) {
     name = getSubName(value, 'Promise');
@@ -852,19 +897,21 @@ fmtValue = function _fmtValue(ctx, value, depth) {
     braces[0] = name + ' ' + braces[0];
   }
 
-  empty = empty === true && keys.length === 0;
+  empty = empty === true && keys.length < 1;
   if (empty) {
     return braces[0] + base + braces[1];
   }
 
   if (depth < 0) {
     if (isRegExp(value)) {
-      return ctx.stylize(pRegExpToString.call(value), 'regexp');
-    } else if ($isArray(value)) {
-      return ctx.stylize('[Array]', 'special');
-    } else {
-      return ctx.stylize('[Object]', 'special');
+      return ctx.stylize(regexpToString(value), 'regexp');
     }
+
+    if (isArray(value)) {
+      return ctx.stylize('[Array]', 'special');
+    }
+
+    return ctx.stylize('[Object]', 'special');
   }
 
   if (ctx.seen.has(value)) {
@@ -874,7 +921,7 @@ fmtValue = function _fmtValue(ctx, value, depth) {
   ctx.seen.add(value);
   var out = fmtter(ctx, value, depth, visibleKeys, keys);
   ctx.seen['delete'](value);
-  return reduceToSingleString(out, base, braces);
+  return reduceToSingleString(out, base, braces, ctx.breakLength);
 };
 
 inspect = function _inspect(obj, opts) {
@@ -900,9 +947,9 @@ inspect = function _inspect(obj, opts) {
 
   // Set default and user-specified options
   if (supportsGetSet) {
-    ctx = $assign({}, inspect.defaultOptions, ctx, opts);
+    ctx = assign({}, inspect.defaultOptions, ctx, opts);
   } else {
-    ctx = $assign({}, inspectDefaultOptions, inspect.defaultOptions, ctx, opts);
+    ctx = assign({}, inspectDefaultOptions, inspect.defaultOptions, ctx, opts);
   }
 
   if (ctx.colors) {
@@ -926,13 +973,13 @@ if (supportsGetSet) {
         throw new TypeError('"options" must be an object');
       }
 
-      return $assign(inspectDefaultOptions, options);
+      return assign(inspectDefaultOptions, options);
     }
   });
 } else {
   defineProperties(inspect, {
     defaultOptions: {
-      value: $assign({}, inspectDefaultOptions),
+      value: assign({}, inspectDefaultOptions),
       writable: true
     }
   });

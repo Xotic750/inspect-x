@@ -99,7 +99,7 @@
     "require-object-coercible-x": "^2.0.4",
     "string-includes-x": "^1.1.0",
     "string-starts-with-x": "^1.1.0",
-    "to-integer-x": "^4.0.1",
+    "to-integer-x": "^4.0.2",
     "to-iso-string-x": "^1.5.0",
     "to-string-x": "^2.0.14",
     "validate.io-undefined": "^1.0.3",

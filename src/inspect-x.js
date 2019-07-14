@@ -8,147 +8,151 @@
  * @module inspect-x
  */
 
-'use strict';
+const bind = require('bind-x');
 
-var bind = require('bind-x');
-var call = Function.prototype.call;
-var isFunction = require('is-function-x');
-var isGeneratorFunction = require('is-generator-function');
-var isAsyncFunction = require('is-async-function-x');
-var isRegExp = require('is-regex');
-var defineProperties = require('object-define-properties-x');
-var isDate = require('is-date-object');
-var isArrayBuffer = require('is-array-buffer-x');
-var isSet = require('is-set-x');
-var isMap = require('is-map-x');
-var isTypedArray = require('is-typed-array');
-var isDataView = require('is-data-view-x');
-var isUndefined = require('validate.io-undefined');
-var isNil = require('is-nil-x');
-var isNull = require('lodash.isnull');
-var isError = require('is-error-x');
-var isObjectLike = require('is-object-like-x');
-var isPromise = require('is-promise');
-var isString = require('is-string');
-var isNumber = require('is-number-object');
-var isBoolean = require('is-boolean-object');
-var objectIs = require('object-is');
-var isSymbol = require('is-symbol');
-var isPrimitive = require('is-primitive');
-var isArray = require('is-array-x');
-var isNumberNaN = require('is-nan');
-var toStr = require('to-string-x');
-var getFunctionName = require('get-function-name-x');
-var hasSymbolSupport = require('has-symbol-support-x');
-var whiteSpace = require('white-space-x');
-var hasSet = typeof Set === 'function' && isSet(new Set());
-var testSet = hasSet && new Set(['SetSentinel']);
-var setForEach = hasSet && bind(call, Set.prototype.forEach);
-var setValues = hasSet && bind(call, Set.prototype.values);
-var hasMap = typeof Map === 'function' && isMap(new Map());
-var testMap = hasMap && new Map([[1, 'MapSentinel']]);
-var mapForEach = hasMap && bind(call, Map.prototype.forEach);
-var mapValues = hasMap && bind(call, Map.prototype.values);
-var symbolToString = hasSymbolSupport && bind(call, Symbol.prototype.toString);
-var symbolValueOf = hasSymbolSupport && bind(call, Symbol.prototype.valueOf);
-var reduce = require('array-reduce-x');
-var filter = require('array-filter-x');
-var some = require('array-some-x');
-var every = require('array-every-x');
-var map = require('array-map-x');
-var slice = require('array-slice-x');
-var reflectOwnKeys = require('reflect-own-keys-x');
-var stringify = require('json3').stringify;
-var objectKeys = require('object-keys-x');
-var getOwnPropertyDescriptor = require('object-get-own-property-descriptor-x');
-var getPrototypeOf = require('get-prototype-of-x');
-var objectSeal = isFunction(Object.seal) ? Object.seal : require('lodash.identity');
-var getOwnPropertySymbols = require('get-own-property-symbols-x');
-var arrayincludes = require('array-includes-x');
-var assign = require('object-assign-x');
-var toISOString = require('to-iso-string-x');
-var collections = require('collections-x');
-var defineProperty = require('object-define-property-x');
-var startsWith = require('string-starts-with-x');
-var strIncludes = require('string-includes-x');
-var clamp = require('math-clamp');
-var difference = require('array-difference-x');
-var intersection = require('array-intersection-x');
-var union = require('array-union-x');
-var regexpToString = bind(call, RegExp.prototype.toString);
-var regexpTest = bind(call, RegExp.prototype.test);
-var errorToString = bind(call, Error.prototype.toString);
-var numberToString = bind(call, Number.prototype.toString);
-var booleanToString = bind(call, Boolean.prototype.toString);
-var concat = bind(call, Array.prototype.concat, []);
-var join = bind(call, Array.prototype.join);
-var push = bind(call, Array.prototype.push);
-var getTime = bind(call, Date.prototype.getTime);
-var replace = bind(call, String.prototype.replace);
-var strSlice = bind(call, String.prototype.slice);
-var propertyIsEnumerable = bind(call, Object.prototype.propertyIsEnumerable);
-var customInspectSymbol = hasSymbolSupport ? Symbol('inspect.custom') : '_inspect.custom_';
-var inspect;
-var fmtValue;
+const {call} = Function.prototype;
+const isFunction = require('is-function-x');
+const isGeneratorFunction = require('is-generator-function');
+const isAsyncFunction = require('is-async-function-x');
+const isRegExp = require('is-regex');
+const defineProperties = require('object-define-properties-x');
+let isDate = require('is-date-object');
+const isArrayBuffer = require('is-array-buffer-x');
+const isSet = require('is-set-x');
+const isMap = require('is-map-x');
+const isTypedArray = require('is-typed-array');
+const isDataView = require('is-data-view-x');
+const isUndefined = require('validate.io-undefined');
+const isNil = require('is-nil-x');
+const isNull = require('lodash.isnull');
+const isError = require('is-error-x');
+const isObjectLike = require('is-object-like-x');
+const isPromise = require('is-promise');
+const isString = require('is-string');
+const isNumber = require('is-number-object');
+const isBoolean = require('is-boolean-object');
+const objectIs = require('object-is');
+const isSymbol = require('is-symbol');
+const isPrimitive = require('is-primitive');
+const isArray = require('is-array-x');
+const isNumberNaN = require('is-nan');
+const toStr = require('to-string-x');
+const getFunctionName = require('get-function-name-x');
+const hasSymbolSupport = require('has-symbol-support-x');
+const whiteSpace = require('white-space-x');
 
-var isFalsey = function _isFalsey(value) {
+const hasSet = typeof Set === 'function' && isSet(new Set());
+const testSet = hasSet && new Set(['SetSentinel']);
+const setForEach = hasSet && bind(call, Set.prototype.forEach);
+const setValues = hasSet && bind(call, Set.prototype.values);
+const hasMap = typeof Map === 'function' && isMap(new Map());
+const testMap = hasMap && new Map([[1, 'MapSentinel']]);
+const mapForEach = hasMap && bind(call, Map.prototype.forEach);
+const mapValues = hasMap && bind(call, Map.prototype.values);
+const symbolToString = hasSymbolSupport && bind(call, Symbol.prototype.toString);
+const symbolValueOf = hasSymbolSupport && bind(call, Symbol.prototype.valueOf);
+const reduce = require('array-reduce-x');
+const filter = require('array-filter-x');
+const some = require('array-some-x');
+const every = require('array-every-x');
+const map = require('array-map-x');
+const slice = require('array-slice-x');
+const reflectOwnKeys = require('reflect-own-keys-x');
+const {stringify} = require('json3');
+const objectKeys = require('object-keys-x');
+const getOwnPropertyDescriptor = require('object-get-own-property-descriptor-x');
+const getPrototypeOf = require('get-prototype-of-x');
+const objectSeal = isFunction(Object.seal) ? Object.seal : require('lodash.identity');
+const getOwnPropertySymbols = require('get-own-property-symbols-x');
+const arrayincludes = require('array-includes-x');
+const assign = require('object-assign-x');
+const toISOString = require('to-iso-string-x');
+const collections = require('collections-x');
+const defineProperty = require('object-define-property-x');
+const startsWith = require('string-starts-with-x');
+const strIncludes = require('string-includes-x');
+const clamp = require('math-clamp');
+const difference = require('array-difference-x');
+const intersection = require('array-intersection-x');
+const union = require('array-union-x');
+
+const regexpToString = bind(call, RegExp.prototype.toString);
+const regexpTest = bind(call, RegExp.prototype.test);
+const errorToString = bind(call, Error.prototype.toString);
+const numberToString = bind(call, Number.prototype.toString);
+const booleanToString = bind(call, Boolean.prototype.toString);
+const concat = bind(call, Array.prototype.concat, []);
+const join = bind(call, Array.prototype.join);
+const push = bind(call, Array.prototype.push);
+const getTime = bind(call, Date.prototype.getTime);
+const replace = bind(call, String.prototype.replace);
+const strSlice = bind(call, String.prototype.slice);
+const propertyIsEnumerable = bind(call, Object.prototype.propertyIsEnumerable);
+const customInspectSymbol = hasSymbolSupport ? Symbol('inspect.custom') : '_inspect.custom_';
+let inspect;
+let fmtValue;
+
+const isFalsey = function _isFalsey(value) {
   return Boolean(value) === false;
 };
 
-var supportsClasses;
+let supportsClasses;
 try {
   // eslint-disable-next-line no-new-func
   Function('return class My {}')();
   supportsClasses = true;
 } catch (e) {}
 
-var isClass = function _isClass(value) {
+const isClass = function _isClass(value) {
   return supportsClasses ? isFunction(value, true) && isFunction(value) === false : false;
 };
 
-var supportsGetSet;
+let supportsGetSet;
 try {
-  var testVar;
-  var testObject = defineProperty({}, 'defaultOptions', {
-    get: function () {
+  let testVar;
+  const testObject = defineProperty({}, 'defaultOptions', {
+    get() {
       return testVar;
     },
-    set: function (val) {
+    set(val) {
       testVar = val;
+
       return testVar;
-    }
+    },
   });
 
   testObject.defaultOptions = 'test';
   supportsGetSet = testVar === 'test' && testObject.defaultOptions === 'test';
 } catch (ignore) {}
 
-var pluralEnding = function _pluralEnding(number) {
+const pluralEnding = function _pluralEnding(number) {
   return number > 1 ? 's' : '';
 };
 
-var isDigits = function _isDigits(key) {
+const isDigits = function _isDigits(key) {
   return regexpTest(/^\d+$/, key);
 };
 
-var appendMissing = function _appendMissing(array, values) {
+const appendMissing = function _appendMissing(array, values) {
   return concat(array, difference(values, array));
 };
 
-var promote = function _promote(array, values) {
+const promote = function _promote(array, values) {
   return concat(values, difference(array, values));
 };
 
-var missingError;
-var errProps;
+let missingError;
+let errProps;
 try {
   throw new Error('test');
 } catch (e) {
   errProps = union(objectKeys(new Error()), objectKeys(e));
-  var errorString = errorToString(e);
-  var errorStack = e.stack;
+  const errorString = errorToString(e);
+  const errorStack = e.stack;
+
   if (errorStack) {
-    var errorRx = new RegExp('^' + errorString);
+    const errorRx = new RegExp(`^${errorString}`);
+
     if (regexpTest(errorRx, errorStack) === false) {
       missingError = true;
     }
@@ -159,6 +163,7 @@ if (isDate(Date.prototype)) {
   isDate = function _isDate(value) {
     try {
       getTime(value);
+
       return true;
     } catch (ignore) {
       return false;
@@ -166,69 +171,67 @@ if (isDate(Date.prototype)) {
   };
 }
 
-var shimmedDate;
-var dateProps = objectKeys(Date);
-if (dateProps.length > 0) {
-  var datePropsCheck = [
-    'now',
-    'UTC',
-    'parse'
-  ];
+let shimmedDate;
+const dateProps = objectKeys(Date);
 
-  shimmedDate = every(datePropsCheck, function (prop) {
-    return arrayincludes(dateProps, prop);
-  }) && arrayincludes(objectKeys(new Date()), 'constructor');
+if (dateProps.length > 0) {
+  const datePropsCheck = ['now', 'UTC', 'parse'];
+
+  shimmedDate =
+    every(datePropsCheck, function(prop) {
+      return arrayincludes(dateProps, prop);
+    }) && arrayincludes(objectKeys(new Date()), 'constructor');
 }
 
-var testFunc1 = function test1() {};
-var fnSupportsName = testFunc1.name === 'test1';
-var hiddenFuncCtr = arrayincludes(reflectOwnKeys(testFunc1.prototype), 'constructor') === false;
-var wantedFnProps = [
-  'length',
-  'name',
-  'prototype'
-];
+const testFunc1 = function test1() {};
 
-var fnPropsCheck = fnSupportsName ? slice(wantedFnProps) : filter(wantedFnProps, function (prop) {
-  return prop !== 'name';
-});
+const fnSupportsName = testFunc1.name === 'test1';
+const hiddenFuncCtr = arrayincludes(reflectOwnKeys(testFunc1.prototype), 'constructor') === false;
+const wantedFnProps = ['length', 'name', 'prototype'];
 
-var funcKeys = reflectOwnKeys(testFunc1);
-var unwantedFnProps = intersection(['arguments', 'caller'], funcKeys);
-var mustFilterFnProps = difference(fnPropsCheck, funcKeys).length > 0;
+const fnPropsCheck = fnSupportsName
+  ? slice(wantedFnProps)
+  : filter(wantedFnProps, function(prop) {
+      return prop !== 'name';
+    });
+
+const funcKeys = reflectOwnKeys(testFunc1);
+const unwantedFnProps = intersection(['arguments', 'caller'], funcKeys);
+let mustFilterFnProps = difference(fnPropsCheck, funcKeys).length > 0;
+
 if (mustFilterFnProps === false) {
-  mustFilterFnProps = some(intersection(funcKeys, wantedFnProps), function (key, index) {
+  mustFilterFnProps = some(intersection(funcKeys, wantedFnProps), function(key, index) {
     return wantedFnProps[index] !== key;
   });
 }
 
-var inspectDefaultOptions = objectSeal({
+const inspectDefaultOptions = objectSeal({
   breakLength: 60,
   colors: false,
   customInspect: true,
   depth: 2,
   maxArrayLength: 100,
   showHidden: false,
-  showProxy: false
+  showProxy: false,
 });
 
-var isBooleanType = function _isBooleanType(arg) {
+const isBooleanType = function _isBooleanType(arg) {
   return typeof arg === 'boolean';
 };
 
-var isNumberType = function _isNumberType(arg) {
+const isNumberType = function _isNumberType(arg) {
   return typeof arg === 'number';
 };
 
-var isStringType = function _isStringType(arg) {
+const isStringType = function _isStringType(arg) {
   return typeof arg === 'string';
 };
 
-var isSymbolType = function _isSymbolType(arg) {
+const isSymbolType = function _isSymbolType(arg) {
   return typeof arg === 'symbol';
 };
 
-var isMapIterator = function _isMapIterator(value) {
+const isMapIterator = function _isMapIterator(value) {
   if (hasMap === false || isObjectLike(value) === false) {
     return false;
   }
@@ -240,7 +243,7 @@ var isMapIterator = function _isMapIterator(value) {
   return false;
 };
 
-var isSetIterator = function _isSetIterator(value) {
+const isSetIterator = function _isSetIterator(value) {
   if (hasSet === false || isObjectLike(value) === false) {
     return false;
   }
@@ -252,37 +255,41 @@ var isSetIterator = function _isSetIterator(value) {
   return false;
 };
 
-var filterIndexes = function _filterIndexes(keys, length) {
-  return filter(keys, function (key) {
+const filterIndexes = function _filterIndexes(keys, length) {
+  return filter(keys, function(key) {
     return isSymbolType(key) || key < 0 || key > length || key % 1 !== 0;
   });
 };
 
-var stylizeWithColor = function _stylizeWithColor(str, styleType) {
-  var style = inspect.styles[styleType];
+const stylizeWithColor = function _stylizeWithColor(str, styleType) {
+  const style = inspect.styles[styleType];
+
   if (style) {
-    var colors = inspect.colors[style];
-    return '\u001b[' + colors[0] + 'm' + str + '\u001b[' + colors[1] + 'm';
+    const colors = inspect.colors[style];
+
+    return `\u001b[${colors[0]}m${str}\u001b[${colors[1]}m`;
   }
 
   return str;
 };
 
-var stylizeNoColor = function _stylizeNoColor(str) {
+const stylizeNoColor = function _stylizeNoColor(str) {
   return str;
 };
 
-var getNameSep = function _getNameSep(obj) {
-  var name = getFunctionName(obj);
-  return name ? ': ' + name : name;
+const getNameSep = function _getNameSep(obj) {
+  const name = getFunctionName(obj);
+
+  return name ? `: ${name}` : name;
 };
 
-var getConstructorOf = function _getConstructorOf(obj) {
-  var o = obj;
-  var maxLoop = 100;
+const getConstructorOf = function _getConstructorOf(obj) {
+  let o = obj;
+  let maxLoop = 100;
   while (isNil(o) === false && maxLoop >= 0) {
     o = Object(o);
-    var descriptor = getOwnPropertyDescriptor(o, 'constructor');
+    const descriptor = getOwnPropertyDescriptor(o, 'constructor');
+
     if (descriptor && descriptor.value) {
       return descriptor.value;
     }
@@ -294,52 +301,48 @@ var getConstructorOf = function _getConstructorOf(obj) {
   return null;
 };
 
-var isSub = function _isSub(value) {
+const isSub = function _isSub(value) {
   if (supportsClasses !== true || isPrimitive(value)) {
     return false;
   }
 
-  var constructor = getConstructorOf(value);
+  const constructor = getConstructorOf(value);
+
   return isFunction(constructor) === false && isFunction(constructor, true);
 };
 
-var getSubName = function _getSubName(value, name) {
+const getSubName = function _getSubName(value, name) {
   if (isSub(value)) {
-    var subName = getFunctionName(getConstructorOf(value));
+    const subName = getFunctionName(getConstructorOf(value));
+
     if (subName && subName !== name) {
       return subName;
     }
   }
 
-  return name ? name : getFunctionName(getConstructorOf(value));
+  return name || getFunctionName(getConstructorOf(value));
 };
 
-var fmtNumber = function _fmtNumber(ctx, value) {
+const fmtNumber = function _fmtNumber(ctx, value) {
   // Format -0 as '-0'.
   return ctx.stylize(objectIs(value, -0) ? '-0' : numberToString(value), 'number');
 };
 
-var fmtPrimitiveReplacers = [
-  [/^"|"$/g, ''],
-  [/'/g, '\\\''],
-  [/\\"/g, '"']
-];
+const fmtPrimitiveReplacers = [[/^"|"$/g, ''], [/'/g, "\\'"], [/\\"/g, '"']];
 
-var fmtPrimitiveReplace = function _fmtPrimitiveReplace(acc, pair) {
+const fmtPrimitiveReplace = function _fmtPrimitiveReplace(acc, pair) {
   return replace(acc, pair[0], pair[1]);
 };
 
-var fmtPrimitive = function _fmtPrimitive(ctx, value) {
+const fmtPrimitive = function _fmtPrimitive(ctx, value) {
   if (isNil(value)) {
-    var str = toStr(value);
+    const str = toStr(value);
+
     return ctx.stylize(str, str);
   }
 
   if (isStringType(value)) {
-    return ctx.stylize(
-      '\'' + reduce(fmtPrimitiveReplacers, fmtPrimitiveReplace, stringify(value)) + '\'',
-      'string'
-    );
+    return ctx.stylize(`'${reduce(fmtPrimitiveReplacers, fmtPrimitiveReplace, stringify(value))}'`, 'string');
   }
 
   if (isNumberType(value)) {
@@ -358,36 +361,32 @@ var fmtPrimitive = function _fmtPrimitive(ctx, value) {
   return void 0;
 };
 
-var fmtPrimNoColor = function _fmtPrimNoColor(ctx, value) {
-  var stylize = ctx.stylize;
+const fmtPrimNoColor = function _fmtPrimNoColor(ctx, value) {
+  const {stylize} = ctx;
   ctx.stylize = stylizeNoColor;
-  var str = fmtPrimitive(ctx, value);
+  const str = fmtPrimitive(ctx, value);
   ctx.stylize = stylize;
+
   return str;
 };
 
-var recurse = function _recurse(depth) {
+const recurse = function _recurse(depth) {
   return isNull(depth) ? null : depth - 1;
 };
 
-var fmtPropReplacers = [
-  [/'/g, '\\\''],
-  [/\\"/g, '"'],
-  [/(^"|"$)/g, '\''],
-  [/\\\\/g, '\\']
-];
+const fmtPropReplacers = [[/'/g, "\\'"], [/\\"/g, '"'], [/(^"|"$)/g, "'"], [/\\\\/g, '\\']];
 
-var fmtPropReplace = function _fmtPropReplace(acc, pair) {
+const fmtPropReplace = function _fmtPropReplace(acc, pair) {
   return replace(acc, pair[0], pair[1]);
 };
 
-var fmtPropReplacer1 = [/\n/g, '\n  '];
-var fmtPropReplacer2 = [/(^|\n)/g, '\n   '];
-var fmtPropTestRx = /^"[\w$]+"$/;
+const fmtPropReplacer1 = [/\n/g, '\n  '];
+const fmtPropReplacer2 = [/(^|\n)/g, '\n   '];
+const fmtPropTestRx = /^"[\w$]+"$/;
 
 // eslint-disable-next-line max-params
-var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
-  var desc = getOwnPropertyDescriptor(value, key) || { value: value[key] };
+const fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
+  const desc = getOwnPropertyDescriptor(value, key) || {value: value[key]};
 
   /*
   // this is a fix for broken FireFox, should not be needed with es6-shim
@@ -396,29 +395,33 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   }
   */
 
-  var name;
+  let name;
+
   if (arrayincludes(visibleKeys, key) === false) {
     if (key === 'BYTES_PER_ELEMENT' && isFalsey(value.BYTES_PER_ELEMENT) && isTypedArray(value)) {
-      var constructor = getConstructorOf(value);
+      const constructor = getConstructorOf(value);
+
       if (constructor) {
         desc.value = constructor.BYTES_PER_ELEMENT;
       }
     } else if (isSymbolType(key)) {
-      name = '[' + ctx.stylize(symbolToString(key), 'symbol') + ']';
+      name = `[${ctx.stylize(symbolToString(key), 'symbol')}]`;
     } else {
-      name = '[' + key + ']';
+      name = `[${key}]`;
     }
   }
 
-  var str;
+  let str;
+
   if (desc.get) {
     str = ctx.stylize(desc.set ? '[Getter/Setter]' : '[Getter]', 'special');
   } else if (desc.set) {
     str = ctx.stylize('[Setter]', 'special');
   } else {
-    var formattedStr = fmtValue(ctx, desc.value, recurse(depth), key === 'prototype');
+    const formattedStr = fmtValue(ctx, desc.value, recurse(depth), key === 'prototype');
+
     if (strIncludes(formattedStr, '\n')) {
-      var replacer = arr ? fmtPropReplacer1 : fmtPropReplacer2;
+      const replacer = arr ? fmtPropReplacer1 : fmtPropReplacer2;
       str = replace(formattedStr, replacer[0], replacer[1]);
     } else {
       str = formattedStr;
@@ -430,7 +433,8 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
       return str;
     }
 
-    var serialisedKey = stringify(key);
+    const serialisedKey = stringify(key);
+
     if (regexpTest(fmtPropTestRx, serialisedKey)) {
       name = ctx.stylize(strSlice(serialisedKey, 1, -1), 'name');
     } else {
@@ -438,39 +442,39 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
     }
   }
 
-  return name + ': ' + str;
+  return `${name}: ${str}`;
 };
 
 // eslint-disable-next-line max-params
-var fmtObject = function _fmtObject(ctx, value, depth, visibleKeys, keys) {
+const fmtObject = function _fmtObject(ctx, value, depth, visibleKeys, keys) {
   return map(keys, function _mapFmObject(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, false);
   });
 };
 
-var getMoreItemText = function _getMoreItemText(remaining) {
-  return '... ' + remaining + ' more item' + pluralEnding(remaining);
+const getMoreItemText = function _getMoreItemText(remaining) {
+  return `... ${remaining} more item${pluralEnding(remaining)}`;
 };
 
-var getEmptyItemText = function _getEmptyItemText(emptyItems) {
-  return '<' + emptyItems + ' empty item' + pluralEnding(emptyItems) + '>';
+const getEmptyItemText = function _getEmptyItemText(emptyItems) {
+  return `<${emptyItems} empty item${pluralEnding(emptyItems)}>`;
 };
 
-var filterOutIndexes = function (keys) {
-  return filter(keys, function (key) {
+const filterOutIndexes = function(keys) {
+  return filter(keys, function(key) {
     return isSymbolType(key) || isDigits(key) === false;
   });
 };
 
 // eslint-disable-next-line max-params
-var fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
-  var length = value.length;
-  var maxLength = clamp(length, 0, ctx.maxArrayLength);
-  var lastIndex = 0;
-  var nextIndex = 0;
-  var output = [];
+const fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
+  const {length} = value;
+  const maxLength = clamp(length, 0, ctx.maxArrayLength);
+  let lastIndex = 0;
+  let nextIndex = 0;
+  const output = [];
 
-  var moreItems = some(value, function (item, index) {
+  const moreItems = some(value, function(item, index) {
     if (index !== nextIndex) {
       push(output, ctx.stylize(getEmptyItemText(index - lastIndex - 1), 'undefined'));
     }
@@ -478,10 +482,12 @@ var fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
     push(output, fmtProp(ctx, value, depth, visibleKeys, numberToString(index), true));
     lastIndex = index;
     nextIndex = index + 1;
+
     return nextIndex >= maxLength;
   });
 
-  var remaining = length - nextIndex;
+  const remaining = length - nextIndex;
+
   if (remaining > 0) {
     if (moreItems) {
       push(output, getMoreItemText(remaining));
@@ -490,7 +496,7 @@ var fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
     }
   }
 
-  var fmtdProps = map(filterOutIndexes(keys), function (key) {
+  const fmtdProps = map(filterOutIndexes(keys), function(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, true);
   });
 
@@ -498,17 +504,18 @@ var fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
 };
 
 // eslint-disable-next-line max-params
-var fmtTypedArray = function _fmtTypedArray(ctx, value, depth, visibleKeys, keys) {
-  var length = value.length;
-  var maxLength = clamp(length, 0, ctx.maxArrayLength);
-  var output = [];
+const fmtTypedArray = function _fmtTypedArray(ctx, value, depth, visibleKeys, keys) {
+  const {length} = value;
+  const maxLength = clamp(length, 0, ctx.maxArrayLength);
+  const output = [];
   output.length = maxLength;
-  var moreItems = some(value, function (item, index) {
+  const moreItems = some(value, function(item, index) {
     if (index >= maxLength) {
       return true;
     }
 
     output[index] = fmtNumber(ctx, value[index]);
+
     return false;
   });
 
@@ -516,7 +523,7 @@ var fmtTypedArray = function _fmtTypedArray(ctx, value, depth, visibleKeys, keys
     push(output, getMoreItemText(length - maxLength));
   }
 
-  var fmtdProps = map(filterOutIndexes(keys), function (key) {
+  const fmtdProps = map(filterOutIndexes(keys), function(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, true);
   });
 
@@ -524,13 +531,13 @@ var fmtTypedArray = function _fmtTypedArray(ctx, value, depth, visibleKeys, keys
 };
 
 // eslint-disable-next-line max-params
-var fmtSet = function _fmtSet(ctx, value, depth, visibleKeys, keys) {
-  var output = [];
-  setForEach(value, function (v) {
+const fmtSet = function _fmtSet(ctx, value, depth, visibleKeys, keys) {
+  const output = [];
+  setForEach(value, function(v) {
     push(output, fmtValue(ctx, v, recurse(depth)));
   });
 
-  var fmtdProps = map(keys, function (key) {
+  const fmtdProps = map(keys, function(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, false);
   });
 
@@ -538,97 +545,94 @@ var fmtSet = function _fmtSet(ctx, value, depth, visibleKeys, keys) {
 };
 
 // eslint-disable-next-line max-params
-var fmtMap = function (ctx, value, depth, visibleKeys, keys) {
-  var r = recurse(depth);
-  var output = [];
-  mapForEach(value, function (v, k) {
-    push(output, fmtValue(ctx, k, r) + ' => ' + fmtValue(ctx, v, r));
+const fmtMap = function(ctx, value, depth, visibleKeys, keys) {
+  const r = recurse(depth);
+  const output = [];
+  mapForEach(value, function(v, k) {
+    push(output, `${fmtValue(ctx, k, r)} => ${fmtValue(ctx, v, r)}`);
   });
 
-  var fmtdProps = map(keys, function (key) {
+  const fmtdProps = map(keys, function(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, false);
   });
 
   return concat(output, fmtdProps);
 };
 
-var reSingle = new RegExp('\\{[' + whiteSpace.string + ']+\\}');
-var lengthReduceRx = /\u001b\[\d\d?m/g;
+const reSingle = new RegExp(`\\{[${whiteSpace.string}]+\\}`);
+const lengthReduceRx = /\u001b\[\d\d?m/g;
 
-var lengthReduce = function _lengthReduce(prev, cur) {
+const lengthReduce = function _lengthReduce(prev, cur) {
   return prev + replace(cur, lengthReduceRx, '').length + 1;
 };
 
 // eslint-disable-next-line max-params
-var reduceToSingleString = function _reduceToSingleString(out, base, braces, breakLength) {
-  var result;
+const reduceToSingleString = function _reduceToSingleString(out, base, braces, breakLength) {
+  let result;
+
   if (reduce(out, lengthReduce, 0) > breakLength) {
     // If the opening "brace" is too large, like in the case of "Set {",
     // we need to force the first item to be on the next line or the
     // items will not line up correctly.
-    var layoutBase = base === '' && braces[0].length === 1 ? '' : base + '\n ';
-    result = braces[0] + layoutBase + ' ' + join(out, ',\n  ') + ' ' + braces[1];
+    const layoutBase = base === '' && braces[0].length === 1 ? '' : `${base}\n `;
+    result = `${braces[0] + layoutBase} ${join(out, ',\n  ')} ${braces[1]}`;
   } else {
-    result = braces[0] + base + ' ' + join(out, ', ') + ' ' + braces[1];
+    result = `${braces[0] + base} ${join(out, ', ')} ${braces[1]}`;
   }
 
   return replace(result, reSingle, '{}');
 };
 
-var fmtDate = function _fmtDate(value) {
+const fmtDate = function _fmtDate(value) {
   return isNumberNaN(getTime(value)) ? 'Invalid Date' : toISOString(value);
 };
 
-var fmtError = function _fmtError(value) {
-  var stack = value.stack;
+const fmtError = function _fmtError(value) {
+  const {stack} = value;
+
   if (stack) {
     if (supportsClasses) {
-      var subName = getSubName(value);
+      const subName = getSubName(value);
+
       if (subName && startsWith(stack, subName) === false) {
-        var msg = value.message;
-        return replace(stack, errorToString(value), subName + (msg ? ': ' + msg : ''));
+        const msg = value.message;
+
+        return replace(stack, errorToString(value), subName + (msg ? `: ${msg}` : ''));
       }
     } else if (missingError) {
-      return errorToString(value) + '\n' + stack;
+      return `${errorToString(value)}\n${stack}`;
     }
   }
 
-  return stack || '[' + errorToString(value) + ']';
+  return stack || `[${errorToString(value)}]`;
 };
 
-var typedArrayKeys = [
-  'BYTES_PER_ELEMENT',
-  'length',
-  'byteLength',
-  'byteOffset',
-  'buffer'
-];
+const typedArrayKeys = ['BYTES_PER_ELEMENT', 'length', 'byteLength', 'byteOffset', 'buffer'];
 
-var dataViewKeys = [
-  'byteLength',
-  'byteOffset',
-  'buffer'
-];
+const dataViewKeys = ['byteLength', 'byteOffset', 'buffer'];
 
-var arrayBufferKeys = ['byteLength'];
-var collectionKeys = ['size'];
-var arrayKeys = ['length'];
-var errorKeys = ['message'];
+const arrayBufferKeys = ['byteLength'];
+const collectionKeys = ['size'];
+const arrayKeys = ['length'];
+const errorKeys = ['message'];
 
 // eslint-disable-next-line complexity,max-params
 fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   // Provide a hook for user-specified inspect functions.
   // Check that value is an object with an inspect function on it
   if (ctx.customInspect && value) {
-    var maybeCustomInspect = value[customInspectSymbol] || value.inspect;
+    const maybeCustomInspect = value[customInspectSymbol] || value.inspect;
+
     if (isFunction(maybeCustomInspect)) {
       // Filter out the util module, its inspect function is special
       if (maybeCustomInspect !== inspect) {
-        var constructor = getConstructorOf(value);
+        const constructor = getConstructorOf(value);
         // Also filter out any prototype objects using the circular check.
-        var isCircular = constructor && constructor.prototype === value;
+        const isCircular = constructor && constructor.prototype === value;
+
         if (isCircular === false) {
-          var ret = maybeCustomInspect.call(value, depth, ctx);
+          const ret = maybeCustomInspect.call(value, depth, ctx);
+
           // If the custom inspection method returned `this`, don't go into
           // infinite recursion.
           // eslint-disable-next-line max-depth
@@ -641,28 +645,32 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   }
 
   // Primitive types cannot have properties
-  var primitive = fmtPrimitive(ctx, value);
+  const primitive = fmtPrimitive(ctx, value);
+
   if (primitive) {
     return primitive;
   }
 
   // Look up the keys of the object.
-  var visibleKeys = objectKeys(value);
+  let visibleKeys = objectKeys(value);
+
   if (visibleKeys.length > 0) {
     if (shimmedDate && isDate(value)) {
-      visibleKeys = filter(visibleKeys, function (key) {
+      visibleKeys = filter(visibleKeys, function(key) {
         return key !== 'constructor';
       });
     } else if (errProps.length > 0 && isError(value)) {
-      visibleKeys = filter(visibleKeys, function (key) {
+      visibleKeys = filter(visibleKeys, function(key) {
         return arrayincludes(errProps, key) === false;
       });
     }
   }
 
-  var keys;
+  let keys;
+
   if (ctx.showHidden) {
     keys = reflectOwnKeys(value);
+
     if (isError(value)) {
       if (arrayincludes(keys, 'message') === false) {
         keys = promote(keys, errorKeys);
@@ -673,8 +681,8 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
       }
 
       if (mustFilterFnProps) {
-        var keysDiff = difference(keys, fnPropsCheck);
-        var missingFnProps = difference(fnPropsCheck, visibleKeys, keysDiff);
+        const keysDiff = difference(keys, fnPropsCheck);
+        const missingFnProps = difference(fnPropsCheck, visibleKeys, keysDiff);
         keys = concat(missingFnProps, keysDiff);
       }
     } else if (hiddenFuncCtr && isProto && isFunction(getConstructorOf(value))) {
@@ -683,7 +691,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
       }
     }
   } else {
-    var enumSymbols = filter(getOwnPropertySymbols(value), function (key) {
+    const enumSymbols = filter(getOwnPropertySymbols(value), function(key) {
       return propertyIsEnumerable(value, key);
     });
 
@@ -700,53 +708,42 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
     visibleKeys = filterIndexes(visibleKeys, value.byteLength);
   }
 
-  var name;
-  var formatted;
+  let name;
+  let formatted;
+
   // Some type of object without properties can be shortcutted.
   if (keys.length < 1) {
     // This could be a boxed primitive (new String(), etc.)
     if (isString(value)) {
-      return ctx.stylize(
-        '[' + getSubName(value, 'String') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']',
-        'string'
-      );
+      return ctx.stylize(`[${getSubName(value, 'String')}: ${fmtPrimNoColor(ctx, value.valueOf())}]`, 'string');
     }
 
     if (isNumber(value)) {
-      return ctx.stylize(
-        '[' + getSubName(value, 'Number') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']',
-        'number'
-      );
+      return ctx.stylize(`[${getSubName(value, 'Number')}: ${fmtPrimNoColor(ctx, value.valueOf())}]`, 'number');
     }
 
     if (isBoolean(value)) {
-      return ctx.stylize(
-        '[' + getSubName(value, 'Boolean') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']',
-        'boolean'
-      );
+      return ctx.stylize(`[${getSubName(value, 'Boolean')}: ${fmtPrimNoColor(ctx, value.valueOf())}]`, 'boolean');
     }
 
     if (isSymbol(value)) {
-      return ctx.stylize(
-        '[Symbol: ' + fmtPrimNoColor(ctx, symbolValueOf(value)) + ']',
-        'symbol'
-      );
+      return ctx.stylize(`[Symbol: ${fmtPrimNoColor(ctx, symbolValueOf(value))}]`, 'symbol');
     }
 
     if (isAsyncFunction(value)) {
-      return ctx.stylize('[AsyncFunction' + getNameSep(value) + ']', 'special');
+      return ctx.stylize(`[AsyncFunction${getNameSep(value)}]`, 'special');
     }
 
     if (isGeneratorFunction(value)) {
-      return ctx.stylize('[GeneratorFunction' + getNameSep(value) + ']', 'special');
+      return ctx.stylize(`[GeneratorFunction${getNameSep(value)}]`, 'special');
     }
 
     if (isFunction(value)) {
-      return ctx.stylize('[' + getSubName(value, 'Function') + getNameSep(value) + ']', 'special');
+      return ctx.stylize(`[${getSubName(value, 'Function')}${getNameSep(value)}]`, 'special');
     }
 
     if (isClass(value)) {
-      return ctx.stylize('[Class' + getNameSep(value) + ']', 'special');
+      return ctx.stylize(`[Class${getNameSep(value)}]`, 'special');
     }
 
     if (isRegExp(value)) {
@@ -756,11 +753,12 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
     if (isDate(value)) {
       name = getSubName(value);
       formatted = ctx.stylize(fmtDate(value), 'date');
+
       if (name === 'Date') {
         return formatted;
       }
 
-      return ctx.stylize('[' + name + ': ' + formatted + ']', 'date');
+      return ctx.stylize(`[${name}: ${formatted}]`, 'date');
     }
 
     if (isError(value)) {
@@ -770,26 +768,27 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
     // Fast path for ArrayBuffer. Can't do the same for DataView because it
     // has a non-primitive buffer property that we need to recurse for.
     if (isArrayBuffer(value)) {
-      return getSubName(value, 'ArrayBuffer') + ' { byteLength: ' + fmtNumber(ctx, value.byteLength) + ' }';
+      return `${getSubName(value, 'ArrayBuffer')} { byteLength: ${fmtNumber(ctx, value.byteLength)} }`;
     }
 
     if (isMapIterator(value)) {
-      return getSubName(value, 'MapIterator') + ' {}';
+      return `${getSubName(value, 'MapIterator')} {}`;
     }
 
     if (isSetIterator(value)) {
-      return getSubName(value, 'SetIterator') + ' {}';
+      return `${getSubName(value, 'SetIterator')} {}`;
     }
 
     if (isPromise(value)) {
-      return getSubName(value, 'Promise') + ' {}';
+      return `${getSubName(value, 'Promise')} {}`;
     }
   }
 
-  var base = '';
-  var empty = false;
-  var braces = ['{', '}'];
-  var fmtter = fmtObject;
+  let base = '';
+  let empty = false;
+  let braces = ['{', '}'];
+  let fmtter = fmtObject;
+
   // We can't compare constructors for various objects using a comparison
   // like `constructor === Array` because the object could have come from a
   // different context and thus the constructor won't match. Instead we check
@@ -797,19 +796,19 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   // needed) to determine object types.
   if (isString(value)) {
     // Make boxed primitive Strings look like such
-    base = '[' + getSubName(value, 'String') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']';
+    base = `[${getSubName(value, 'String')}: ${fmtPrimNoColor(ctx, value.valueOf())}]`;
   } else if (isNumber(value)) {
     // Make boxed primitive Numbers look like such
-    base = '[' + getSubName(value, 'Number') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']';
+    base = `[${getSubName(value, 'Number')}: ${fmtPrimNoColor(ctx, value.valueOf())}]`;
   } else if (isBoolean(value)) {
     // Make boxed primitive Booleans look like such
-    base = '[' + getSubName(value, 'Boolean') + ': ' + fmtPrimNoColor(ctx, value.valueOf()) + ']';
+    base = `[${getSubName(value, 'Boolean')}: ${fmtPrimNoColor(ctx, value.valueOf())}]`;
   } else if (isFunction(value)) {
     // Make functions say that they are functions
-    base = '[' + getSubName(value, 'Function') + getNameSep(value) + ']';
+    base = `[${getSubName(value, 'Function')}${getNameSep(value)}]`;
   } else if (isClass(value)) {
     // Make functions say that they are functions
-    base = '[Class' + getNameSep(value) + ']';
+    base = `[Class${getNameSep(value)}]`;
   } else if (isRegExp(value)) {
     // Make RegExps say that they are RegExps
     // name = getSubName(value, 'RegExp');
@@ -818,10 +817,11 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
     // Make dates with properties first say the date
     name = getSubName(value);
     formatted = fmtDate(value);
+
     if (name === 'Date') {
       base = formatted;
     } else {
-      base = '[' + name + ': ' + formatted + ']';
+      base = `[${name}: ${formatted}]`;
     }
   } else if (isError(value)) {
     name = getSubName(value);
@@ -832,6 +832,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
     // Unset the constructor to prevent "Array [...]" for ordinary arrays.
     name = name === 'Array' ? '' : name;
     braces = ['[', ']'];
+
     if (ctx.showHidden) {
       keys = promote(keys, arrayKeys);
     }
@@ -841,6 +842,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   } else if (isSet(value)) {
     name = getSubName(value, 'Set');
     fmtter = fmtSet;
+
     // With `showHidden`, `length` will display as a hidden property for
     // arrays. For consistency's sake, do the same for `size`, even though
     // this property isn't selected by Object.getOwnPropertyNames().
@@ -852,6 +854,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   } else if (isMap(value)) {
     name = getSubName(value, 'Map');
     fmtter = fmtMap;
+
     // With `showHidden`, `length` will display as a hidden property for
     // arrays. For consistency's sake, do the same for `size`, even though
     // this property isn't selected by Object.getOwnPropertyNames().
@@ -872,6 +875,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
     name = getSubName(value);
     braces = ['[', ']'];
     fmtter = fmtTypedArray;
+
     if (ctx.showHidden) {
       keys = promote(keys, typedArrayKeys);
     }
@@ -891,13 +895,14 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   }
 
   if (base) {
-    base = ' ' + base;
+    base = ` ${base}`;
   } else if (name) {
     // Add constructor name if available
-    braces[0] = name + ' ' + braces[0];
+    braces[0] = `${name} ${braces[0]}`;
   }
 
   empty = empty === true && keys.length < 1;
+
   if (empty) {
     return braces[0] + base + braces[1];
   }
@@ -919,16 +924,17 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   }
 
   ctx.seen.add(value);
-  var out = fmtter(ctx, value, depth, visibleKeys, keys);
-  ctx.seen['delete'](value);
+  const out = fmtter(ctx, value, depth, visibleKeys, keys);
+  ctx.seen.delete(value);
+
   return reduceToSingleString(out, base, braces, ctx.breakLength);
 };
 
 inspect = function _inspect(obj, opts) {
   // default options
-  var ctx = {
+  let ctx = {
     seen: new collections.Set(),
-    stylize: stylizeNoColor
+    stylize: stylizeNoColor,
   };
 
   // legacy...
@@ -974,14 +980,14 @@ if (supportsGetSet) {
       }
 
       return assign(inspectDefaultOptions, options);
-    }
+    },
   });
 } else {
   defineProperties(inspect, {
     defaultOptions: {
       value: assign({}, inspectDefaultOptions),
-      writable: true
-    }
+      writable: true,
+    },
   });
 }
 
@@ -1001,27 +1007,27 @@ defineProperties(inspect, {
       red: [31, 39],
       underline: [4, 24],
       white: [37, 39],
-      yellow: [33, 39]
-    }
+      yellow: [33, 39],
+    },
   },
   custom: {
-    value: customInspectSymbol
+    value: customInspectSymbol,
   },
   // Don't use 'blue' not visible on cmd.exe
   styles: {
     value: {
-      'boolean': 'yellow',
+      boolean: 'yellow',
       date: 'magenta',
       // name: intentionally not styling
-      'null': 'bold',
+      null: 'bold',
       number: 'yellow',
       regexp: 'red',
       special: 'cyan',
       string: 'green',
       symbol: 'green',
-      undefined: 'grey'
-    }
-  }
+      undefined: 'grey',
+    },
+  },
 });
 
 /**
@@ -1031,8 +1037,8 @@ defineProperties(inspect, {
  * when called they receive the current depth in the recursive inspection,
  * as well as the options object passed to `inspect`.
  *
- * @param {Object} obj - The object to print out.
- * @param {Object} [opts] - Options object that alters the out.
+ * @param {object} obj - The object to print out.
+ * @param {object} [opts] - Options object that alters the out.
  * @returns {string} The string representation.
  * @example
  * var inspect = require('inspect-x');

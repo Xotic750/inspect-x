@@ -55,7 +55,7 @@
     "array-intersection-x": "^2.0.0",
     "array-map-x": "^2.3.0",
     "array-reduce-x": "^2.1.0",
-    "array-slice-x": "^3.5.0",
+    "array-slice-x": "^4.0.0",
     "array-some-x": "^2.5.0",
     "array-union-x": "^2.0.0",
     "bind-x": "^3.0.0",

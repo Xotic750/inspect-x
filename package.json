@@ -51,7 +51,7 @@
     "array-difference-x": "^2.0.0",
     "array-every-x": "^3.0.1",
     "array-filter-x": "^3.0.1",
-    "array-includes-x": "^2.0.0",
+    "array-includes-x": "^3.0.0",
     "array-intersection-x": "^2.0.0",
     "array-map-x": "^3.0.2",
     "array-reduce-x": "^2.1.0",

@@ -90,7 +90,7 @@
     "lodash.isnull": "^3.0.0",
     "math-clamp": "^1.0.0",
     "object-assign-x": "^1.1.0",
-    "object-define-properties-x": "^4.2.0",
+    "object-define-properties-x": "^5.0.0",
     "object-define-property-x": "^5.0.2",
     "object-get-own-property-descriptor-x": "^4.0.3",
     "object-is": "^1.0.1",

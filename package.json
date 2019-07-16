@@ -58,7 +58,7 @@
     "array-slice-x": "^4.0.5",
     "array-some-x": "^2.5.0",
     "array-union-x": "^3.0.2",
-    "bind-x": "^3.0.0",
+    "bind-x": "^4.0.0",
     "collections-x": "^2.0.0",
     "get-function-name-x": "^2.1.0",
     "get-own-property-symbols-x": "^2.0.2",

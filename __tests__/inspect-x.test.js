@@ -197,7 +197,6 @@ const fmtError = function(er) {
 describe('inspect', function() {
   it('basic', function() {
     expect.assertions(1);
-    expect.assertions(1);
     expect(inspect(1)).toBe('1');
     expect(inspect(false)).toBe('false');
     expect(inspect('')).toBe("''");
@@ -400,7 +399,6 @@ describe('inspect', function() {
   });
 
   it('objects without prototype', function() {
-    expect.assertions(1);
     expect.assertions(1); // Due to the hash seed randomization it's not deterministic the order
     // that the following ways this hash is displayed.
     // See http://codereview.chromium.org/9124004/
@@ -429,7 +427,6 @@ describe('inspect', function() {
   });
 
   it('objects without prototype', function() {
-    expect.assertions(1);
     expect.assertions(1); // Objects without prototype
     const out = inspect(
       Object.create(null, {
@@ -512,7 +509,6 @@ describe('inspect', function() {
   });
 
   it('function with properties', function() {
-    expect.assertions(1);
     expect.assertions(1); // Function with properties
     const value = function() {};
 
@@ -529,7 +525,6 @@ describe('inspect', function() {
   });
 
   it('regular expressions with properties', function() {
-    expect.assertions(1);
     expect.assertions(1); // Regular expressions with properties
     const value = /123/gim;
     value.aprop = 42;
@@ -537,7 +532,6 @@ describe('inspect', function() {
   });
 
   it('dates with properties', function() {
-    expect.assertions(1);
     expect.assertions(1); // Dates with properties
     const value = new Date(1266148120000);
     value.aprop = 42;
@@ -550,14 +544,12 @@ describe('inspect', function() {
   });
 
   it('positive/negative zero', function() {
-    expect.assertions(1);
     expect.assertions(1); // test positive/negative zero
     expect(inspect(0)).toBe('0');
     expect(inspect(-0)).toBe('-0');
   });
 
   it('sparse array', function() {
-    expect.assertions(1);
     expect.assertions(1); // test for sparse array
     const a = ['foo', 'bar', 'baz'];
     expect(inspect(a)).toBe("[ 'foo', 'bar', 'baz' ]");
@@ -602,7 +594,6 @@ describe('inspect', function() {
   });
 
   it("exceptions should print the error message, not '{}'", function() {
-    expect.assertions(1);
     expect.assertions(1); // exceptions should print the error message, not '{}'
     const errors = [new Error(), new Error('FAIL'), new TypeError('FAIL'), new SyntaxError('FAIL')];
 
@@ -644,7 +635,6 @@ describe('inspect', function() {
   });
 
   it("doesn't capture stack trace", function() {
-    expect.assertions(1);
     expect.assertions(1); // Doesn't capture stack trace
     const BadCustomError = function(msg) {
       Error.call(this);
@@ -666,7 +656,6 @@ describe('inspect', function() {
 
   it('correct stack.trace', function() {
     expect.assertions(1);
-    expect.assertions(1);
     const CustomError = function(msg) {
       Error.call(this);
       Object.defineProperty(this, 'message', {enumerable: false, value: msg});
@@ -687,7 +676,6 @@ describe('inspect', function() {
   });
 
   it('gH-1941', function() {
-    expect.assertions(1);
     expect.assertions(1); // GH-1941
     // should not throw:
     const prot = Object.create(Date.prototype);
@@ -697,7 +685,6 @@ describe('inspect', function() {
   });
 
   it('gH-1944', function() {
-    expect.assertions(1);
     expect.assertions(1); // GH-1944
     expect(function() {
       const d = new Date();
@@ -719,7 +706,6 @@ describe('inspect', function() {
   });
 
   it('bug with user-supplied inspect function returns non-string', function() {
-    expect.assertions(1);
     expect.assertions(1); // bug with user-supplied inspect function returns non-string
     expect(function() {
       inspect([
@@ -733,14 +719,12 @@ describe('inspect', function() {
   });
 
   it('gH-2225', function() {
-    expect.assertions(1);
     expect.assertions(1); // GH-2225
     const x = {inspect};
     expect(inspect(x).indexOf('inspect')).not.toBe(-1);
   });
 
   it('inspect should not display the escaped value of a key.', function() {
-    expect.assertions(1);
     expect.assertions(1); // inspect should not display the escaped value of a key.
     const w = {
       '\\': 1,
@@ -757,7 +741,6 @@ describe('inspect', function() {
   });
 
   it('inspect.styles and inspect.colors', function() {
-    expect.assertions(1);
     expect.assertions(1); // inspect.styles and inspect.colors
     const testColorStyle = function(style, input) {
       const colorName = inspect.styles[style];
@@ -784,7 +767,6 @@ describe('inspect', function() {
   });
 
   it('an object with "hasOwnProperty" overwritten should not throw', function() {
-    expect.assertions(1);
     expect.assertions(1); // an object with "hasOwnProperty" overwritten should not throw
     expect(function() {
       inspect({hasOwnProperty: null});
@@ -792,7 +774,6 @@ describe('inspect', function() {
   });
 
   it('new API, accepts an "options" object', function() {
-    expect.assertions(1);
     expect.assertions(1); // new API, accepts an "options" object
     const subject = {
       a: {b: {c: {d: 0}}},
@@ -817,7 +798,6 @@ describe('inspect', function() {
   });
 
   it('"customInspect" option can enable/disable calling inspect() on objects', function() {
-    expect.assertions(1);
     expect.assertions(1); // "customInspect" option can enable/disable calling inspect() on objects
     const subject = {
       inspect() {
@@ -832,7 +812,6 @@ describe('inspect', function() {
   });
 
   it('custom inspect() functions should be able to return other Objects', function() {
-    expect.assertions(1);
     expect.assertions(1); // custom inspect() functions should be able to return other Objects
     const subject = {
       inspect() {
@@ -850,7 +829,6 @@ describe('inspect', function() {
   });
 
   it('"customInspect" option can enable/disable calling [inspect.custom]()', function() {
-    expect.assertions(1);
     expect.assertions(1); // "customInspect" option can enable/disable calling [inspect.custom]()
     const subject = {};
     subject[inspect.custom] = function() {
@@ -875,7 +853,6 @@ describe('inspect', function() {
   });
 
   it('[inspect.custom] takes precedence over inspect', function() {
-    expect.assertions(1);
     expect.assertions(1); // [inspect.custom] takes precedence over inspect
     const subject = {};
     subject[inspect.custom] = function() {
@@ -893,7 +870,6 @@ describe('inspect', function() {
   });
 
   it('returning `this` from a custom inspection function works', function() {
-    expect.assertions(1);
     expect.assertions(1); // Returning `this` from a custom inspection function works.
     let subject = {
       a: 123,
@@ -926,7 +902,6 @@ describe('inspect', function() {
   });
 
   it('inspect with "colors" option should produce as many lines as without it', function() {
-    expect.assertions(1);
     expect.assertions(1); // inspect with "colors" option should produce as many lines as without it
     const testLines = function(input) {
       const countLines = function(str) {
@@ -964,7 +939,6 @@ describe('inspect', function() {
   });
 
   it('boxed primitives output the correct values', function() {
-    expect.assertions(1);
     expect.assertions(1); // test boxed primitives output the correct values
     expect(inspect(Object('test'))).toBe("[String: 'test']");
     expect(inspect(Object(false))).toBe('[Boolean: false]');
@@ -976,7 +950,6 @@ describe('inspect', function() {
   });
 
   it('boxed primitives with own properties', function() {
-    expect.assertions(1);
     expect.assertions(1); // test boxed primitives with own properties
     const str = Object('baz');
     str.foo = 'bar';
@@ -1155,7 +1128,6 @@ describe('inspect', function() {
   });
 
   it('alignment', function() {
-    expect.assertions(1);
     expect.assertions(1); // Test alignment of items in container
     // Assumes that the first numeric character is the start of an item.
 
@@ -1218,7 +1190,6 @@ describe('inspect', function() {
   });
 
   it('corner cases', function() {
-    expect.assertions(1);
     expect.assertions(1); // Corner cases.
     let x = {constructor: 42};
     expect(inspect(x)).toBe('{ constructor: 42 }');
@@ -1242,7 +1213,6 @@ describe('inspect', function() {
   });
 
   it('inspect.defaultOptions', function() {
-    expect.assertions(1);
     expect.assertions(1); // inspect.defaultOptions tests
     const arr = new Array(101).fill();
     const obj = {a: {a: {a: {a: 1}}}};

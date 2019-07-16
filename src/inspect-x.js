@@ -1,13 +1,3 @@
-/**
- * @file An implementation of node's ES6 inspect module.
- * @version 2.0.0
- * @author Xotic750 <Xotic750@gmail.com>
- * @copyright  Xotic750
- * @license {@link <https://opensource.org/licenses/MIT> MIT}
- * @see https://nodejs.org/api/util.html#util_util_inspect_object_options
- * @module inspect-x
- */
-
 import bind from 'bind-x';
 import isFunction from 'is-function-x';
 import isGeneratorFunction from 'is-generator-function';
@@ -123,7 +113,9 @@ try {
 
   testObject.defaultOptions = 'test';
   supportsGetSet = testVar === 'test' && testObject.defaultOptions === 'test';
-} catch (ignore) {}
+} catch (ignore) {
+  // empty
+}
 
 const pluralEnding = function _pluralEnding(number) {
   return number > 1 ? 's' : '';
@@ -238,7 +230,9 @@ const isMapIterator = function _isMapIterator(value) {
 
   try {
     return value.next.call(mapValues(testMap)).value === 'MapSentinel';
-  } catch (ignore) {}
+  } catch (ignore) {
+    // empty
+  }
 
   return false;
 };
@@ -250,7 +244,9 @@ const isSetIterator = function _isSetIterator(value) {
 
   try {
     return value.next.call(setValues(testSet)).value === 'SetSentinel';
-  } catch (ignore) {}
+  } catch (ignore) {
+    // empty
+  }
 
   return false;
 };
@@ -1040,37 +1036,5 @@ defineProperties(inspect, {
  * @param {object} obj - The object to print out.
  * @param {object} [opts] - Options object that alters the out.
  * @returns {string} The string representation.
- * @example
- * var inspect = require('inspect-x');
- *
- * console.log(inspect(inspect, { showHidden: true, depth: null }));
- * //{ [Function: inspect]
- * //  [length]: 2,
- * //  [name]: 'inspect',
- * //  [prototype]: inspect { [constructor]: [Circular] },
- * //  [colors]:
- * //   { [bold]: [ 1, 22, [length]: 2 ],
- * //     [italic]: [ 3, 23, [length]: 2 ],
- * //     [underline]: [ 4, 24, [length]: 2 ],
- * //     [inverse]: [ 7, 27, [length]: 2 ],
- * //     [white]: [ 37, 39, [length]: 2 ],
- * //     [grey]: [ 90, 39, [length]: 2 ],
- * //     [black]: [ 30, 39, [length]: 2 ],
- * //     [blue]: [ 34, 39, [length]: 2 ],
- * //     [cyan]: [ 36, 39, [length]: 2 ],
- * //     [green]: [ 32, 39, [length]: 2 ],
- * //     [magenta]: [ 35, 39, [length]: 2 ],
- * //     [red]: [ 31, 39, [length]: 2 ],
- * //     [yellow]: [ 33, 39, [length]: 2 ] },
- * //  [styles]:
- * //   { [special]: 'cyan',
- * //     [number]: 'yellow',
- * //     [boolean]: 'yellow',
- * //     [undefined]: 'grey',
- * //     [null]: 'bold',
- * //     [string]: 'green',
- * //     [symbol]: 'green',
- * //     [date]: 'magenta',
- * //     [regexp]: 'red' } }
  */
 export default inspect;

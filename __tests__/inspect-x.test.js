@@ -192,6 +192,7 @@ const fmtError = function(er) {
 
 describe('inspect', function() {
   it('basic', function() {
+    expect.assertions(1);
     expect(inspect(1)).toBe('1');
     expect(inspect(false)).toBe('false');
     expect(inspect('')).toBe("''");
@@ -394,7 +395,7 @@ describe('inspect', function() {
   });
 
   it('objects without prototype', function() {
-    // Due to the hash seed randomization it's not deterministic the order
+    expect.assertions(1); // Due to the hash seed randomization it's not deterministic the order
     // that the following ways this hash is displayed.
     // See http://codereview.chromium.org/9124004/
 
@@ -422,7 +423,7 @@ describe('inspect', function() {
   });
 
   it('objects without prototype', function() {
-    // Objects without prototype
+    expect.assertions(1); // Objects without prototype
     const out = inspect(
       Object.create(null, {
         hidden: {value: 'Visible on ES3'},
@@ -504,7 +505,7 @@ describe('inspect', function() {
   });
 
   it('function with properties', function() {
-    // Function with properties
+    expect.assertions(1); // Function with properties
     const value = function() {};
 
     value.aprop = 42;
@@ -520,14 +521,14 @@ describe('inspect', function() {
   });
 
   it('regular expressions with properties', function() {
-    // Regular expressions with properties
+    expect.assertions(1); // Regular expressions with properties
     const value = /123/gim;
     value.aprop = 42;
     expect(inspect(value)).toBe('{ /123/gim aprop: 42 }');
   });
 
   it('dates with properties', function() {
-    // Dates with properties
+    expect.assertions(1); // Dates with properties
     const value = new Date(1266148120000);
     value.aprop = 42;
     const ex = inspect(value);
@@ -539,13 +540,13 @@ describe('inspect', function() {
   });
 
   it('positive/negative zero', function() {
-    // test positive/negative zero
+    expect.assertions(1); // test positive/negative zero
     expect(inspect(0)).toBe('0');
     expect(inspect(-0)).toBe('-0');
   });
 
   it('sparse array', function() {
-    // test for sparse array
+    expect.assertions(1); // test for sparse array
     const a = ['foo', 'bar', 'baz'];
     expect(inspect(a)).toBe("[ 'foo', 'bar', 'baz' ]");
     delete a[1];
@@ -589,7 +590,7 @@ describe('inspect', function() {
   });
 
   it("exceptions should print the error message, not '{}'", function() {
-    // exceptions should print the error message, not '{}'
+    expect.assertions(1); // exceptions should print the error message, not '{}'
     const errors = [new Error(), new Error('FAIL'), new TypeError('FAIL'), new SyntaxError('FAIL')];
 
     errors.forEach(function(err) {
@@ -630,7 +631,7 @@ describe('inspect', function() {
   });
 
   it("doesn't capture stack trace", function() {
-    // Doesn't capture stack trace
+    expect.assertions(1); // Doesn't capture stack trace
     const BadCustomError = function(msg) {
       Error.call(this);
       Object.defineProperty(this, 'message', {enumerable: false, value: msg});
@@ -650,6 +651,7 @@ describe('inspect', function() {
   });
 
   it('correct stack.trace', function() {
+    expect.assertions(1);
     const CustomError = function(msg) {
       Error.call(this);
       Object.defineProperty(this, 'message', {enumerable: false, value: msg});
@@ -670,7 +672,7 @@ describe('inspect', function() {
   });
 
   it('gH-1941', function() {
-    // GH-1941
+    expect.assertions(1); // GH-1941
     // should not throw:
     const prot = Object.create(Date.prototype);
     const ex = inspect(prot);
@@ -679,28 +681,28 @@ describe('inspect', function() {
   });
 
   it('gH-1944', function() {
-    // GH-1944
+    expect.assertions(1); // GH-1944
     expect(function() {
       const d = new Date();
       d.toUTCString = null;
       inspect(d);
-    }).not.toThrow();
+    }).not.toThrowErrorMatchingSnapshot();
 
     expect(function() {
       const d = new Date();
       d.toISOString = null;
       inspect(d);
-    }).not.toThrow();
+    }).not.toThrowErrorMatchingSnapshot();
 
     expect(function() {
       const r = /regexp/;
       r.toString = null;
       inspect(r);
-    }).not.toThrow();
+    }).not.toThrowErrorMatchingSnapshot();
   });
 
   it('bug with user-supplied inspect function returns non-string', function() {
-    // bug with user-supplied inspect function returns non-string
+    expect.assertions(1); // bug with user-supplied inspect function returns non-string
     expect(function() {
       inspect([
         {
@@ -709,17 +711,17 @@ describe('inspect', function() {
           },
         },
       ]);
-    }).not.toThrow();
+    }).not.toThrowErrorMatchingSnapshot();
   });
 
   it('gH-2225', function() {
-    // GH-2225
+    expect.assertions(1); // GH-2225
     const x = {inspect};
     expect(inspect(x).indexOf('inspect')).not.toBe(-1);
   });
 
   it('inspect should not display the escaped value of a key.', function() {
-    // inspect should not display the escaped value of a key.
+    expect.assertions(1); // inspect should not display the escaped value of a key.
     const w = {
       '\\': 1,
       '\\\\': 2,
@@ -735,7 +737,7 @@ describe('inspect', function() {
   });
 
   it('inspect.styles and inspect.colors', function() {
-    // inspect.styles and inspect.colors
+    expect.assertions(1); // inspect.styles and inspect.colors
     const testColorStyle = function(style, input) {
       const colorName = inspect.styles[style];
       let color = ['', ''];
@@ -761,14 +763,14 @@ describe('inspect', function() {
   });
 
   it('an object with "hasOwnProperty" overwritten should not throw', function() {
-    // an object with "hasOwnProperty" overwritten should not throw
+    expect.assertions(1); // an object with "hasOwnProperty" overwritten should not throw
     expect(function() {
       inspect({hasOwnProperty: null});
-    }).not.toThrow();
+    }).not.toThrowErrorMatchingSnapshot();
   });
 
   it('new API, accepts an "options" object', function() {
-    // new API, accepts an "options" object
+    expect.assertions(1); // new API, accepts an "options" object
     const subject = {
       a: {b: {c: {d: 0}}},
       foo: 'bar',
@@ -792,7 +794,7 @@ describe('inspect', function() {
   });
 
   it('"customInspect" option can enable/disable calling inspect() on objects', function() {
-    // "customInspect" option can enable/disable calling inspect() on objects
+    expect.assertions(1); // "customInspect" option can enable/disable calling inspect() on objects
     const subject = {
       inspect() {
         return 123;
@@ -806,7 +808,7 @@ describe('inspect', function() {
   });
 
   it('custom inspect() functions should be able to return other Objects', function() {
-    // custom inspect() functions should be able to return other Objects
+    expect.assertions(1); // custom inspect() functions should be able to return other Objects
     const subject = {
       inspect() {
         return {foo: 'bar'};
@@ -823,7 +825,7 @@ describe('inspect', function() {
   });
 
   it('"customInspect" option can enable/disable calling [inspect.custom]()', function() {
-    // "customInspect" option can enable/disable calling [inspect.custom]()
+    expect.assertions(1); // "customInspect" option can enable/disable calling [inspect.custom]()
     const subject = {};
     subject[inspect.custom] = function() {
       return 123;
@@ -847,7 +849,7 @@ describe('inspect', function() {
   });
 
   it('[inspect.custom] takes precedence over inspect', function() {
-    // [inspect.custom] takes precedence over inspect
+    expect.assertions(1); // [inspect.custom] takes precedence over inspect
     const subject = {};
     subject[inspect.custom] = function() {
       return 123;
@@ -864,7 +866,7 @@ describe('inspect', function() {
   });
 
   it('returning `this` from a custom inspection function works', function() {
-    // Returning `this` from a custom inspection function works.
+    expect.assertions(1); // Returning `this` from a custom inspection function works.
     let subject = {
       a: 123,
       inspect() {
@@ -896,7 +898,7 @@ describe('inspect', function() {
   });
 
   it('inspect with "colors" option should produce as many lines as without it', function() {
-    // inspect with "colors" option should produce as many lines as without it
+    expect.assertions(1); // inspect with "colors" option should produce as many lines as without it
     const testLines = function(input) {
       const countLines = function(str) {
         return (str.match(/\n/g) || []).length;
@@ -933,7 +935,7 @@ describe('inspect', function() {
   });
 
   it('boxed primitives output the correct values', function() {
-    // test boxed primitives output the correct values
+    expect.assertions(1); // test boxed primitives output the correct values
     expect(inspect(Object('test'))).toBe("[String: 'test']");
     expect(inspect(Object(false))).toBe('[Boolean: false]');
     expect(inspect(Object(true))).toBe('[Boolean: true]');
@@ -944,7 +946,7 @@ describe('inspect', function() {
   });
 
   it('boxed primitives with own properties', function() {
-    // test boxed primitives with own properties
+    expect.assertions(1); // test boxed primitives with own properties
     const str = Object('baz');
     str.foo = 'bar';
     expect(inspect(str)).toBe("{ [String: 'baz'] foo: 'bar' }");
@@ -1122,7 +1124,7 @@ describe('inspect', function() {
   });
 
   it('alignment', function() {
-    // Test alignment of items in container
+    expect.assertions(1); // Test alignment of items in container
     // Assumes that the first numeric character is the start of an item.
 
     const checkAlignment = function(container) {
@@ -1184,7 +1186,7 @@ describe('inspect', function() {
   });
 
   it('corner cases', function() {
-    // Corner cases.
+    expect.assertions(1); // Corner cases.
     let x = {constructor: 42};
     expect(inspect(x)).toBe('{ constructor: 42 }');
 
@@ -1207,7 +1209,7 @@ describe('inspect', function() {
   });
 
   it('inspect.defaultOptions', function() {
-    // inspect.defaultOptions tests
+    expect.assertions(1); // inspect.defaultOptions tests
     const arr = new Array(101).fill();
     const obj = {a: {a: {a: {a: 1}}}};
     const oldOptions = {...inspect.defaultOptions};

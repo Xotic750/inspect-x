@@ -4,31 +4,6 @@
 
 let inspect;
 
-if (typeof module === 'object' && module.exports) {
-  require('es5-shim');
-  require('es5-shim/es5-sham');
-
-  if (typeof JSON === 'undefined') {
-    JSON = {};
-  }
-
-  require('json3').runInContext(null, JSON);
-  require('es6-shim');
-  const es7 = require('es7-shim');
-  Object.keys(es7).forEach(function(key) {
-    const obj = es7[key];
-
-    if (typeof obj.shim === 'function') {
-      obj.shim();
-    }
-  });
-  inspect = require('../../index.js');
-  // Test against `master`
-  // inspect = require('util').inspect;
-} else {
-  inspect = returnExports;
-}
-
 const hasSymbol = typeof Symbol === 'function' && typeof Symbol('') === 'symbol';
 const ifHasSymbolIt = hasSymbol ? it : xit;
 const hasSet = typeof Set === 'function';
@@ -110,28 +85,24 @@ try {
 
 let ifGenSupportedIt = xit;
 try {
-  // eslint-disable-next-line no-new-func
   new Function('return function*() {}')();
   ifGenSupportedIt = it;
 } catch (e) {}
 
 let ifArrowSupportedIt = xit;
 try {
-  // eslint-disable-next-line no-new-func
   new Function('return () => {}')();
   ifArrowSupportedIt = it;
 } catch (e) {}
 
 let ifAsyncSupportedIt = xit;
 try {
-  // eslint-disable-next-line no-new-func
   new Function('return async function() {}')();
   ifAsyncSupportedIt = it;
 } catch (e) {}
 
 let ifClassSupportedIt = xit;
 try {
-  // eslint-disable-next-line no-new-func
   new Function('return class My {}')();
   ifClassSupportedIt = it;
 } catch (e) {}
@@ -249,19 +220,16 @@ describe('inspect', function() {
   });
 
   ifArrowSupportedIt('arrow functions', function() {
-    // eslint-disable-next-line no-new-func
     expect(inspect(new Function('return () => {}')())).toBe('[Function]');
   });
 
   ifGenSupportedIt('generator functions', function() {
-    // eslint-disable-next-line no-new-func
     expect(inspect(new Function('return function*() {}')())).toBe('[GeneratorFunction]');
   });
 
   ifAsyncSupportedIt('async functions', function() {
-    // eslint-disable-next-line no-new-func
     expect(inspect(new Function('return async function() {}')())).toBe('[AsyncFunction]');
-    // eslint-disable-next-line no-new-func
+
     expect(inspect(new Function('return async () => {}')())).toBe('[AsyncFunction]');
   });
 
@@ -518,7 +486,7 @@ describe('inspect', function() {
 
   ifArrowSupportedIt('Anonymous function with properties', function() {
     // Anonymous function with properties
-    // eslint-disable-next-line no-new-func
+
     const value = new Function('return (() => function() {})()')();
     value.aprop = 42;
     expect(inspect(value)).toBe('{ [Function] aprop: 42 }');
@@ -1252,25 +1220,23 @@ describe('inspect', function() {
   });
 
   ifClassSupportedIt('classes', function() {
-    // eslint-disable-next-line no-new-func
     const classFn = new Function('return class My {}')();
     expect(inspect(classFn)).toBe('[Class: My]');
 
-    // eslint-disable-next-line no-new-func
     const ObjectSubclass = new Function('return class ObjectSubclass {}')();
-    // eslint-disable-next-line no-new-func
+
     const ArraySubclass = new Function('return class ArraySubclass extends Array {}')();
-    // eslint-disable-next-line no-new-func
+
     const SetSubclass = new Function('return class SetSubclass extends Set {}')();
-    // eslint-disable-next-line no-new-func
+
     const MapSubclass = new Function('return class MapSubclass extends Map {}')();
-    // eslint-disable-next-line no-new-func
+
     const PromiseSubclass = new Function('return class PromiseSubclass extends Promise {}')();
-    // eslint-disable-next-line no-new-func
+
     const StringSubclass = new Function('return class StringSubclass extends String {}')();
-    // eslint-disable-next-line no-new-func
+
     const BooleanSubclass = new Function('return class BooleanSubclass extends Boolean {}')();
-    // eslint-disable-next-line no-new-func
+
     const NumberSubclass = new Function('return class NumberSubclass extends Number {}')();
 
     let x = new ObjectSubclass();
@@ -1282,7 +1248,6 @@ describe('inspect', function() {
     expect(inspect(new PromiseSubclass(function _cb() {}))).toBe('PromiseSubclass {}');
 
     if (Date.toString().includes('Date() { [native code] }')) {
-      // eslint-disable-next-line no-new-func
       const DateSubclass = new Function('return class DateSubclass extends Date {}')();
       expect(inspect(new DateSubclass(0))).toBe('[DateSubclass: 1970-01-01T00:00:00.000Z]');
     }
@@ -1291,7 +1256,6 @@ describe('inspect', function() {
     expect(inspect(new BooleanSubclass(true))).toBe('[BooleanSubclass: true]');
     expect(inspect(new NumberSubclass(1))).toBe('[NumberSubclass: 1]');
 
-    // eslint-disable-next-line no-new-func
     const ErrorSubclass = new Function('return class ErrorSubclass extends Error {}')();
     x = inspect(new ErrorSubclass('test'));
     expect(x.split('\n').shift()).toBe('ErrorSubclass: test');

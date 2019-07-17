@@ -87,7 +87,7 @@
     "is-typed-array": "^1.1.0",
     "json3": "^3.3.3",
     "math-clamp": "^1.0.0",
-    "object-assign-x": "^2.0.0",
+    "object-assign-x": "^2.0.1",
     "object-define-properties-x": "^5.0.2",
     "object-define-property-x": "^5.0.5",
     "object-get-own-property-descriptor-x": "^4.0.6",

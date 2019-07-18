@@ -1,8 +1,4 @@
-/* global Promise, ArrayBuffer, DataView, Int8Array, Uint8ClampedArray,
-   Float32Array, Float64Array, Int16Array, Int32Array, Uint16Array,
-   Uint32Array, Uint8Array */
-
-let inspect;
+import inspect from '../src/inspect-x';
 
 const hasSymbol = typeof Symbol === 'function' && typeof Symbol('') === 'symbol';
 const ifHasSymbolIt = hasSymbol ? it : xit;
@@ -29,7 +25,7 @@ const propVisibleOnArrayBuffer =
 
 const getSupport = (function() {
   try {
-    // eslint-disable-next-line no-eval
+    /* eslint-disable-next-line no-eval */
     eval('var x={get prop(){return;}};');
 
     return true;
@@ -65,7 +61,7 @@ const itDoesNotSupportsFnName = fnSupportsFnName ? xit : it;
 let supportsGetSetIt = xit;
 let isGetSetEnumerable;
 try {
-  let testVar;
+  let testVar = void 0;
   const testObject = Object.defineProperty(Object.create(null), 'defaultOptions', {
     get() {
       return testVar;
@@ -87,28 +83,37 @@ let ifGenSupportedIt = xit;
 try {
   new Function('return function*() {}')();
   ifGenSupportedIt = it;
-} catch (e) {}
+} catch (ignore) {
+  // empty
+}
 
 let ifArrowSupportedIt = xit;
 try {
   new Function('return () => {}')();
   ifArrowSupportedIt = it;
-} catch (e) {}
+} catch (ignore) {
+  // empty
+}
 
 let ifAsyncSupportedIt = xit;
 try {
   new Function('return async function() {}')();
   ifAsyncSupportedIt = it;
-} catch (e) {}
+} catch (ignore) {
+  // empty
+}
 
 let ifClassSupportedIt = xit;
 try {
   new Function('return class My {}')();
   ifClassSupportedIt = it;
-} catch (e) {}
+} catch (ignore) {
+  // empty
+}
 
 let missingError;
 try {
+  // noinspection ExceptionCaughtLocallyJS
   throw new Error('test');
 } catch (e) {
   const errorString = e.toString();
@@ -130,7 +135,7 @@ if (hasSet || hasMap) {
   splitEs6Shim = function _splitEs6Shim(value) {
     let insStr = inspect(value);
 
-    // eslint-disable-next-line no-underscore-dangle
+    /* eslint-disable-next-line no-underscore-dangle */
     if (value._es6map || value._es6set) {
       insStr = insStr.split(/\n /).join('');
     }
@@ -141,7 +146,7 @@ if (hasSet || hasMap) {
   sliceEs6Shim = function _sliceEs6Shim(value) {
     let insStr = inspect(value);
 
-    // eslint-disable-next-line no-underscore-dangle
+    /* eslint-disable-next-line no-underscore-dangle */
     if (value._es6map || value._es6set) {
       insStr = insStr.split(/\n /);
       insStr = `${insStr
@@ -167,7 +172,7 @@ const fmtError = function(er) {
 
 describe('inspect', function() {
   it('basic', function() {
-    expect.assertions(1);
+    expect.assertions(29);
     expect(inspect(1)).toBe('1');
     expect(inspect(false)).toBe('false');
     expect(inspect('')).toBe("''");
@@ -348,7 +353,7 @@ describe('inspect', function() {
       expect(ex.slice(0, item.name.length + 2)).toBe(`${item.name} [`);
       expect(ex.slice(-1)).toBe(']');
       let match = ex.match(
-        /(65,)[\s\S]+(97)[\s\S]+\[?(BYTES_PER_ELEMENT)\]?: (\d*)[\s\S]+\[?(length)\]?: (\d*)[\s\S]+\[?(byteLength)\]?: (\d*)[\s\S]+\[?(byteOffset)\]?: (0)[\s\S]+\[?(buffer)\]?:[\s\S]+(ArrayBuffer)[\s\S]+(byteLength: \d*)/,
+        /(65,)[\s\S]+(97)[\s\S]+\[?(BYTES_PER_ELEMENT)]?: (\d*)[\s\S]+\[?(length)]?: (\d*)[\s\S]+\[?(byteLength)]?: (\d*)[\s\S]+\[?(byteOffset)]?: (0)[\s\S]+\[?(buffer)]?:[\s\S]+(ArrayBuffer)[\s\S]+(byteLength: \d*)/,
       );
       match = match ? match.slice(1).join(' ') : ex;
       expect(match).toBe(
@@ -366,7 +371,7 @@ describe('inspect', function() {
     });
   });
 
-  it('objects without prototype', function() {
+  it('objects without prototype 1', function() {
     expect.assertions(1); // Due to the hash seed randomization it's not deterministic the order
     // that the following ways this hash is displayed.
     // See http://codereview.chromium.org/9124004/
@@ -385,16 +390,16 @@ describe('inspect', function() {
       true,
     );
 
+    const expected = out !== "{ [hidden]: 'Visible on ES3', visible: 1 }" && out !== "{ visible: 1, [hidden]: 'Visible on ES3' }";
+
     if (noHidden) {
-      if (!(out !== "{ [hidden]: 'Visible on ES3', visible: 1 }" && out !== "{ visible: 1, [hidden]: 'Visible on ES3' }")) {
-        expect(false).toBe(true);
-      }
-    } else if (out !== "{ [hidden]: 'Visible on ES3', visible: 1 }" && out !== "{ visible: 1, [hidden]: 'Visible on ES3' }") {
-      expect(false).toBe(true);
+      expect(expected).toBe(true);
+    } else {
+      expect(expected).toBe(false);
     }
   });
 
-  it('objects without prototype', function() {
+  it('objects without prototype 2', function() {
     expect.assertions(1); // Objects without prototype
     const out = inspect(
       Object.create(null, {
@@ -445,15 +450,16 @@ describe('inspect', function() {
       get() {
         return void 0;
       },
-      set(val) {}, // eslint-disable-line no-unused-vars
+      /* eslint-disable-next-line no-unused-vars */
+      set(val) {},
     });
     expect(inspect(subject)).toBe('{ readwrite: [Getter/Setter] }');
 
     subject = {};
     Object.defineProperty(subject, 'writeonly', {
-      // eslint-disable-line accessor-pairs
       enumerable: true,
-      set(val) {}, // eslint-disable-line no-unused-vars
+      /* eslint-disable-next-line no-unused-vars */
+      set(val) {},
     });
     expect(inspect(subject)).toBe('{ writeonly: [Setter] }');
 
@@ -500,7 +506,7 @@ describe('inspect', function() {
   });
 
   it('dates with properties', function() {
-    expect.assertions(1); // Dates with properties
+    expect.assertions(3); // Dates with properties
     const value = new Date(1266148120000);
     value.aprop = 42;
     const ex = inspect(value);
@@ -512,13 +518,13 @@ describe('inspect', function() {
   });
 
   it('positive/negative zero', function() {
-    expect.assertions(1); // test positive/negative zero
+    expect.assertions(2); // test positive/negative zero
     expect(inspect(0)).toBe('0');
     expect(inspect(-0)).toBe('-0');
   });
 
   it('sparse array', function() {
-    expect.assertions(1); // test for sparse array
+    expect.assertions(5); // test for sparse array
     const a = ['foo', 'bar', 'baz'];
     expect(inspect(a)).toBe("[ 'foo', 'bar', 'baz' ]");
     delete a[1];
@@ -539,7 +545,7 @@ describe('inspect', function() {
         },
       },
     });
-    // eslint-disable-next-line accessor-pairs
+
     const setter = Object.create(null, {b: {set() {}}});
     const getterAndSetter = Object.create(null, {
       c: {
@@ -562,7 +568,7 @@ describe('inspect', function() {
   });
 
   it("exceptions should print the error message, not '{}'", function() {
-    expect.assertions(1); // exceptions should print the error message, not '{}'
+    expect.assertions(8); // exceptions should print the error message, not '{}'
     const errors = [new Error(), new Error('FAIL'), new TypeError('FAIL'), new SyntaxError('FAIL')];
 
     errors.forEach(function(err) {
@@ -572,7 +578,7 @@ describe('inspect', function() {
     });
 
     try {
-      // eslint-disable-next-line no-undef
+      /* eslint-disable-next-line no-undef */
       undef();
     } catch (e) {
       expect(inspect(e)).toBe(fmtError(e));
@@ -583,13 +589,13 @@ describe('inspect', function() {
     expect(ex).toContain('Error: FAILURE');
 
     if (err.stack !== undefined) {
-      let stack = ex.match(/\[?stack\]?:/);
+      let stack = ex.match(/\[?stack]?:/);
       stack = stack ? stack[1] : ex;
       expect(stack).not.toBe('stack');
     }
 
     if (err.message !== undefined) {
-      let message = ex.match(/\[?(message)\]?(: 'FAILURE')/);
+      let message = ex.match(/\[?(message)]?(: 'FAILURE')/);
       message = message ? message[1] + message[2] : ex;
       expect(message).toBe("message: 'FAILURE'");
     }
@@ -644,7 +650,7 @@ describe('inspect', function() {
   });
 
   it('gH-1941', function() {
-    expect.assertions(1); // GH-1941
+    expect.assertions(2); // GH-1941
     // should not throw:
     const prot = Object.create(Date.prototype);
     const ex = inspect(prot);
@@ -654,36 +660,32 @@ describe('inspect', function() {
 
   it('gH-1944', function() {
     expect.assertions(1); // GH-1944
-    expect(function() {
-      const d = new Date();
-      d.toUTCString = null;
-      inspect(d);
-    }).not.toThrowErrorMatchingSnapshot();
+    const d1 = new Date();
+    d1.toUTCString = null;
+    inspect(d1);
 
-    expect(function() {
-      const d = new Date();
-      d.toISOString = null;
-      inspect(d);
-    }).not.toThrowErrorMatchingSnapshot();
+    const d2 = new Date();
+    d2.toISOString = null;
+    inspect(d2);
 
-    expect(function() {
-      const r = /regexp/;
-      r.toString = null;
-      inspect(r);
-    }).not.toThrowErrorMatchingSnapshot();
+    const r = /regexp/;
+    r.toString = null;
+    inspect(r);
+
+    expect(true).toBe(true);
   });
 
   it('bug with user-supplied inspect function returns non-string', function() {
     expect.assertions(1); // bug with user-supplied inspect function returns non-string
-    expect(function() {
-      inspect([
-        {
-          inspect() {
-            return 123;
-          },
+    inspect([
+      {
+        inspect() {
+          return 123;
         },
-      ]);
-    }).not.toThrowErrorMatchingSnapshot();
+      },
+    ]);
+
+    expect(true).toBe(true);
   });
 
   it('gH-2225', function() {
@@ -693,7 +695,7 @@ describe('inspect', function() {
   });
 
   it('inspect should not display the escaped value of a key.', function() {
-    expect.assertions(1); // inspect should not display the escaped value of a key.
+    expect.assertions(2); // inspect should not display the escaped value of a key.
     const w = {
       '\\': 1,
       '\\\\': 2,
@@ -709,7 +711,7 @@ describe('inspect', function() {
   });
 
   it('inspect.styles and inspect.colors', function() {
-    expect.assertions(1); // inspect.styles and inspect.colors
+    expect.assertions(8); // inspect.styles and inspect.colors
     const testColorStyle = function(style, input) {
       const colorName = inspect.styles[style];
       let color = ['', ''];
@@ -736,13 +738,14 @@ describe('inspect', function() {
 
   it('an object with "hasOwnProperty" overwritten should not throw', function() {
     expect.assertions(1); // an object with "hasOwnProperty" overwritten should not throw
-    expect(function() {
-      inspect({hasOwnProperty: null});
-    }).not.toThrowErrorMatchingSnapshot();
+
+    inspect({hasOwnProperty: null});
+
+    expect(true).toBe(true);
   });
 
   it('new API, accepts an "options" object', function() {
-    expect.assertions(1); // new API, accepts an "options" object
+    expect.assertions(7); // new API, accepts an "options" object
     const subject = {
       a: {b: {c: {d: 0}}},
       foo: 'bar',
@@ -766,7 +769,7 @@ describe('inspect', function() {
   });
 
   it('"customInspect" option can enable/disable calling inspect() on objects', function() {
-    expect.assertions(1); // "customInspect" option can enable/disable calling inspect() on objects
+    expect.assertions(4); // "customInspect" option can enable/disable calling inspect() on objects
     const subject = {
       inspect() {
         return 123;
@@ -780,7 +783,7 @@ describe('inspect', function() {
   });
 
   it('custom inspect() functions should be able to return other Objects', function() {
-    expect.assertions(1); // custom inspect() functions should be able to return other Objects
+    expect.assertions(2); // custom inspect() functions should be able to return other Objects
     const subject = {
       inspect() {
         return {foo: 'bar'};
@@ -797,7 +800,7 @@ describe('inspect', function() {
   });
 
   it('"customInspect" option can enable/disable calling [inspect.custom]()', function() {
-    expect.assertions(1); // "customInspect" option can enable/disable calling [inspect.custom]()
+    expect.assertions(4); // "customInspect" option can enable/disable calling [inspect.custom]()
     const subject = {};
     subject[inspect.custom] = function() {
       return 123;
@@ -811,7 +814,7 @@ describe('inspect', function() {
       return {foo: 'bar'};
     };
 
-    expect(inspect(subject), "{ foo: 'bar' }");
+    expect(inspect(subject)).toBe("{ foo: 'bar' }");
 
     subject[inspect.custom] = function(depth, opts) {
       expect(opts.customInspectOptions).toBe(true);
@@ -821,7 +824,7 @@ describe('inspect', function() {
   });
 
   it('[inspect.custom] takes precedence over inspect', function() {
-    expect.assertions(1); // [inspect.custom] takes precedence over inspect
+    expect.assertions(4); // [inspect.custom] takes precedence over inspect
     const subject = {};
     subject[inspect.custom] = function() {
       return 123;
@@ -838,7 +841,7 @@ describe('inspect', function() {
   });
 
   it('returning `this` from a custom inspection function works', function() {
-    expect.assertions(1); // Returning `this` from a custom inspection function works.
+    expect.assertions(2); // Returning `this` from a custom inspection function works.
     let subject = {
       a: 123,
       inspect() {
@@ -870,7 +873,7 @@ describe('inspect', function() {
   });
 
   it('inspect with "colors" option should produce as many lines as without it', function() {
-    expect.assertions(1); // inspect with "colors" option should produce as many lines as without it
+    expect.assertions(4); // inspect with "colors" option should produce as many lines as without it
     const testLines = function(input) {
       const countLines = function(str) {
         return (str.match(/\n/g) || []).length;
@@ -907,7 +910,7 @@ describe('inspect', function() {
   });
 
   it('boxed primitives output the correct values', function() {
-    expect.assertions(1); // test boxed primitives output the correct values
+    expect.assertions(7); // test boxed primitives output the correct values
     expect(inspect(Object('test'))).toBe("[String: 'test']");
     expect(inspect(Object(false))).toBe('[Boolean: false]');
     expect(inspect(Object(true))).toBe('[Boolean: true]');
@@ -918,7 +921,7 @@ describe('inspect', function() {
   });
 
   it('boxed primitives with own properties', function() {
-    expect.assertions(1); // test boxed primitives with own properties
+    expect.assertions(3); // test boxed primitives with own properties
     const str = Object('baz');
     str.foo = 'bar';
     expect(inspect(str)).toBe("{ [String: 'baz'] foo: 'bar' }");
@@ -976,7 +979,7 @@ describe('inspect', function() {
     set.add('foo');
     set.bar = 42;
     ex = inspect(set, true);
-    match = ex.match(/('foo',)[\s\S]+(\[size\]: 1,)[\s\S]+(bar: 42)/);
+    match = ex.match(/('foo',)[\s\S]+(\[size]: 1,)[\s\S]+(bar: 42)/);
     match = match ? match.slice(1).join(' ') : ex;
     expect(match).toBe("'foo', [size]: 1, bar: 42");
 
@@ -1003,7 +1006,7 @@ describe('inspect', function() {
     map.set('foo', null);
     map.bar = 42;
     ex = inspect(map, true);
-    match = ex.match(/('foo' => null,)[\s\S]+(\[size\]: 1,)[\s\S]+(bar: 42)/);
+    match = ex.match(/('foo' => null,)[\s\S]+(\[size]: 1,)[\s\S]+(bar: 42)/);
     match = match ? match.slice(1).join(' ') : ex;
     expect(match).toBe("'foo' => null, [size]: 1, bar: 42");
 
@@ -1027,7 +1030,7 @@ describe('inspect', function() {
     let ex = inspect(Promise.resolve(3));
     expect(ex.slice(0, 9)).toBe('Promise {');
     expect(ex.slice(-1)).toBe('}');
-    // eslint-disable-next-line prefer-promise-reject-errors
+    /* eslint-disable-next-line prefer-promise-reject-errors */
     const rejected = Promise.reject(3);
     ex = inspect(rejected);
     rejected.catch(function() {});
@@ -1096,7 +1099,7 @@ describe('inspect', function() {
   });
 
   it('alignment', function() {
-    expect.assertions(1); // Test alignment of items in container
+    expect.assertions(396); // Test alignment of items in container
     // Assumes that the first numeric character is the start of an item.
 
     const checkAlignment = function(container) {
@@ -1135,7 +1138,7 @@ describe('inspect', function() {
     if (hasSet) {
       const s = new Set();
 
-      // eslint-disable-next-line no-underscore-dangle
+      /* eslint-disable-next-line no-underscore-dangle */
       if (s._es6set !== true) {
         bigArray.forEach(function(item) {
           s.add(item);
@@ -1147,7 +1150,7 @@ describe('inspect', function() {
     if (hasMap) {
       const m = new Map();
 
-      // eslint-disable-next-line no-underscore-dangle
+      /* eslint-disable-next-line no-underscore-dangle */
       if (m._es6map !== true) {
         bigArray.forEach(function(item, index) {
           m.set(index, item);
@@ -1158,7 +1161,7 @@ describe('inspect', function() {
   });
 
   it('corner cases', function() {
-    expect.assertions(1); // Corner cases.
+    expect.assertions(4); // Corner cases.
     let x = {constructor: 42};
     expect(inspect(x)).toBe('{ constructor: 42 }');
 
@@ -1181,7 +1184,7 @@ describe('inspect', function() {
   });
 
   it('inspect.defaultOptions', function() {
-    expect.assertions(1); // inspect.defaultOptions tests
+    expect.assertions(10); // inspect.defaultOptions tests
     const arr = new Array(101).fill();
     const obj = {a: {a: {a: {a: 1}}}};
     const oldOptions = {...inspect.defaultOptions};

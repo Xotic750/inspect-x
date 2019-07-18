@@ -21,16 +21,15 @@
 <a name="module_inspect-x"></a>
 
 ## inspect-x
+
 An implementation of node's ES6 inspect module.
 
-**See**: https://nodejs.org/api/util.html#util_util_inspect_object_options  
-**Version**: 2.0.0  
-**Author**: Xotic750 <Xotic750@gmail.com>  
-**License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
-**Copyright**: Xotic750  
+**See**: https://nodejs.org/api/util.html#util_util_inspect_object_options
+
 <a name="exp_module_inspect-x--module.exports"></a>
 
 ### `module.exports` ⇒ <code>string</code> ⏏
+
 Echos the value of a value. Trys to print the value out
 in the best way possible given the different types.
 Values may supply their own custom `inspect(depth, opts)` functions,
@@ -38,18 +37,19 @@ when called they receive the current depth in the recursive inspection,
 as well as the options object passed to `inspect`.
 
 **Kind**: Exported member  
-**Returns**: <code>string</code> - The string representation.  
+**Returns**: <code>string</code> - The string representation.
 
-| Param | Type | Description |
-| --- | --- | --- |
-| obj | <code>Object</code> | The object to print out. |
+| Param  | Type                | Description                         |
+| ------ | ------------------- | ----------------------------------- |
+| obj    | <code>Object</code> | The object to print out.            |
 | [opts] | <code>Object</code> | Options object that alters the out. |
 
-**Example**  
-```js
-var inspect = require('inspect-x');
+**Example**
 
-console.log(inspect(inspect, { showHidden: true, depth: null }));
+```js
+import inspect from 'inspect-x';
+
+console.log(inspect(inspect, {showHidden: true, depth: null}));
 //{ [Function: inspect]
 //  [length]: 2,
 //  [name]: 'inspect',

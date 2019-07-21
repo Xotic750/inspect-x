@@ -2,13 +2,13 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-20T20:02:33.108Z",
+  "date": "2019-07-21T23:27:24.010Z",
   "describe": "",
   "description": "An implementation of node's ES6 inspect module.",
   "file": "inspect-x.js",
   "hash": "10593f8544a239f45cf8",
   "license": "MIT",
-  "version": "3.0.3"
+  "version": "3.0.4"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {

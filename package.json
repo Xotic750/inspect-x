@@ -1,6 +1,6 @@
 {
   "name": "inspect-x",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "An implementation of node's ES6 inspect module.",
   "homepage": "https://github.com/Xotic750/inspect-x",
   "author": {
@@ -48,11 +48,11 @@
     "url": "https://github.com/Xotic750/inspect-x/issues"
   },
   "dependencies": {
-    "array-difference-x": "^3.0.6",
+    "array-difference-x": "^3.0.7",
     "array-every-x": "^3.0.13",
     "array-filter-x": "^3.0.13",
     "array-includes-x": "^3.0.10",
-    "array-intersection-x": "^3.0.6",
+    "array-intersection-x": "^3.0.7",
     "array-map-x": "^3.0.14",
     "array-reduce-x": "^3.0.9",
     "array-slice-x": "^4.0.16",
@@ -96,7 +96,7 @@
     "reflect-own-keys-x": "^3.0.5",
     "require-object-coercible-x": "^2.0.19",
     "string-includes-x": "^2.0.5",
-    "string-starts-with-x": "^2.0.5",
+    "string-starts-with-x": "^2.0.6",
     "to-integer-x": "^4.0.20",
     "to-iso-string-x": "^2.0.5",
     "to-string-x": "^2.0.27",

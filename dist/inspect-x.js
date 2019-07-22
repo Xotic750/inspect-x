@@ -2,13 +2,13 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-22T13:28:32.570Z",
+  "date": "2019-07-22T17:38:24.035Z",
   "describe": "",
   "description": "An implementation of node's ES6 inspect module.",
   "file": "inspect-x.js",
-  "hash": "10593f8544a239f45cf8",
+  "hash": "9c9c457a8ae7fc20c9ee",
   "license": "MIT",
-  "version": "3.0.5"
+  "version": "3.0.6"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -9206,7 +9206,8 @@ var collections_x_esm_isSet = $$isSet;
 
 
 
-var sw = ''.startsWith;
+var ERR_MSG = 'Cannot call method "startsWith" with a regex';
+var sw = ERR_MSG.startsWith;
 var nativeStartsWith = typeof sw === 'function' && sw;
 var string_starts_with_x_esm_isWorking;
 
@@ -9215,7 +9216,7 @@ if (nativeStartsWith) {
   string_starts_with_x_esm_isWorking = string_starts_with_x_esm_res.threw;
 
   if (string_starts_with_x_esm_isWorking) {
-    string_starts_with_x_esm_res = attempt_x_esm.call('abc', nativeStartsWith, 'a', Infinity);
+    string_starts_with_x_esm_res = attempt_x_esm.call('abc', nativeStartsWith, 'a', 1 / 0);
     string_starts_with_x_esm_isWorking = string_starts_with_x_esm_res.threw === false && string_starts_with_x_esm_res.value === false;
   }
 
@@ -9235,13 +9236,10 @@ if (nativeStartsWith) {
  *
  * @param {string} string - The string to be search.
  * @throws {TypeError} If string is null or undefined.
- * @param {string} searchString - The characters to be searched for at the start
- *  of this string.
+ * @param {string} searchString - The characters to be searched for at the start of this string.
  * @throws {TypeError} If searchString is a RegExp.
- * @param {number} [position] -The position in this string at which to begin
- *  searching for searchString; defaults to 0.
- * @returns {boolean} `true` if the given characters are found at the beginning
- *  of the string; otherwise, `false`.
+ * @param {number} [position] -The position in this string at which to begin searching for searchString; defaults to 0.
+ * @returns {boolean} `true` if the given characters are found at the beginning of the string; otherwise, `false`.
  */
 
 
@@ -9249,6 +9247,12 @@ var $startsWith;
 
 if (string_starts_with_x_esm_isWorking) {
   $startsWith = function startsWith(string, searchString) {
+    var str = require_object_coercible_x_esm(string);
+
+    if (is_regexp_x_esm(searchString)) {
+      throw new TypeError(ERR_MSG);
+    }
+
     var args = [searchString];
 
     if (arguments.length > 2) {
@@ -9256,7 +9260,7 @@ if (string_starts_with_x_esm_isWorking) {
       args[1] = arguments[2];
     }
 
-    return nativeStartsWith.apply(string, args);
+    return nativeStartsWith.apply(str, args);
   };
 } else {
   // Firefox (< 37?) and IE 11 TP have a noncompliant startsWith implementation
@@ -9264,7 +9268,7 @@ if (string_starts_with_x_esm_isWorking) {
     var str = to_string_x_esm(require_object_coercible_x_esm(string));
 
     if (is_regexp_x_esm(searchString)) {
-      throw new TypeError('Cannot call method "startsWith" with a regex');
+      throw new TypeError(ERR_MSG);
     }
 
     var searchStr = to_string_x_esm(searchString);

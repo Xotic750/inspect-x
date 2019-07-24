@@ -2,13 +2,13 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-22T17:38:24.035Z",
+  "date": "2019-07-24T01:14:01.686Z",
   "describe": "",
   "description": "An implementation of node's ES6 inspect module.",
   "file": "inspect-x.js",
-  "hash": "9c9c457a8ae7fc20c9ee",
+  "hash": "4d92ad0ac7a0d86d208f",
   "license": "MIT",
-  "version": "3.0.6"
+  "version": "3.0.7"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -2566,33 +2566,21 @@ var string2016 = stringES2016;
 
 var EMPTY_STRING = '';
 var RegExpCtr = /none/.constructor;
-var reLeft2016 = new RegExpCtr("^[".concat(string2016, "]+"));
 var reLeft = new RegExpCtr("^[".concat(white_space_x_esm, "]+"));
 var replace = EMPTY_STRING.replace;
 /**
- * This method removes whitespace from the left end of a string. (ES2016).
+ * This method removes whitespace from the start of a string. (ES2019).
  *
  * @param {string} [string] - The string to trim the left end whitespace from.
  * @throws {TypeError} If string is null or undefined or not coercible.
  * @returns {string} The left trimmed string.
  */
 
-function trimLeft2016(string) {
-  return replace.call(require_coercible_to_string_x_esm(string), reLeft2016, EMPTY_STRING);
-}
-/**
- * This method removes whitespace from the left end of a string. (ES2018).
- *
- * @param {string} [string] - The string to trim the left end whitespace from.
- * @throws {TypeError} If string is null or undefined or not coercible.
- * @returns {string} The left trimmed string.
- */
-
-var trim_left_x_esm_trimLeft2018 = function trimLeft2018(string) {
+var trim_left_x_esm_trimStart = function trimStart(string) {
   return replace.call(require_coercible_to_string_x_esm(string), reLeft, EMPTY_STRING);
 };
 
-/* harmony default export */ var trim_left_x_esm = (trim_left_x_esm_trimLeft2018);
+/* harmony default export */ var trim_left_x_esm = (trim_left_x_esm_trimStart);
 
 
 // CONCATENATED MODULE: ./node_modules/trim-right-x/dist/trim-right-x.esm.js
@@ -2600,64 +2588,40 @@ var trim_left_x_esm_trimLeft2018 = function trimLeft2018(string) {
 
 var trim_right_x_esm_EMPTY_STRING = '';
 var trim_right_x_esm_RegExpCtr = /none/.constructor;
-var reRight2016 = new trim_right_x_esm_RegExpCtr("[".concat(string2016, "]+$"));
 var reRight2018 = new trim_right_x_esm_RegExpCtr("[".concat(white_space_x_esm, "]+$"));
 var trim_right_x_esm_replace = trim_right_x_esm_EMPTY_STRING.replace;
 /**
- * This method removes whitespace from the right end of a string. (ES2016).
+ * This method removes whitespace from the end of a string. (ES2019).
  *
  * @param {string} [string] - The string to trim the right end whitespace from.
  * @throws {TypeError} If string is null or undefined or not coercible.
  * @returns {string} The right trimmed string.
  */
 
-function trimRight2016(string) {
-  return trim_right_x_esm_replace.call(require_coercible_to_string_x_esm(string), reRight2016, trim_right_x_esm_EMPTY_STRING);
-}
-/**
- * This method removes whitespace from the right end of a string. (ES2018).
- *
- * @param {string} [string] - The string to trim the right end whitespace from.
- * @throws {TypeError} If string is null or undefined or not coercible.
- * @returns {string} The right trimmed string.
- */
-
-var trim_right_x_esm_trimRight2018 = function trimRight2018(string) {
+var trim_right_x_esm_trimEnd = function trimEnd(string) {
   return trim_right_x_esm_replace.call(require_coercible_to_string_x_esm(string), reRight2018, trim_right_x_esm_EMPTY_STRING);
 };
 
-/* harmony default export */ var trim_right_x_esm = (trim_right_x_esm_trimRight2018);
+/* harmony default export */ var trim_right_x_esm = (trim_right_x_esm_trimEnd);
 
 
 // CONCATENATED MODULE: ./node_modules/trim-x/dist/trim-x.esm.js
 
 
 /**
- * This method removes whitespace from the left and right end of a string.
- * (ES2016).
+ * This method removes whitespace from the start and end of a string.
+ * (ES2019).
  *
  * @param {string} [string] - The string to trim the whitespace from.
  * @throws {TypeError} If string is null or undefined or not coercible.
  * @returns {string} The trimmed string.
  */
 
-function trim2016(string) {
-  return trimLeft2016(trimRight2016(string));
-}
-/**
- * This method removes whitespace from the left and right end of a string.
- * (ES2018).
- *
- * @param {string} [string] - The string to trim the whitespace from.
- * @throws {TypeError} If string is null or undefined or not coercible.
- * @returns {string} The trimmed string.
- */
-
-var trim_x_esm_trim2018 = function trim2018(string) {
+var trim_x_esm_trim = function trim(string) {
   return trim_left_x_esm(trim_right_x_esm(string));
 };
 
-/* harmony default export */ var trim_x_esm = (trim_x_esm_trim2018);
+/* harmony default export */ var trim_x_esm = (trim_x_esm_trim);
 
 
 // CONCATENATED MODULE: ./node_modules/normalize-space-x/dist/normalize-space-x.esm.js
@@ -2665,36 +2629,22 @@ var trim_x_esm_trim2018 = function trim2018(string) {
 
 var SPACE = ' ';
 var normalize_space_x_esm_RegExpCtr = /none/.constructor;
-var reNormalize2016 = new normalize_space_x_esm_RegExpCtr("[".concat(string2016, "]+"), 'g');
 var reNormalize2018 = new normalize_space_x_esm_RegExpCtr("[".concat(white_space_x_esm, "]+"), 'g');
 var normalize_space_x_esm_replace = SPACE.replace;
 /**
  * This method strips leading and trailing white-space from a string,
  * replaces sequences of whitespace characters by a single space,
- * and returns the resulting string. (ES2016).
- *
- * @param {string} [string] - The string to be normalized.
- * @throws {TypeError} If string is null or undefined or not coercible.
- * @returns {string} The normalized string.
- */
-
-function normalizeSpace2016(string) {
-  return normalize_space_x_esm_replace.call(trim2016(string), reNormalize2016, SPACE);
-}
-/**
- * This method strips leading and trailing white-space from a string,
- * replaces sequences of whitespace characters by a single space,
- * and returns the resulting string. (ES2018).
+ * and returns the resulting string. (ES2019).
  *
  * @param {string} [string] - The string to be normalized.
  * @throws {TypeError} If string is null or undefined or not coercible.
  */
 
-var normalize_space_x_esm_normalizeSpace2018 = function normalizeSpace2018(string) {
+var normalize_space_x_esm_normalizeSpace = function normalizeSpace(string) {
   return normalize_space_x_esm_replace.call(trim_x_esm(string), reNormalize2018, SPACE);
 };
 
-/* harmony default export */ var normalize_space_x_esm = (normalize_space_x_esm_normalizeSpace2018);
+/* harmony default export */ var normalize_space_x_esm = (normalize_space_x_esm_normalizeSpace);
 
 
 // CONCATENATED MODULE: ./node_modules/replace-comments-x/dist/replace-comments-x.esm.js
@@ -3112,7 +3062,7 @@ var hexRegex = /^[-+]?0[xX]/;
 var parse_int_x_esm_test = hexRegex.test;
 /**
  * This method parses a string argument and returns an integer of the specified
- * radix (the base in mathematical numeral systems). (ES2016).
+ * radix (the base in mathematical numeral systems). (ES2019).
  *
  * @param {string} [string] - The value to parse. If the string argument is not a
  *  string, then it is converted to a string (using the ToString abstract
@@ -3128,29 +3078,7 @@ var parse_int_x_esm_test = hexRegex.test;
  *  character cannot be converted to a number, NaN is returned.
  */
 
-function parseInt2016(string, radix) {
-  var str = trimLeft2016(to_string_x_esm(string));
-  return nativeParseInt(str, castNumber(radix) || (parse_int_x_esm_test.call(hexRegex, str) ? 16 : 10));
-}
-/**
- * This method parses a string argument and returns an integer of the specified
- * radix (the base in mathematical numeral systems). (ES2018).
- *
- * @param {string} [string] - The value to parse. If the string argument is not a
- *  string, then it is converted to a string (using the ToString abstract
- *  operation). Leading whitespace in the string argument is ignored.
- * @param {number} [radix] - An integer between 2 and 36 that represents the radix
- *  (the base in mathematical numeral systems) of the above mentioned string.
- *  Specify 10 for the decimal numeral system commonly used by humans. Always
- *  specify this parameter to eliminate reader confusion and to guarantee
- *  predictable behavior. Different implementations produce different results
- *  when a radix is not specified, usually defaulting the value to 10.
- * @throws {TypeError} If target is a Symbol or is not coercible.
- * @returns {number} An integer number parsed from the given string. If the first
- *  character cannot be converted to a number, NaN is returned.
- */
-
-var parse_int_x_esm_parseInt2018 = function parseInt2018(string, radix) {
+var parse_int_x_esm_$parseInt = function $parseInt(string, radix) {
   var str = trim_left_x_esm(to_string_x_esm(string));
 
   if (charAt.call(str, 0) === "\u180E") {
@@ -3160,7 +3088,7 @@ var parse_int_x_esm_parseInt2018 = function parseInt2018(string, radix) {
   return nativeParseInt(str, castNumber(radix) || (parse_int_x_esm_test.call(hexRegex, str) ? 16 : 10));
 };
 
-/* harmony default export */ var parse_int_x_esm = (parse_int_x_esm_parseInt2018);
+/* harmony default export */ var parse_int_x_esm = (parse_int_x_esm_$parseInt);
 
 
 // CONCATENATED MODULE: ./node_modules/to-number-x/dist/to-number-x.esm.js
@@ -3193,12 +3121,6 @@ var isOctal = function _isOctal(value) {
   return to_number_x_esm_test.call(octalRegex, value);
 };
 
-var nonWSregex2016 = new RegExpConstructor("[\x85\u200B\uFFFE]", 'g');
-
-var hasNonWS2016 = function _hasNonWS(value) {
-  return to_number_x_esm_test.call(nonWSregex2016, value);
-};
-
 var nonWSregex2018 = new RegExpConstructor("[\x85\u180E\u200B\uFFFE]", 'g');
 
 var hasNonWS2018 = function _hasNonWS(value) {
@@ -3211,44 +3133,6 @@ var isInvalidHexLiteral = function _isInvalidHexLiteral(value) {
   return to_number_x_esm_test.call(invalidHexLiteral, value);
 };
 /**
- * This method converts argument to a value of type Number. (ES2016).
- *
- * @param {*} [argument] - The argument to convert to a number.
- * @throws {TypeError} - If argument is a Symbol or not coercible.
- * @returns {*} The argument converted to a number.
- */
-
-
-function toNumber2016(argument) {
-  var value = to_primitive_x_esm(argument, Number);
-
-  if (is_symbol_default()(value)) {
-    throw new TypeError(to_number_x_esm_ERROR_MESSAGE);
-  }
-
-  if (typeof value === 'string') {
-    if (isBinary(value)) {
-      return toNumber2016(parseInt2016(pStrSlice.call(value, testCharsCount), binaryRadix));
-    }
-
-    if (isOctal(value)) {
-      return toNumber2016(parseInt2016(pStrSlice.call(value, testCharsCount), octalRadix));
-    }
-
-    if (hasNonWS2016(value) || isInvalidHexLiteral(value)) {
-      return nan_x_esm;
-    }
-
-    var trimmed = trim2016(value);
-
-    if (trimmed !== value) {
-      return toNumber2016(trimmed);
-    }
-  }
-
-  return to_number_x_esm_castNumber(value);
-}
-/**
  * This method converts argument to a value of type Number. (ES2018).
  *
  * @param {*} [argument] - The argument to convert to a number.
@@ -3256,7 +3140,8 @@ function toNumber2016(argument) {
  * @returns {*} The argument converted to a number.
  */
 
-var to_number_x_esm_toNumber2018 = function toNumber2018(argument) {
+
+var to_number_x_esm_toNumber = function toNumber(argument) {
   var value = to_primitive_x_esm(argument, to_number_x_esm_castNumber);
 
   if (is_symbol_default()(value)) {
@@ -3265,11 +3150,11 @@ var to_number_x_esm_toNumber2018 = function toNumber2018(argument) {
 
   if (typeof value === 'string') {
     if (isBinary(value)) {
-      return toNumber2018(parse_int_x_esm(pStrSlice.call(value, testCharsCount), binaryRadix));
+      return toNumber(parse_int_x_esm(pStrSlice.call(value, testCharsCount), binaryRadix));
     }
 
     if (isOctal(value)) {
-      return toNumber2018(parse_int_x_esm(pStrSlice.call(value, testCharsCount), octalRadix));
+      return toNumber(parse_int_x_esm(pStrSlice.call(value, testCharsCount), octalRadix));
     }
 
     if (hasNonWS2018(value) || isInvalidHexLiteral(value)) {
@@ -3279,14 +3164,14 @@ var to_number_x_esm_toNumber2018 = function toNumber2018(argument) {
     var trimmed = trim_x_esm(value);
 
     if (trimmed !== value) {
-      return toNumber2018(trimmed);
+      return toNumber(trimmed);
     }
   }
 
   return to_number_x_esm_castNumber(value);
 };
 
-/* harmony default export */ var to_number_x_esm = (to_number_x_esm_toNumber2018);
+/* harmony default export */ var to_number_x_esm = (to_number_x_esm_toNumber);
 
 
 // CONCATENATED MODULE: ./node_modules/is-nan-x/dist/is-nan-x.esm.js
@@ -3337,7 +3222,7 @@ var is_finite_x_esm_isFinite = function isFinite(number) {
 
 /**
  * This method returns the sign of a number, indicating whether the number is positive,
- * negative or zero. (ES2016).
+ * negative or zero. (ES2019).
  *
  * @param {*} x - A number.
  * @returns {number} A number representing the sign of the given argument. If the argument
@@ -3345,26 +3230,7 @@ var is_finite_x_esm_isFinite = function isFinite(number) {
  * return 1, -1, 0 or -0 respectively. Otherwise, NaN is returned.
  */
 
-function sign2016(x) {
-  var n = toNumber2016(x);
-
-  if (n === 0 || is_nan_x_esm(n)) {
-    return n;
-  }
-
-  return n > 0 ? 1 : -1;
-}
-/**
- * This method returns the sign of a number, indicating whether the number is positive,
- * negative or zero. (ES2018).
- *
- * @param {*} x - A number.
- * @returns {number} A number representing the sign of the given argument. If the argument
- * is a positive number, negative number, positive zero or negative zero, the function will
- * return 1, -1, 0 or -0 respectively. Otherwise, NaN is returned.
- */
-
-var math_sign_x_esm_sign2018 = function sign2018(x) {
+var math_sign_x_esm_sign = function sign(x) {
   var n = to_number_x_esm(x);
 
   if (n === 0 || is_nan_x_esm(n)) {
@@ -3374,7 +3240,7 @@ var math_sign_x_esm_sign2018 = function sign2018(x) {
   return n > 0 ? 1 : -1;
 };
 
-/* harmony default export */ var math_sign_x_esm = (math_sign_x_esm_sign2018);
+/* harmony default export */ var math_sign_x_esm = (math_sign_x_esm_sign);
 
 
 // CONCATENATED MODULE: ./node_modules/to-integer-x/dist/to-integer-x.esm.js
@@ -3385,33 +3251,13 @@ var math_sign_x_esm_sign2018 = function sign2018(x) {
 var abs = Math.abs,
     floor = Math.floor;
 /**
- * Converts `value` to an integer. (ES2016).
+ * Converts `value` to an integer. (ES2019).
  *
  * @param {*} value - The value to convert.
  * @returns {number} Returns the converted integer.
  */
 
-function toInteger2016(value) {
-  var number = toNumber2016(value);
-
-  if (is_nan_x_esm(number)) {
-    return 0;
-  }
-
-  if (number === 0 || is_finite_x_esm(number) === false) {
-    return number;
-  }
-
-  return sign2016(number) * floor(abs(number));
-}
-/**
- * Converts `value` to an integer. (ES2018).
- *
- * @param {*} value - The value to convert.
- * @returns {number} Returns the converted integer.
- */
-
-var to_integer_x_esm_toInteger2018 = function toInteger2018(value) {
+var to_integer_x_esm_toInteger = function toInteger(value) {
   var number = to_number_x_esm(value);
 
   if (is_nan_x_esm(number)) {
@@ -3425,7 +3271,7 @@ var to_integer_x_esm_toInteger2018 = function toInteger2018(value) {
   return math_sign_x_esm(number) * floor(abs(number));
 };
 
-/* harmony default export */ var to_integer_x_esm = (to_integer_x_esm_toInteger2018);
+/* harmony default export */ var to_integer_x_esm = (to_integer_x_esm_toInteger);
 
 
 // CONCATENATED MODULE: ./node_modules/to-length-x/dist/to-length-x.esm.js
@@ -3433,34 +3279,13 @@ var to_integer_x_esm_toInteger2018 = function toInteger2018(value) {
 var MAX_SAFE_INTEGER = 9007199254740991;
 /**
  * Converts `value` to an integer suitable for use as the length of an
- * array-like object. (ES2016).
+ * array-like object. (ES2019).
  *
  * @param {*} value - The value to convert.
  * @returns {number} Returns the converted integer.
  */
 
-function toLength2016(value) {
-  var len = toInteger2016(value); // includes converting -0 to +0
-
-  if (len <= 0) {
-    return 0;
-  }
-
-  if (len > MAX_SAFE_INTEGER) {
-    return MAX_SAFE_INTEGER;
-  }
-
-  return len;
-}
-/**
- * Converts `value` to an integer suitable for use as the length of an
- * array-like object. (ES2018).
- *
- * @param {*} value - The value to convert.
- * @returns {number} Returns the converted integer.
- */
-
-var to_length_x_esm_toLength2018 = function toLength2018(value) {
+var to_length_x_esm_toLength = function toLength(value) {
   var len = to_integer_x_esm(value); // includes converting -0 to +0
 
   if (len <= 0) {
@@ -3474,7 +3299,7 @@ var to_length_x_esm_toLength2018 = function toLength2018(value) {
   return len;
 };
 
-/* harmony default export */ var to_length_x_esm = (to_length_x_esm_toLength2018);
+/* harmony default export */ var to_length_x_esm = (to_length_x_esm_toLength);
 
 
 // CONCATENATED MODULE: ./node_modules/has-boxed-string-x/dist/has-boxed-string-x.esm.js

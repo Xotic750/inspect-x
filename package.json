@@ -98,8 +98,10 @@
     "require-object-coercible-x": "^2.0.26",
     "string-includes-x": "^2.0.10",
     "string-starts-with-x": "^2.0.11",
+    "to-boolean-x": "^2.0.24",
     "to-integer-x": "^4.0.28",
     "to-iso-string-x": "^2.0.10",
+    "to-object-x": "^2.0.20",
     "to-string-x": "^2.0.34",
     "white-space-x": "^4.0.23"
   },

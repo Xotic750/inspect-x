@@ -55,24 +55,12 @@ import clamp from 'math-clamp-x';
 import difference from 'array-difference-x';
 import intersection from 'array-intersection-x';
 import union from 'array-union-x';
-/** @type {RegExpConstructor} */
-
+import toBoolean from 'to-boolean-x';
+import toObject from 'to-object-x';
+var EMPTY_ARRAY = [];
 var RegExpCtr = /none/.constructor;
-/** @type {BooleanConstructor} */
-
-var NumberCtr = 0 .constructor;
-/** @type {ArrayConstructor} */
-
-var ArrayCtr = [].constructor;
-/** @type {StringConstructor} */
-
-var StringCtr = ''.constructor;
-/** @type {ObjectConstructor} */
-
-var castObject = {}.constructor;
-/** @type {BooleanConstructor} */
-
-var castBoolean = true.constructor;
+var EMPTY_STRING = '';
+var EMPTY_OBJECT = {};
 var call = isFunction.call;
 /* eslint-disable-next-line compat/compat */
 
@@ -80,45 +68,38 @@ var hasSet = typeof Set === 'function' && isSet(new Set());
 /* eslint-disable-next-line compat/compat */
 
 var testSet = hasSet && new Set(['SetSentinel']);
-/* eslint-disable-next-line compat/compat */
-
-var setForEach = hasSet && bind(call, Set.prototype.forEach);
-/* eslint-disable-next-line compat/compat */
-
-var setValues = hasSet && bind(call, Set.prototype.values);
+var setForEach = hasSet && bind(call, testSet.forEach);
+var setValues = hasSet && bind(call, testSet.values);
 /* eslint-disable-next-line compat/compat */
 
 var hasMap = typeof Map === 'function' && isMap(new Map());
 /* eslint-disable-next-line compat/compat */
 
 var testMap = hasMap && new Map([[1, 'MapSentinel']]);
-/* eslint-disable-next-line compat/compat */
-
-var mapForEach = hasMap && bind(call, Map.prototype.forEach);
-/* eslint-disable-next-line compat/compat */
-
-var mapValues = hasMap && bind(call, Map.prototype.values);
+var mapForEach = hasMap && bind(call, testMap.forEach);
+var mapValues = hasMap && bind(call, testMap.values);
 /* eslint-disable-next-line compat/compat */
 
 var symbolToString = hasSymbolSupport && bind(call, Symbol.prototype.toString);
 /* eslint-disable-next-line compat/compat */
 
 var symbolValueOf = hasSymbolSupport && bind(call, Symbol.prototype.valueOf);
-var objectSeal = isFunction(castObject.seal) ? castObject.seal : function seal(value) {
+var oSeal = EMPTY_OBJECT.constructor.seal;
+var objectSeal = isFunction(oSeal) ? oSeal : function seal(value) {
   return value;
 };
 var regexpToString = bind(call, RegExpCtr.prototype.toString);
 var regexpTest = bind(call, RegExpCtr.prototype.test);
 var errorToString = bind(call, Error.prototype.toString);
-var numberToString = bind(call, NumberCtr.prototype.toString);
-var booleanToString = bind(call, castBoolean.prototype.toString);
-var concat = bind(call, ArrayCtr.prototype.concat, []);
-var join = bind(call, ArrayCtr.prototype.join);
-var push = bind(call, ArrayCtr.prototype.push);
+var numberToString = bind(call, 0 .toString);
+var booleanToString = bind(call, true.toString);
+var concat = bind(call, EMPTY_ARRAY.concat, EMPTY_ARRAY);
+var join = bind(call, EMPTY_ARRAY.join);
+var push = bind(call, EMPTY_ARRAY.push);
 var getTime = bind(call, Date.prototype.getTime);
-var replace = bind(call, StringCtr.prototype.replace);
-var strSlice = bind(call, StringCtr.prototype.slice);
-var propertyIsEnumerable = bind(call, castObject.prototype.propertyIsEnumerable);
+var replace = bind(call, EMPTY_STRING.replace);
+var strSlice = bind(call, EMPTY_STRING.slice);
+var propertyIsEnumerable = bind(call, EMPTY_OBJECT.propertyIsEnumerable);
 /* eslint-disable-next-line compat/compat */
 
 var customInspectSymbol = hasSymbolSupport ? Symbol('inspect.custom') : '_inspect.custom_';
@@ -138,7 +119,7 @@ var inspect;
 var fmtValue;
 
 var isFalsey = function _isFalsey(value) {
-  return castBoolean(value) === false;
+  return toBoolean(value) === false;
 };
 
 var supportsClasses;
@@ -174,7 +155,7 @@ try {
 }
 
 var pluralEnding = function _pluralEnding(number) {
-  return number > 1 ? 's' : '';
+  return number > 1 ? 's' : EMPTY_STRING;
 };
 
 var isDigits = function _isDigits(key) {
@@ -343,7 +324,7 @@ var getConstructorOf = function _getConstructorOf(obj) {
   var maxLoop = 100;
 
   while (isNil(o) === false && maxLoop >= 0) {
-    o = castObject(o);
+    o = toObject(o);
     var descriptor = getOwnPropertyDescriptor(o, 'constructor');
 
     if (descriptor && descriptor.value) {
@@ -383,7 +364,7 @@ var fmtNumber = function _fmtNumber(ctx, value) {
   return ctx.stylize(objectIs(value, -0) ? '-0' : numberToString(value), 'number');
 };
 
-var fmtPrimitiveReplacers = [[/^"|"$/g, ''], [/'/g, "\\'"], [/\\"/g, '"']];
+var fmtPrimitiveReplacers = [[/^"|"$/g, EMPTY_STRING], [/'/g, "\\'"], [/\\"/g, '"']];
 
 var fmtPrimitiveReplace = function _fmtPrimitiveReplace(acc, pair) {
   return replace(acc, pair[0], pair[1]);
@@ -633,7 +614,7 @@ var reSingle = new RegExpCtr("\\{[".concat(whiteSpace, "]+\\}"));
 var lengthReduceRx = /\u001b\[\d\d?m/g;
 
 var lengthReduce = function _lengthReduce(prev, cur) {
-  return prev + replace(cur, lengthReduceRx, '').length + 1;
+  return prev + replace(cur, lengthReduceRx, EMPTY_STRING).length + 1;
 };
 
 var reduceToSingleString = function _reduceToSingleString(out, base, braces, breakLength) {
@@ -643,7 +624,7 @@ var reduceToSingleString = function _reduceToSingleString(out, base, braces, bre
     // If the opening "brace" is too large, like in the case of "Set {",
     // we need to force the first item to be on the next line or the
     // items will not line up correctly.
-    var layoutBase = base === '' && braces[0].length === 1 ? '' : "".concat(base, "\n ");
+    var layoutBase = base === EMPTY_STRING && braces[0].length === 1 ? EMPTY_STRING : "".concat(base, "\n ");
     result = "".concat(braces[0] + layoutBase, " ").concat(join(out, ',\n  '), " ").concat(braces[1]);
   } else {
     result = "".concat(braces[0] + base, " ").concat(join(out, ', '), " ").concat(braces[1]);
@@ -665,7 +646,7 @@ var fmtError = function _fmtError(value) {
 
       if (subName && startsWith(stack, subName) === false) {
         var msg = value.message;
-        return replace(stack, errorToString(value), subName + (msg ? ": ".concat(msg) : ''));
+        return replace(stack, errorToString(value), subName + (msg ? ": ".concat(msg) : EMPTY_STRING));
       }
     } else if (missingError) {
       return "".concat(errorToString(value), "\n").concat(stack);
@@ -854,7 +835,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
     }
   }
 
-  var base = '';
+  var base = EMPTY_STRING;
   var empty = false;
   var braces = ['{', '}'];
   var fmtter = fmtObject; // We can't compare constructors for various objects using a comparison
@@ -899,7 +880,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   } else if (isArray(value)) {
     name = getSubName(value); // Unset the constructor to prevent "Array [...]" for ordinary arrays.
 
-    name = name === 'Array' ? '' : name;
+    name = name === 'Array' ? EMPTY_STRING : name;
     braces = ['[', ']'];
 
     if (ctx.showHidden) {
@@ -957,7 +938,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   } else {
     name = getSubName(value); // Unset the constructor to prevent "Object {...}" for ordinary objects.
 
-    name = name === 'Object' ? '' : name;
+    name = name === 'Object' ? EMPTY_STRING : name;
     empty = true; // No other data than keys.
   }
 

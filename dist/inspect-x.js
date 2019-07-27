@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-27T15:18:38.312Z",
+  "date": "2019-07-27T19:12:22.427Z",
   "describe": "",
   "description": "An implementation of node's ES6 inspect module.",
   "file": "inspect-x.js",
-  "hash": "1d96e191320ad2fd840b",
+  "hash": "3b849f4b890204adc6a9",
   "license": "MIT",
   "version": "3.0.11"
 }
@@ -9277,24 +9277,12 @@ function inspect_x_esm_newArrowCheck(innerThis, boundThis) { if (innerThis !== b
 
 
 
-/** @type {RegExpConstructor} */
 
+
+var EMPTY_ARRAY = [];
 var inspect_x_esm_RegExpCtr = /none/.constructor;
-/** @type {BooleanConstructor} */
-
-var inspect_x_esm_NumberCtr = 0 .constructor;
-/** @type {ArrayConstructor} */
-
-var inspect_x_esm_ArrayCtr = [].constructor;
-/** @type {StringConstructor} */
-
-var inspect_x_esm_StringCtr = ''.constructor;
-/** @type {ObjectConstructor} */
-
-var inspect_x_esm_castObject = {}.constructor;
-/** @type {BooleanConstructor} */
-
-var inspect_x_esm_castBoolean = true.constructor;
+var inspect_x_esm_EMPTY_STRING = '';
+var EMPTY_OBJECT = {};
 var call = is_function_x_esm.call;
 /* eslint-disable-next-line compat/compat */
 
@@ -9302,45 +9290,38 @@ var hasSet = typeof Set === 'function' && is_set_x_esm(new Set());
 /* eslint-disable-next-line compat/compat */
 
 var inspect_x_esm_testSet = hasSet && new Set(['SetSentinel']);
-/* eslint-disable-next-line compat/compat */
-
-var setForEach = hasSet && bind_x_esm(call, Set.prototype.forEach);
-/* eslint-disable-next-line compat/compat */
-
-var setValues = hasSet && bind_x_esm(call, Set.prototype.values);
+var setForEach = hasSet && bind_x_esm(call, inspect_x_esm_testSet.forEach);
+var setValues = hasSet && bind_x_esm(call, inspect_x_esm_testSet.values);
 /* eslint-disable-next-line compat/compat */
 
 var hasMap = typeof Map === 'function' && is_map_x_esm(new Map());
 /* eslint-disable-next-line compat/compat */
 
 var inspect_x_esm_testMap = hasMap && new Map([[1, 'MapSentinel']]);
-/* eslint-disable-next-line compat/compat */
-
-var mapForEach = hasMap && bind_x_esm(call, Map.prototype.forEach);
-/* eslint-disable-next-line compat/compat */
-
-var mapValues = hasMap && bind_x_esm(call, Map.prototype.values);
+var mapForEach = hasMap && bind_x_esm(call, inspect_x_esm_testMap.forEach);
+var mapValues = hasMap && bind_x_esm(call, inspect_x_esm_testMap.values);
 /* eslint-disable-next-line compat/compat */
 
 var symbolToString = has_symbol_support_x_esm && bind_x_esm(call, Symbol.prototype.toString);
 /* eslint-disable-next-line compat/compat */
 
 var symbolValueOf = has_symbol_support_x_esm && bind_x_esm(call, Symbol.prototype.valueOf);
-var objectSeal = is_function_x_esm(inspect_x_esm_castObject.seal) ? inspect_x_esm_castObject.seal : function seal(value) {
+var oSeal = EMPTY_OBJECT.constructor.seal;
+var objectSeal = is_function_x_esm(oSeal) ? oSeal : function seal(value) {
   return value;
 };
 var regexpToString = bind_x_esm(call, inspect_x_esm_RegExpCtr.prototype.toString);
 var regexpTest = bind_x_esm(call, inspect_x_esm_RegExpCtr.prototype.test);
 var errorToString = bind_x_esm(call, Error.prototype.toString);
-var numberToString = bind_x_esm(call, inspect_x_esm_NumberCtr.prototype.toString);
-var booleanToString = bind_x_esm(call, inspect_x_esm_castBoolean.prototype.toString);
-var inspect_x_esm_concat = bind_x_esm(call, inspect_x_esm_ArrayCtr.prototype.concat, []);
-var inspect_x_esm_join = bind_x_esm(call, inspect_x_esm_ArrayCtr.prototype.join);
-var push = bind_x_esm(call, inspect_x_esm_ArrayCtr.prototype.push);
+var numberToString = bind_x_esm(call, 0 .toString);
+var booleanToString = bind_x_esm(call, true.toString);
+var inspect_x_esm_concat = bind_x_esm(call, EMPTY_ARRAY.concat, EMPTY_ARRAY);
+var inspect_x_esm_join = bind_x_esm(call, EMPTY_ARRAY.join);
+var push = bind_x_esm(call, EMPTY_ARRAY.push);
 var getTime = bind_x_esm(call, Date.prototype.getTime);
-var inspect_x_esm_replace = bind_x_esm(call, inspect_x_esm_StringCtr.prototype.replace);
-var strSlice = bind_x_esm(call, inspect_x_esm_StringCtr.prototype.slice);
-var inspect_x_esm_propertyIsEnumerable = bind_x_esm(call, inspect_x_esm_castObject.prototype.propertyIsEnumerable);
+var inspect_x_esm_replace = bind_x_esm(call, inspect_x_esm_EMPTY_STRING.replace);
+var strSlice = bind_x_esm(call, inspect_x_esm_EMPTY_STRING.slice);
+var inspect_x_esm_propertyIsEnumerable = bind_x_esm(call, EMPTY_OBJECT.propertyIsEnumerable);
 /* eslint-disable-next-line compat/compat */
 
 var customInspectSymbol = has_symbol_support_x_esm ? Symbol('inspect.custom') : '_inspect.custom_';
@@ -9360,7 +9341,7 @@ var inspect;
 var fmtValue;
 
 var isFalsey = function _isFalsey(value) {
-  return inspect_x_esm_castBoolean(value) === false;
+  return to_boolean_x_esm(value) === false;
 };
 
 var supportsClasses;
@@ -9396,7 +9377,7 @@ try {
 }
 
 var pluralEnding = function _pluralEnding(number) {
-  return number > 1 ? 's' : '';
+  return number > 1 ? 's' : inspect_x_esm_EMPTY_STRING;
 };
 
 var isDigits = function _isDigits(key) {
@@ -9565,7 +9546,7 @@ var getConstructorOf = function _getConstructorOf(obj) {
   var maxLoop = 100;
 
   while (is_nil_x_esm(o) === false && maxLoop >= 0) {
-    o = inspect_x_esm_castObject(o);
+    o = to_object_x_esm(o);
     var descriptor = object_get_own_property_descriptor_x_esm(o, 'constructor');
 
     if (descriptor && descriptor.value) {
@@ -9605,7 +9586,7 @@ var fmtNumber = function _fmtNumber(ctx, value) {
   return ctx.stylize(object_is_default()(value, -0) ? '-0' : numberToString(value), 'number');
 };
 
-var fmtPrimitiveReplacers = [[/^"|"$/g, ''], [/'/g, "\\'"], [/\\"/g, '"']];
+var fmtPrimitiveReplacers = [[/^"|"$/g, inspect_x_esm_EMPTY_STRING], [/'/g, "\\'"], [/\\"/g, '"']];
 
 var fmtPrimitiveReplace = function _fmtPrimitiveReplace(acc, pair) {
   return inspect_x_esm_replace(acc, pair[0], pair[1]);
@@ -9855,7 +9836,7 @@ var reSingle = new inspect_x_esm_RegExpCtr("\\{[".concat(white_space_x_esm, "]+\
 var lengthReduceRx = /\u001b\[\d\d?m/g;
 
 var lengthReduce = function _lengthReduce(prev, cur) {
-  return prev + inspect_x_esm_replace(cur, lengthReduceRx, '').length + 1;
+  return prev + inspect_x_esm_replace(cur, lengthReduceRx, inspect_x_esm_EMPTY_STRING).length + 1;
 };
 
 var reduceToSingleString = function _reduceToSingleString(out, base, braces, breakLength) {
@@ -9865,7 +9846,7 @@ var reduceToSingleString = function _reduceToSingleString(out, base, braces, bre
     // If the opening "brace" is too large, like in the case of "Set {",
     // we need to force the first item to be on the next line or the
     // items will not line up correctly.
-    var layoutBase = base === '' && braces[0].length === 1 ? '' : "".concat(base, "\n ");
+    var layoutBase = base === inspect_x_esm_EMPTY_STRING && braces[0].length === 1 ? inspect_x_esm_EMPTY_STRING : "".concat(base, "\n ");
     result = "".concat(braces[0] + layoutBase, " ").concat(inspect_x_esm_join(out, ',\n  '), " ").concat(braces[1]);
   } else {
     result = "".concat(braces[0] + base, " ").concat(inspect_x_esm_join(out, ', '), " ").concat(braces[1]);
@@ -9887,7 +9868,7 @@ var fmtError = function _fmtError(value) {
 
       if (subName && string_starts_with_x_esm(stack, subName) === false) {
         var msg = value.message;
-        return inspect_x_esm_replace(stack, errorToString(value), subName + (msg ? ": ".concat(msg) : ''));
+        return inspect_x_esm_replace(stack, errorToString(value), subName + (msg ? ": ".concat(msg) : inspect_x_esm_EMPTY_STRING));
       }
     } else if (missingError) {
       return "".concat(errorToString(value), "\n").concat(stack);
@@ -10076,7 +10057,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
     }
   }
 
-  var base = '';
+  var base = inspect_x_esm_EMPTY_STRING;
   var empty = false;
   var braces = ['{', '}'];
   var fmtter = fmtObject; // We can't compare constructors for various objects using a comparison
@@ -10121,7 +10102,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   } else if (is_array_x_esm(value)) {
     name = getSubName(value); // Unset the constructor to prevent "Array [...]" for ordinary arrays.
 
-    name = name === 'Array' ? '' : name;
+    name = name === 'Array' ? inspect_x_esm_EMPTY_STRING : name;
     braces = ['[', ']'];
 
     if (ctx.showHidden) {
@@ -10179,7 +10160,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   } else {
     name = getSubName(value); // Unset the constructor to prevent "Object {...}" for ordinary objects.
 
-    name = name === 'Object' ? '' : name;
+    name = name === 'Object' ? inspect_x_esm_EMPTY_STRING : name;
     empty = true; // No other data than keys.
   }
 

@@ -1,8 +1,12 @@
-var _this = this;
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
 import bind from 'bind-x';
 import isFunction from 'is-function-x';
@@ -115,10 +119,10 @@ var customInspectSymbol = hasSymbolSupport ? Symbol('inspect.custom') : '_inspec
  * @returns {string} The string representation.
  */
 
-var inspect;
-var fmtValue;
+var $inspect;
+var $fmtValue;
 
-var isFalsey = function _isFalsey(value) {
+var isFalsey = function isFalsey(value) {
   return toBoolean(value) === false;
 };
 
@@ -131,7 +135,7 @@ try {
 } catch (ignore) {// empty
 }
 
-var isClass = function _isClass(value) {
+var isClass = function isClass(value) {
   return supportsClasses ? isFunction(value, true) && isFunction(value) === false : false;
 };
 
@@ -154,19 +158,19 @@ try {
 } catch (ignore) {// empty
 }
 
-var pluralEnding = function _pluralEnding(number) {
+var pluralEnding = function pluralEnding(number) {
   return number > 1 ? 's' : EMPTY_STRING;
 };
 
-var isDigits = function _isDigits(key) {
+var isDigits = function isDigits(key) {
   return regexpTest(/^\d+$/, key);
 };
 
-var appendMissing = function _appendMissing(array, values) {
+var appendMissing = function appendMissing(array, values) {
   return concat(array, difference(values, array));
 };
 
-var promote = function _promote(array, values) {
+var promote = function promote(array, values) {
   return concat(values, difference(array, values));
 };
 
@@ -191,7 +195,7 @@ try {
 }
 
 if (isDate(Date.prototype)) {
-  isDate = function _isDate(value) {
+  isDate = function $isDate(value) {
     try {
       getTime(value);
       return true;
@@ -206,11 +210,9 @@ var dateProps = objectKeys(Date);
 
 if (dateProps.length > 0) {
   var datePropsCheck = ['now', 'UTC', 'parse'];
-  shimmedDate = every(datePropsCheck, function (prop) {
-    _newArrowCheck(this, _this);
-
+  shimmedDate = every(datePropsCheck, function predicate(prop) {
     return arrayincludes(dateProps, prop);
-  }.bind(this)) && arrayincludes(objectKeys(new Date()), 'constructor');
+  }) && arrayincludes(objectKeys(new Date()), 'constructor');
 }
 /* eslint-disable-next-line lodash/prefer-noop */
 
@@ -220,21 +222,17 @@ var testFunc1 = function test1() {};
 var fnSupportsName = testFunc1.name === 'test1';
 var hiddenFuncCtr = arrayincludes(reflectOwnKeys(testFunc1.prototype), 'constructor') === false;
 var wantedFnProps = ['length', 'name', 'prototype'];
-var fnPropsCheck = fnSupportsName ? slice(wantedFnProps) : filter(wantedFnProps, function (prop) {
-  _newArrowCheck(this, _this);
-
+var fnPropsCheck = fnSupportsName ? slice(wantedFnProps) : filter(wantedFnProps, function predicate(prop) {
   return prop !== 'name';
-}.bind(this));
+});
 var funcKeys = reflectOwnKeys(testFunc1);
 var unwantedFnProps = intersection(['arguments', 'caller'], funcKeys);
 var mustFilterFnProps = difference(fnPropsCheck, funcKeys).length > 0;
 
 if (mustFilterFnProps === false) {
-  mustFilterFnProps = some(intersection(funcKeys, wantedFnProps), function (key, index) {
-    _newArrowCheck(this, _this);
-
+  mustFilterFnProps = some(intersection(funcKeys, wantedFnProps), function predicate(key, index) {
     return wantedFnProps[index] !== key;
-  }.bind(this));
+  });
 }
 
 var inspectDefaultOptions = objectSeal({
@@ -247,23 +245,23 @@ var inspectDefaultOptions = objectSeal({
   showProxy: false
 });
 
-var isBooleanType = function _isBooleanType(arg) {
+var isBooleanType = function isBooleanType(arg) {
   return typeof arg === 'boolean';
 };
 
-var isNumberType = function _isNumberType(arg) {
+var isNumberType = function isNumberType(arg) {
   return typeof arg === 'number';
 };
 
-var isStringType = function _isStringType(arg) {
+var isStringType = function isStringType(arg) {
   return typeof arg === 'string';
 };
 
-var isSymbolType = function _isSymbolType(arg) {
+var isSymbolType = function isSymbolType(arg) {
   return _typeof(arg) === 'symbol';
 };
 
-var isMapIterator = function _isMapIterator(value) {
+var isMapIterator = function isMapIterator(value) {
   if (hasMap === false || isObjectLike(value) === false) {
     return false;
   }
@@ -276,7 +274,7 @@ var isMapIterator = function _isMapIterator(value) {
   return false;
 };
 
-var isSetIterator = function _isSetIterator(value) {
+var isSetIterator = function isSetIterator(value) {
   if (hasSet === false || isObjectLike(value) === false) {
     return false;
   }
@@ -289,37 +287,33 @@ var isSetIterator = function _isSetIterator(value) {
   return false;
 };
 
-var filterIndexes = function _filterIndexes(keys, length) {
-  var _this2 = this;
-
-  return filter(keys, function (key) {
-    _newArrowCheck(this, _this2);
-
+var filterIndexes = function filterIndexes(keys, length) {
+  return filter(keys, function predicate(key) {
     return isSymbolType(key) || key < 0 || key > length || key % 1 !== 0;
-  }.bind(this));
+  });
 };
 
-var stylizeWithColor = function _stylizeWithColor(str, styleType) {
-  var style = inspect.styles[styleType];
+var stylizeWithColor = function stylizeWithColor(str, styleType) {
+  var style = $inspect.styles[styleType];
 
   if (style) {
-    var colors = inspect.colors[style];
+    var colors = $inspect.colors[style];
     return "\x1B[".concat(colors[0], "m").concat(str, "\x1B[").concat(colors[1], "m");
   }
 
   return str;
 };
 
-var stylizeNoColor = function _stylizeNoColor(str) {
+var stylizeNoColor = function stylizeNoColor(str) {
   return str;
 };
 
-var getNameSep = function _getNameSep(obj) {
+var getNameSep = function getNameSep(obj) {
   var name = getFunctionName(obj);
   return name ? ": ".concat(name) : name;
 };
 
-var getConstructorOf = function _getConstructorOf(obj) {
+var getConstructorOf = function getConstructorOf(obj) {
   var o = obj;
   var maxLoop = 100;
 
@@ -338,7 +332,7 @@ var getConstructorOf = function _getConstructorOf(obj) {
   return null;
 };
 
-var isSub = function _isSub(value) {
+var isSub = function isSub(value) {
   if (supportsClasses !== true || isPrimitive(value)) {
     return false;
   }
@@ -347,7 +341,7 @@ var isSub = function _isSub(value) {
   return isFunction(constructor) === false && isFunction(constructor, true);
 };
 
-var getSubName = function _getSubName(value, name) {
+var getSubName = function getSubName(value, name) {
   if (isSub(value)) {
     var subName = getFunctionName(getConstructorOf(value));
 
@@ -359,7 +353,7 @@ var getSubName = function _getSubName(value, name) {
   return name || getFunctionName(getConstructorOf(value));
 };
 
-var fmtNumber = function _fmtNumber(ctx, value) {
+var fmtNumber = function fmtNumber(ctx, value) {
   // Format -0 as '-0'.
   return ctx.stylize(objectIs(value, -0) ? '-0' : numberToString(value), 'number');
 };
@@ -370,7 +364,7 @@ var fmtPrimitiveReplace = function _fmtPrimitiveReplace(acc, pair) {
   return replace(acc, pair[0], pair[1]);
 };
 
-var fmtPrimitive = function _fmtPrimitive(ctx, value) {
+var fmtPrimitive = function fmtPrimitive(ctx, value) {
   if (isNil(value)) {
     var str = toStr(value);
     return ctx.stylize(str, str);
@@ -398,7 +392,7 @@ var fmtPrimitive = function _fmtPrimitive(ctx, value) {
   return void 0;
 };
 
-var fmtPrimNoColor = function _fmtPrimNoColor(ctx, value) {
+var fmtPrimNoColor = function fmtPrimNoColor(ctx, value) {
   var stylize = ctx.stylize;
   ctx.stylize = stylizeNoColor;
   var str = fmtPrimitive(ctx, value);
@@ -406,7 +400,7 @@ var fmtPrimNoColor = function _fmtPrimNoColor(ctx, value) {
   return str;
 };
 
-var recurse = function _recurse(depth) {
+var recurse = function recurse(depth) {
   return depth === null ? null : depth - 1;
 };
 
@@ -420,7 +414,7 @@ var fmtPropReplacer1 = [/\n/g, '\n  '];
 var fmtPropReplacer2 = [/(^|\n)/g, '\n   '];
 var fmtPropTestRx = /^"[\w$]+"$/;
 
-var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
+var fmtProp = function fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   var desc = getOwnPropertyDescriptor(value, key) || {
     value: value[key]
   };
@@ -454,7 +448,7 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   } else if (desc.set) {
     str = ctx.stylize('[Setter]', 'special');
   } else {
-    var formattedStr = fmtValue(ctx, desc.value, recurse(depth), key === 'prototype');
+    var formattedStr = $fmtValue(ctx, desc.value, recurse(depth), key === 'prototype');
 
     if (strIncludes(formattedStr, '\n')) {
       var replacer = arr ? fmtPropReplacer1 : fmtPropReplacer2;
@@ -481,41 +475,51 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   return "".concat(name, ": ").concat(str);
 };
 
-var fmtObject = function _fmtObject(ctx, value, depth, visibleKeys, keys) {
-  return map(keys, function _mapFmObject(key) {
+var fmtObject = function fmtObject() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice = slice(arguments),
+      _slice2 = _slicedToArray(_slice, 5),
+      ctx = _slice2[0],
+      value = _slice2[1],
+      depth = _slice2[2],
+      visibleKeys = _slice2[3],
+      keys = _slice2[4];
+
+  return map(keys, function mapFmObject(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, false);
   });
 };
 
-var getMoreItemText = function _getMoreItemText(remaining) {
+var getMoreItemText = function getMoreItemText(remaining) {
   return "... ".concat(remaining, " more item").concat(pluralEnding(remaining));
 };
 
-var getEmptyItemText = function _getEmptyItemText(emptyItems) {
+var getEmptyItemText = function getEmptyItemText(emptyItems) {
   return "<".concat(emptyItems, " empty item").concat(pluralEnding(emptyItems), ">");
 };
 
-var filterOutIndexes = function _filterOutIndexes(keys) {
-  var _this3 = this;
-
-  return filter(keys, function (key) {
-    _newArrowCheck(this, _this3);
-
+var filterOutIndexes = function filterOutIndexes(keys) {
+  return filter(keys, function predicate(key) {
     return isSymbolType(key) || isDigits(key) === false;
-  }.bind(this));
+  });
 };
 
-var fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
-  var _this4 = this;
+var fmtArray = function _fmtArray() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice3 = slice(arguments),
+      _slice4 = _slicedToArray(_slice3, 5),
+      ctx = _slice4[0],
+      value = _slice4[1],
+      depth = _slice4[2],
+      visibleKeys = _slice4[3],
+      keys = _slice4[4];
 
   var length = value.length;
   var maxLength = clamp(length, 0, ctx.maxArrayLength);
   var lastIndex = 0;
   var nextIndex = 0;
   var output = [];
-  var moreItems = some(value, function (item, index) {
-    _newArrowCheck(this, _this4);
-
+  var moreItems = some(value, function predicate(item, index) {
     if (index !== nextIndex) {
       push(output, ctx.stylize(getEmptyItemText(index - lastIndex - 1), 'undefined'));
     }
@@ -524,7 +528,7 @@ var fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
     lastIndex = index;
     nextIndex = index + 1;
     return nextIndex >= maxLength;
-  }.bind(this));
+  });
   var remaining = length - nextIndex;
 
   if (remaining > 0) {
@@ -535,76 +539,83 @@ var fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
     }
   }
 
-  var fmtdProps = map(filterOutIndexes(keys), function (key) {
-    _newArrowCheck(this, _this4);
-
+  var fmtdProps = map(filterOutIndexes(keys), function iteratee(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, true);
-  }.bind(this));
+  });
   return concat(output, fmtdProps);
 };
 
-var fmtTypedArray = function _fmtTypedArray(ctx, value, depth, visibleKeys, keys) {
-  var _this5 = this;
+var fmtTypedArray = function fmtTypedArray() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice5 = slice(arguments),
+      _slice6 = _slicedToArray(_slice5, 5),
+      ctx = _slice6[0],
+      value = _slice6[1],
+      depth = _slice6[2],
+      visibleKeys = _slice6[3],
+      keys = _slice6[4];
 
   var length = value.length;
   var maxLength = clamp(length, 0, ctx.maxArrayLength);
   var output = [];
   output.length = maxLength;
-  var moreItems = some(value, function (item, index) {
-    _newArrowCheck(this, _this5);
-
+  var moreItems = some(value, function predicate(item, index) {
     if (index >= maxLength) {
       return true;
     }
 
     output[index] = fmtNumber(ctx, value[index]);
     return false;
-  }.bind(this));
+  });
 
   if (moreItems) {
     push(output, getMoreItemText(length - maxLength));
   }
 
-  var fmtdProps = map(filterOutIndexes(keys), function (key) {
-    _newArrowCheck(this, _this5);
-
+  var fmtdProps = map(filterOutIndexes(keys), function iteratee(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, true);
-  }.bind(this));
+  });
   return concat(output, fmtdProps);
 };
 
-var fmtSet = function _fmtSet(ctx, value, depth, visibleKeys, keys) {
-  var _this6 = this;
+var fmtSet = function fmtSet() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice7 = slice(arguments),
+      _slice8 = _slicedToArray(_slice7, 5),
+      ctx = _slice8[0],
+      value = _slice8[1],
+      depth = _slice8[2],
+      visibleKeys = _slice8[3],
+      keys = _slice8[4];
 
   var output = [];
-  setForEach(value, function (v) {
-    _newArrowCheck(this, _this6);
-
-    push(output, fmtValue(ctx, v, recurse(depth)));
-  }.bind(this));
-  var fmtdProps = map(keys, function (key) {
-    _newArrowCheck(this, _this6);
-
+  setForEach(value, function iteratee(v) {
+    push(output, $fmtValue(ctx, v, recurse(depth)));
+  });
+  var fmtdProps = map(keys, function iteratee(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, false);
-  }.bind(this));
+  });
   return concat(output, fmtdProps);
 };
 
-var fmtMap = function _fmtMap(ctx, value, depth, visibleKeys, keys) {
-  var _this7 = this;
+var fmtMap = function fmtMap() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice9 = slice(arguments),
+      _slice10 = _slicedToArray(_slice9, 5),
+      ctx = _slice10[0],
+      value = _slice10[1],
+      depth = _slice10[2],
+      visibleKeys = _slice10[3],
+      keys = _slice10[4];
 
   var r = recurse(depth);
   var output = [];
-  mapForEach(value, function (v, k) {
-    _newArrowCheck(this, _this7);
-
-    push(output, "".concat(fmtValue(ctx, k, r), " => ").concat(fmtValue(ctx, v, r)));
-  }.bind(this));
-  var fmtdProps = map(keys, function (key) {
-    _newArrowCheck(this, _this7);
-
+  mapForEach(value, function iteratee(v, k) {
+    push(output, "".concat($fmtValue(ctx, k, r), " => ").concat($fmtValue(ctx, v, r)));
+  });
+  var fmtdProps = map(keys, function iteratee(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, false);
-  }.bind(this));
+  });
   return concat(output, fmtdProps);
 };
 
@@ -613,11 +624,11 @@ var reSingle = new RegExpCtr("\\{[".concat(whiteSpace, "]+\\}"));
 
 var lengthReduceRx = /\u001b\[\d\d?m/g;
 
-var lengthReduce = function _lengthReduce(prev, cur) {
+var lengthReduce = function lengthReduce(prev, cur) {
   return prev + replace(cur, lengthReduceRx, EMPTY_STRING).length + 1;
 };
 
-var reduceToSingleString = function _reduceToSingleString(out, base, braces, breakLength) {
+var reduceToSingleString = function reduceToSingleString(out, base, braces, breakLength) {
   var result;
 
   if (reduce(out, lengthReduce, 0) > breakLength) {
@@ -633,11 +644,11 @@ var reduceToSingleString = function _reduceToSingleString(out, base, braces, bre
   return replace(result, reSingle, '{}');
 };
 
-var fmtDate = function _fmtDate(value) {
+var fmtDate = function fmtDate(value) {
   return isNumberNaN(getTime(value)) ? 'Invalid Date' : toISOString(value);
 };
 
-var fmtError = function _fmtError(value) {
+var fmtError = function fmtError(value) {
   var stack = value.stack;
 
   if (stack) {
@@ -663,17 +674,23 @@ var collectionKeys = ['size'];
 var arrayKeys = ['length'];
 var errorKeys = ['message'];
 
-fmtValue = function _fmtValue(ctx, value, depth, isProto) {
-  var _this8 = this;
-
-  // Provide a hook for user-specified inspect functions.
+$fmtValue = function fmtValue() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice11 = slice(arguments),
+      _slice12 = _slicedToArray(_slice11, 4),
+      ctx = _slice12[0],
+      value = _slice12[1],
+      depth = _slice12[2],
+      isProto = _slice12[3]; // Provide a hook for user-specified inspect functions.
   // Check that value is an object with an inspect function on it
+
+
   if (ctx.customInspect && value) {
     var maybeCustomInspect = value[customInspectSymbol] || value.inspect;
 
     if (isFunction(maybeCustomInspect)) {
       // Filter out the util module, its inspect function is special
-      if (maybeCustomInspect !== inspect) {
+      if (maybeCustomInspect !== $inspect) {
         var _constructor2 = getConstructorOf(value); // Also filter out any prototype objects using the circular check.
 
 
@@ -684,7 +701,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
           // infinite recursion.
 
           if (ret !== value) {
-            return isStringType(ret) ? ret : fmtValue(ctx, ret, depth);
+            return isStringType(ret) ? ret : $fmtValue(ctx, ret, depth);
           }
         }
       }
@@ -703,17 +720,13 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
 
   if (visibleKeys.length > 0) {
     if (shimmedDate && isDate(value)) {
-      visibleKeys = filter(visibleKeys, function (key) {
-        _newArrowCheck(this, _this8);
-
+      visibleKeys = filter(visibleKeys, function predicate(key) {
         return key !== 'constructor';
-      }.bind(this));
+      });
     } else if (errProps.length > 0 && isError(value)) {
-      visibleKeys = filter(visibleKeys, function (key) {
-        _newArrowCheck(this, _this8);
-
+      visibleKeys = filter(visibleKeys, function predicate(key) {
         return arrayincludes(errProps, key) === false;
-      }.bind(this));
+      });
     }
   }
 
@@ -742,11 +755,9 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
       }
     }
   } else {
-    var enumSymbols = filter(getOwnPropertySymbols(value), function (key) {
-      _newArrowCheck(this, _this8);
-
+    var enumSymbols = filter(getOwnPropertySymbols(value), function predicate(key) {
       return propertyIsEnumerable(value, key);
-    }.bind(this));
+    });
     keys = concat(visibleKeys, enumSymbols);
   }
 
@@ -977,7 +988,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   return reduceToSingleString(out, base, braces, ctx.breakLength);
 };
 
-inspect = function _inspect(obj, opts) {
+$inspect = function inspect(obj, opts) {
   // default options
   var ctx = {
     seen: new SetConstructor(),
@@ -1005,9 +1016,9 @@ inspect = function _inspect(obj, opts) {
 
 
   if (supportsGetSet) {
-    ctx = assign({}, inspect.defaultOptions, ctx, opts);
+    ctx = assign({}, $inspect.defaultOptions, ctx, opts);
   } else {
-    ctx = assign({}, inspectDefaultOptions, inspect.defaultOptions, ctx, opts);
+    ctx = assign({}, inspectDefaultOptions, $inspect.defaultOptions, ctx, opts);
   }
 
   if (ctx.colors) {
@@ -1018,11 +1029,11 @@ inspect = function _inspect(obj, opts) {
     ctx.maxArrayLength = Infinity;
   }
 
-  return fmtValue(ctx, obj, ctx.depth);
+  return $fmtValue(ctx, obj, ctx.depth);
 };
 
 if (supportsGetSet) {
-  defineProperty(inspect, 'defaultOptions', {
+  defineProperty($inspect, 'defaultOptions', {
     get: function _get() {
       return inspectDefaultOptions;
     },
@@ -1035,7 +1046,7 @@ if (supportsGetSet) {
     }
   });
 } else {
-  defineProperties(inspect, {
+  defineProperties($inspect, {
     defaultOptions: {
       value: assign({}, inspectDefaultOptions),
       writable: true
@@ -1043,7 +1054,7 @@ if (supportsGetSet) {
   });
 }
 
-defineProperties(inspect, {
+defineProperties($inspect, {
   // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
   colors: {
     value: {
@@ -1081,7 +1092,7 @@ defineProperties(inspect, {
     }
   }
 });
-var ins = inspect;
+var ins = $inspect;
 export default ins;
 
 //# sourceMappingURL=inspect-x.esm.js.map

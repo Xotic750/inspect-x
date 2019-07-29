@@ -107,10 +107,10 @@ const customInspectSymbol = hasSymbolSupport ? Symbol('inspect.custom') : '_insp
  * @param {object} [opts] - Options object that alters the out.
  * @returns {string} The string representation.
  */
-let inspect;
-let fmtValue;
+let $inspect;
+let $fmtValue;
 
-const isFalsey = function _isFalsey(value) {
+const isFalsey = function isFalsey(value) {
   return toBoolean(value) === false;
 };
 
@@ -123,7 +123,7 @@ try {
   // empty
 }
 
-const isClass = function _isClass(value) {
+const isClass = function isClass(value) {
   return supportsClasses ? isFunction(value, true) && isFunction(value) === false : false;
 };
 
@@ -148,19 +148,19 @@ try {
   // empty
 }
 
-const pluralEnding = function _pluralEnding(number) {
+const pluralEnding = function pluralEnding(number) {
   return number > 1 ? 's' : EMPTY_STRING;
 };
 
-const isDigits = function _isDigits(key) {
+const isDigits = function isDigits(key) {
   return regexpTest(/^\d+$/, key);
 };
 
-const appendMissing = function _appendMissing(array, values) {
+const appendMissing = function appendMissing(array, values) {
   return concat(array, difference(values, array));
 };
 
-const promote = function _promote(array, values) {
+const promote = function promote(array, values) {
   return concat(values, difference(array, values));
 };
 
@@ -184,7 +184,7 @@ try {
 }
 
 if (isDate(Date.prototype)) {
-  isDate = function _isDate(value) {
+  isDate = function $isDate(value) {
     try {
       getTime(value);
 
@@ -202,7 +202,7 @@ if (dateProps.length > 0) {
   const datePropsCheck = ['now', 'UTC', 'parse'];
 
   shimmedDate =
-    every(datePropsCheck, (prop) => {
+    every(datePropsCheck, function predicate(prop) {
       return arrayincludes(dateProps, prop);
     }) && arrayincludes(objectKeys(new Date()), 'constructor');
 }
@@ -216,7 +216,7 @@ const wantedFnProps = ['length', 'name', 'prototype'];
 
 const fnPropsCheck = fnSupportsName
   ? slice(wantedFnProps)
-  : filter(wantedFnProps, (prop) => {
+  : filter(wantedFnProps, function predicate(prop) {
       return prop !== 'name';
     });
 
@@ -225,7 +225,7 @@ const unwantedFnProps = intersection(['arguments', 'caller'], funcKeys);
 let mustFilterFnProps = difference(fnPropsCheck, funcKeys).length > 0;
 
 if (mustFilterFnProps === false) {
-  mustFilterFnProps = some(intersection(funcKeys, wantedFnProps), (key, index) => {
+  mustFilterFnProps = some(intersection(funcKeys, wantedFnProps), function predicate(key, index) {
     return wantedFnProps[index] !== key;
   });
 }
@@ -240,23 +240,23 @@ const inspectDefaultOptions = objectSeal({
   showProxy: false,
 });
 
-const isBooleanType = function _isBooleanType(arg) {
+const isBooleanType = function isBooleanType(arg) {
   return typeof arg === 'boolean';
 };
 
-const isNumberType = function _isNumberType(arg) {
+const isNumberType = function isNumberType(arg) {
   return typeof arg === 'number';
 };
 
-const isStringType = function _isStringType(arg) {
+const isStringType = function isStringType(arg) {
   return typeof arg === 'string';
 };
 
-const isSymbolType = function _isSymbolType(arg) {
+const isSymbolType = function isSymbolType(arg) {
   return typeof arg === 'symbol';
 };
 
-const isMapIterator = function _isMapIterator(value) {
+const isMapIterator = function isMapIterator(value) {
   if (hasMap === false || isObjectLike(value) === false) {
     return false;
   }
@@ -270,7 +270,7 @@ const isMapIterator = function _isMapIterator(value) {
   return false;
 };
 
-const isSetIterator = function _isSetIterator(value) {
+const isSetIterator = function isSetIterator(value) {
   if (hasSet === false || isObjectLike(value) === false) {
     return false;
   }
@@ -284,17 +284,17 @@ const isSetIterator = function _isSetIterator(value) {
   return false;
 };
 
-const filterIndexes = function _filterIndexes(keys, length) {
-  return filter(keys, (key) => {
+const filterIndexes = function filterIndexes(keys, length) {
+  return filter(keys, function predicate(key) {
     return isSymbolType(key) || key < 0 || key > length || key % 1 !== 0;
   });
 };
 
-const stylizeWithColor = function _stylizeWithColor(str, styleType) {
-  const style = inspect.styles[styleType];
+const stylizeWithColor = function stylizeWithColor(str, styleType) {
+  const style = $inspect.styles[styleType];
 
   if (style) {
-    const colors = inspect.colors[style];
+    const colors = $inspect.colors[style];
 
     return `\u001b[${colors[0]}m${str}\u001b[${colors[1]}m`;
   }
@@ -302,17 +302,17 @@ const stylizeWithColor = function _stylizeWithColor(str, styleType) {
   return str;
 };
 
-const stylizeNoColor = function _stylizeNoColor(str) {
+const stylizeNoColor = function stylizeNoColor(str) {
   return str;
 };
 
-const getNameSep = function _getNameSep(obj) {
+const getNameSep = function getNameSep(obj) {
   const name = getFunctionName(obj);
 
   return name ? `: ${name}` : name;
 };
 
-const getConstructorOf = function _getConstructorOf(obj) {
+const getConstructorOf = function getConstructorOf(obj) {
   let o = obj;
   let maxLoop = 100;
   while (isNil(o) === false && maxLoop >= 0) {
@@ -330,7 +330,7 @@ const getConstructorOf = function _getConstructorOf(obj) {
   return null;
 };
 
-const isSub = function _isSub(value) {
+const isSub = function isSub(value) {
   if (supportsClasses !== true || isPrimitive(value)) {
     return false;
   }
@@ -340,7 +340,7 @@ const isSub = function _isSub(value) {
   return isFunction(constructor) === false && isFunction(constructor, true);
 };
 
-const getSubName = function _getSubName(value, name) {
+const getSubName = function getSubName(value, name) {
   if (isSub(value)) {
     const subName = getFunctionName(getConstructorOf(value));
 
@@ -352,7 +352,7 @@ const getSubName = function _getSubName(value, name) {
   return name || getFunctionName(getConstructorOf(value));
 };
 
-const fmtNumber = function _fmtNumber(ctx, value) {
+const fmtNumber = function fmtNumber(ctx, value) {
   // Format -0 as '-0'.
   return ctx.stylize(objectIs(value, -0) ? '-0' : numberToString(value), 'number');
 };
@@ -363,7 +363,7 @@ const fmtPrimitiveReplace = function _fmtPrimitiveReplace(acc, pair) {
   return replace(acc, pair[0], pair[1]);
 };
 
-const fmtPrimitive = function _fmtPrimitive(ctx, value) {
+const fmtPrimitive = function fmtPrimitive(ctx, value) {
   if (isNil(value)) {
     const str = toStr(value);
 
@@ -391,7 +391,7 @@ const fmtPrimitive = function _fmtPrimitive(ctx, value) {
   return void 0;
 };
 
-const fmtPrimNoColor = function _fmtPrimNoColor(ctx, value) {
+const fmtPrimNoColor = function fmtPrimNoColor(ctx, value) {
   const {stylize} = ctx;
   ctx.stylize = stylizeNoColor;
   const str = fmtPrimitive(ctx, value);
@@ -400,7 +400,7 @@ const fmtPrimNoColor = function _fmtPrimNoColor(ctx, value) {
   return str;
 };
 
-const recurse = function _recurse(depth) {
+const recurse = function recurse(depth) {
   return depth === null ? null : depth - 1;
 };
 
@@ -414,7 +414,7 @@ const fmtPropReplacer1 = [/\n/g, '\n  '];
 const fmtPropReplacer2 = [/(^|\n)/g, '\n   '];
 const fmtPropTestRx = /^"[\w$]+"$/;
 
-const fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
+const fmtProp = function fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   const desc = getOwnPropertyDescriptor(value, key) || {value: value[key]};
 
   /*
@@ -447,7 +447,7 @@ const fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   } else if (desc.set) {
     str = ctx.stylize('[Setter]', 'special');
   } else {
-    const formattedStr = fmtValue(ctx, desc.value, recurse(depth), key === 'prototype');
+    const formattedStr = $fmtValue(ctx, desc.value, recurse(depth), key === 'prototype');
 
     if (strIncludes(formattedStr, '\n')) {
       const replacer = arr ? fmtPropReplacer1 : fmtPropReplacer2;
@@ -474,34 +474,39 @@ const fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   return `${name}: ${str}`;
 };
 
-const fmtObject = function _fmtObject(ctx, value, depth, visibleKeys, keys) {
-  return map(keys, function _mapFmObject(key) {
+const fmtObject = function fmtObject() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [ctx, value, depth, visibleKeys, keys] = slice(arguments);
+
+  return map(keys, function mapFmObject(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, false);
   });
 };
 
-const getMoreItemText = function _getMoreItemText(remaining) {
+const getMoreItemText = function getMoreItemText(remaining) {
   return `... ${remaining} more item${pluralEnding(remaining)}`;
 };
 
-const getEmptyItemText = function _getEmptyItemText(emptyItems) {
+const getEmptyItemText = function getEmptyItemText(emptyItems) {
   return `<${emptyItems} empty item${pluralEnding(emptyItems)}>`;
 };
 
-const filterOutIndexes = function _filterOutIndexes(keys) {
-  return filter(keys, (key) => {
+const filterOutIndexes = function filterOutIndexes(keys) {
+  return filter(keys, function predicate(key) {
     return isSymbolType(key) || isDigits(key) === false;
   });
 };
 
-const fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
+const fmtArray = function _fmtArray() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [ctx, value, depth, visibleKeys, keys] = slice(arguments);
   const {length} = value;
   const maxLength = clamp(length, 0, ctx.maxArrayLength);
   let lastIndex = 0;
   let nextIndex = 0;
   const output = [];
 
-  const moreItems = some(value, (item, index) => {
+  const moreItems = some(value, function predicate(item, index) {
     if (index !== nextIndex) {
       push(output, ctx.stylize(getEmptyItemText(index - lastIndex - 1), 'undefined'));
     }
@@ -523,19 +528,21 @@ const fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
     }
   }
 
-  const fmtdProps = map(filterOutIndexes(keys), (key) => {
+  const fmtdProps = map(filterOutIndexes(keys), function iteratee(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, true);
   });
 
   return concat(output, fmtdProps);
 };
 
-const fmtTypedArray = function _fmtTypedArray(ctx, value, depth, visibleKeys, keys) {
+const fmtTypedArray = function fmtTypedArray() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [ctx, value, depth, visibleKeys, keys] = slice(arguments);
   const {length} = value;
   const maxLength = clamp(length, 0, ctx.maxArrayLength);
   const output = [];
   output.length = maxLength;
-  const moreItems = some(value, (item, index) => {
+  const moreItems = some(value, function predicate(item, index) {
     if (index >= maxLength) {
       return true;
     }
@@ -549,34 +556,38 @@ const fmtTypedArray = function _fmtTypedArray(ctx, value, depth, visibleKeys, ke
     push(output, getMoreItemText(length - maxLength));
   }
 
-  const fmtdProps = map(filterOutIndexes(keys), (key) => {
+  const fmtdProps = map(filterOutIndexes(keys), function iteratee(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, true);
   });
 
   return concat(output, fmtdProps);
 };
 
-const fmtSet = function _fmtSet(ctx, value, depth, visibleKeys, keys) {
+const fmtSet = function fmtSet() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [ctx, value, depth, visibleKeys, keys] = slice(arguments);
   const output = [];
-  setForEach(value, (v) => {
-    push(output, fmtValue(ctx, v, recurse(depth)));
+  setForEach(value, function iteratee(v) {
+    push(output, $fmtValue(ctx, v, recurse(depth)));
   });
 
-  const fmtdProps = map(keys, (key) => {
+  const fmtdProps = map(keys, function iteratee(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, false);
   });
 
   return concat(output, fmtdProps);
 };
 
-const fmtMap = function _fmtMap(ctx, value, depth, visibleKeys, keys) {
+const fmtMap = function fmtMap() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [ctx, value, depth, visibleKeys, keys] = slice(arguments);
   const r = recurse(depth);
   const output = [];
-  mapForEach(value, (v, k) => {
-    push(output, `${fmtValue(ctx, k, r)} => ${fmtValue(ctx, v, r)}`);
+  mapForEach(value, function iteratee(v, k) {
+    push(output, `${$fmtValue(ctx, k, r)} => ${$fmtValue(ctx, v, r)}`);
   });
 
-  const fmtdProps = map(keys, (key) => {
+  const fmtdProps = map(keys, function iteratee(key) {
     return fmtProp(ctx, value, depth, visibleKeys, key, false);
   });
 
@@ -587,11 +598,11 @@ const reSingle = new RegExpCtr(`\\{[${whiteSpace}]+\\}`);
 /* eslint-disable-next-line no-control-regex */
 const lengthReduceRx = /\u001b\[\d\d?m/g;
 
-const lengthReduce = function _lengthReduce(prev, cur) {
+const lengthReduce = function lengthReduce(prev, cur) {
   return prev + replace(cur, lengthReduceRx, EMPTY_STRING).length + 1;
 };
 
-const reduceToSingleString = function _reduceToSingleString(out, base, braces, breakLength) {
+const reduceToSingleString = function reduceToSingleString(out, base, braces, breakLength) {
   let result;
 
   if (reduce(out, lengthReduce, 0) > breakLength) {
@@ -607,11 +618,11 @@ const reduceToSingleString = function _reduceToSingleString(out, base, braces, b
   return replace(result, reSingle, '{}');
 };
 
-const fmtDate = function _fmtDate(value) {
+const fmtDate = function fmtDate(value) {
   return isNumberNaN(getTime(value)) ? 'Invalid Date' : toISOString(value);
 };
 
-const fmtError = function _fmtError(value) {
+const fmtError = function fmtError(value) {
   const {stack} = value;
 
   if (stack) {
@@ -640,7 +651,10 @@ const collectionKeys = ['size'];
 const arrayKeys = ['length'];
 const errorKeys = ['message'];
 
-fmtValue = function _fmtValue(ctx, value, depth, isProto) {
+$fmtValue = function fmtValue() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [ctx, value, depth, isProto] = slice(arguments);
+
   // Provide a hook for user-specified inspect functions.
   // Check that value is an object with an inspect function on it
   if (ctx.customInspect && value) {
@@ -648,7 +662,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
 
     if (isFunction(maybeCustomInspect)) {
       // Filter out the util module, its inspect function is special
-      if (maybeCustomInspect !== inspect) {
+      if (maybeCustomInspect !== $inspect) {
         const constructor = getConstructorOf(value);
         // Also filter out any prototype objects using the circular check.
         const isCircular = constructor && constructor.prototype === value;
@@ -659,7 +673,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
           // If the custom inspection method returned `this`, don't go into
           // infinite recursion.
           if (ret !== value) {
-            return isStringType(ret) ? ret : fmtValue(ctx, ret, depth);
+            return isStringType(ret) ? ret : $fmtValue(ctx, ret, depth);
           }
         }
       }
@@ -678,11 +692,11 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
 
   if (visibleKeys.length > 0) {
     if (shimmedDate && isDate(value)) {
-      visibleKeys = filter(visibleKeys, (key) => {
+      visibleKeys = filter(visibleKeys, function predicate(key) {
         return key !== 'constructor';
       });
     } else if (errProps.length > 0 && isError(value)) {
-      visibleKeys = filter(visibleKeys, (key) => {
+      visibleKeys = filter(visibleKeys, function predicate(key) {
         return arrayincludes(errProps, key) === false;
       });
     }
@@ -713,7 +727,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
       }
     }
   } else {
-    const enumSymbols = filter(getOwnPropertySymbols(value), (key) => {
+    const enumSymbols = filter(getOwnPropertySymbols(value), function predicate(key) {
       return propertyIsEnumerable(value, key);
     });
 
@@ -952,7 +966,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   return reduceToSingleString(out, base, braces, ctx.breakLength);
 };
 
-inspect = function _inspect(obj, opts) {
+$inspect = function inspect(obj, opts) {
   // default options
   let ctx = {
     seen: new SetConstructor(),
@@ -979,9 +993,9 @@ inspect = function _inspect(obj, opts) {
 
   // Set default and user-specified options
   if (supportsGetSet) {
-    ctx = assign({}, inspect.defaultOptions, ctx, opts);
+    ctx = assign({}, $inspect.defaultOptions, ctx, opts);
   } else {
-    ctx = assign({}, inspectDefaultOptions, inspect.defaultOptions, ctx, opts);
+    ctx = assign({}, inspectDefaultOptions, $inspect.defaultOptions, ctx, opts);
   }
 
   if (ctx.colors) {
@@ -992,11 +1006,11 @@ inspect = function _inspect(obj, opts) {
     ctx.maxArrayLength = Infinity;
   }
 
-  return fmtValue(ctx, obj, ctx.depth);
+  return $fmtValue(ctx, obj, ctx.depth);
 };
 
 if (supportsGetSet) {
-  defineProperty(inspect, 'defaultOptions', {
+  defineProperty($inspect, 'defaultOptions', {
     get: function _get() {
       return inspectDefaultOptions;
     },
@@ -1009,7 +1023,7 @@ if (supportsGetSet) {
     },
   });
 } else {
-  defineProperties(inspect, {
+  defineProperties($inspect, {
     defaultOptions: {
       value: assign({}, inspectDefaultOptions),
       writable: true,
@@ -1017,7 +1031,7 @@ if (supportsGetSet) {
   });
 }
 
-defineProperties(inspect, {
+defineProperties($inspect, {
   // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
   colors: {
     value: {
@@ -1056,6 +1070,6 @@ defineProperties(inspect, {
   },
 });
 
-const ins = inspect;
+const ins = $inspect;
 
 export default ins;

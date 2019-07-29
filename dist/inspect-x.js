@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-27T22:11:37.796Z",
+  "date": "2019-07-29T14:32:55.381Z",
   "describe": "",
   "description": "An implementation of node's ES6 inspect module.",
   "file": "inspect-x.js",
-  "hash": "3b849f4b890204adc6a9",
+  "hash": "c766508ead82189aa3ff",
   "license": "MIT",
   "version": "3.0.11"
 }
@@ -9220,11 +9220,15 @@ var array_union_x_esm_union = function union() {
 
 
 // CONCATENATED MODULE: ./dist/inspect-x.esm.js
-var inspect_x_esm_this = undefined;
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function inspect_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { inspect_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { inspect_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return inspect_x_esm_typeof(obj); }
-
-function inspect_x_esm_newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
 
 
 
@@ -9337,10 +9341,10 @@ var customInspectSymbol = has_symbol_support_x_esm ? Symbol('inspect.custom') : 
  * @returns {string} The string representation.
  */
 
-var inspect;
-var fmtValue;
+var $inspect;
+var $fmtValue;
 
-var isFalsey = function _isFalsey(value) {
+var inspect_x_esm_isFalsey = function isFalsey(value) {
   return to_boolean_x_esm(value) === false;
 };
 
@@ -9353,7 +9357,7 @@ try {
 } catch (ignore) {// empty
 }
 
-var isClass = function _isClass(value) {
+var inspect_x_esm_isClass = function isClass(value) {
   return supportsClasses ? is_function_x_esm(value, true) && is_function_x_esm(value) === false : false;
 };
 
@@ -9376,19 +9380,19 @@ try {
 } catch (ignore) {// empty
 }
 
-var pluralEnding = function _pluralEnding(number) {
+var pluralEnding = function pluralEnding(number) {
   return number > 1 ? 's' : inspect_x_esm_EMPTY_STRING;
 };
 
-var isDigits = function _isDigits(key) {
+var isDigits = function isDigits(key) {
   return regexpTest(/^\d+$/, key);
 };
 
-var appendMissing = function _appendMissing(array, values) {
+var inspect_x_esm_appendMissing = function appendMissing(array, values) {
   return inspect_x_esm_concat(array, array_difference_x_esm(values, array));
 };
 
-var promote = function _promote(array, values) {
+var inspect_x_esm_promote = function promote(array, values) {
   return inspect_x_esm_concat(values, array_difference_x_esm(array, values));
 };
 
@@ -9413,7 +9417,7 @@ try {
 }
 
 if (is_date_object_default()(Date.prototype)) {
-  isDate = function _isDate(value) {
+  isDate = function $isDate(value) {
     try {
       getTime(value);
       return true;
@@ -9428,11 +9432,9 @@ var dateProps = object_keys_x_esm(Date);
 
 if (dateProps.length > 0) {
   var datePropsCheck = ['now', 'UTC', 'parse'];
-  shimmedDate = array_every_x_esm(datePropsCheck, function (prop) {
-    inspect_x_esm_newArrowCheck(this, inspect_x_esm_this);
-
+  shimmedDate = array_every_x_esm(datePropsCheck, function predicate(prop) {
     return array_includes_x_esm(dateProps, prop);
-  }.bind(undefined)) && array_includes_x_esm(object_keys_x_esm(new Date()), 'constructor');
+  }) && array_includes_x_esm(object_keys_x_esm(new Date()), 'constructor');
 }
 /* eslint-disable-next-line lodash/prefer-noop */
 
@@ -9442,21 +9444,17 @@ var testFunc1 = function test1() {};
 var fnSupportsName = testFunc1.name === 'test1';
 var hiddenFuncCtr = array_includes_x_esm(reflect_own_keys_x_esm(testFunc1.prototype), 'constructor') === false;
 var wantedFnProps = ['length', 'name', 'prototype'];
-var fnPropsCheck = fnSupportsName ? array_slice_x_esm(wantedFnProps) : array_filter_x_esm(wantedFnProps, function (prop) {
-  inspect_x_esm_newArrowCheck(this, inspect_x_esm_this);
-
+var fnPropsCheck = fnSupportsName ? array_slice_x_esm(wantedFnProps) : array_filter_x_esm(wantedFnProps, function predicate(prop) {
   return prop !== 'name';
-}.bind(undefined));
+});
 var funcKeys = reflect_own_keys_x_esm(testFunc1);
 var unwantedFnProps = array_intersection_x_esm(['arguments', 'caller'], funcKeys);
 var mustFilterFnProps = array_difference_x_esm(fnPropsCheck, funcKeys).length > 0;
 
 if (mustFilterFnProps === false) {
-  mustFilterFnProps = array_some_x_esm(array_intersection_x_esm(funcKeys, wantedFnProps), function (key, index) {
-    inspect_x_esm_newArrowCheck(this, inspect_x_esm_this);
-
+  mustFilterFnProps = array_some_x_esm(array_intersection_x_esm(funcKeys, wantedFnProps), function predicate(key, index) {
     return wantedFnProps[index] !== key;
-  }.bind(undefined));
+  });
 }
 
 var inspectDefaultOptions = objectSeal({
@@ -9469,23 +9467,23 @@ var inspectDefaultOptions = objectSeal({
   showProxy: false
 });
 
-var isBooleanType = function _isBooleanType(arg) {
+var isBooleanType = function isBooleanType(arg) {
   return typeof arg === 'boolean';
 };
 
-var inspect_x_esm_isNumberType = function _isNumberType(arg) {
+var inspect_x_esm_isNumberType = function isNumberType(arg) {
   return typeof arg === 'number';
 };
 
-var isStringType = function _isStringType(arg) {
+var isStringType = function isStringType(arg) {
   return typeof arg === 'string';
 };
 
-var isSymbolType = function _isSymbolType(arg) {
+var isSymbolType = function isSymbolType(arg) {
   return inspect_x_esm_typeof(arg) === 'symbol';
 };
 
-var isMapIterator = function _isMapIterator(value) {
+var inspect_x_esm_isMapIterator = function isMapIterator(value) {
   if (hasMap === false || is_object_like_x_esm(value) === false) {
     return false;
   }
@@ -9498,7 +9496,7 @@ var isMapIterator = function _isMapIterator(value) {
   return false;
 };
 
-var isSetIterator = function _isSetIterator(value) {
+var inspect_x_esm_isSetIterator = function isSetIterator(value) {
   if (hasSet === false || is_object_like_x_esm(value) === false) {
     return false;
   }
@@ -9511,37 +9509,33 @@ var isSetIterator = function _isSetIterator(value) {
   return false;
 };
 
-var filterIndexes = function _filterIndexes(keys, length) {
-  var _this2 = this;
-
-  return array_filter_x_esm(keys, function (key) {
-    inspect_x_esm_newArrowCheck(this, _this2);
-
+var inspect_x_esm_filterIndexes = function filterIndexes(keys, length) {
+  return array_filter_x_esm(keys, function predicate(key) {
     return isSymbolType(key) || key < 0 || key > length || key % 1 !== 0;
-  }.bind(this));
+  });
 };
 
-var stylizeWithColor = function _stylizeWithColor(str, styleType) {
-  var style = inspect.styles[styleType];
+var stylizeWithColor = function stylizeWithColor(str, styleType) {
+  var style = $inspect.styles[styleType];
 
   if (style) {
-    var colors = inspect.colors[style];
+    var colors = $inspect.colors[style];
     return "\x1B[".concat(colors[0], "m").concat(str, "\x1B[").concat(colors[1], "m");
   }
 
   return str;
 };
 
-var stylizeNoColor = function _stylizeNoColor(str) {
+var stylizeNoColor = function stylizeNoColor(str) {
   return str;
 };
 
-var getNameSep = function _getNameSep(obj) {
+var inspect_x_esm_getNameSep = function getNameSep(obj) {
   var name = get_function_name_x_esm(obj);
   return name ? ": ".concat(name) : name;
 };
 
-var getConstructorOf = function _getConstructorOf(obj) {
+var inspect_x_esm_getConstructorOf = function getConstructorOf(obj) {
   var o = obj;
   var maxLoop = 100;
 
@@ -9560,28 +9554,28 @@ var getConstructorOf = function _getConstructorOf(obj) {
   return null;
 };
 
-var isSub = function _isSub(value) {
+var inspect_x_esm_isSub = function isSub(value) {
   if (supportsClasses !== true || is_primitive_default()(value)) {
     return false;
   }
 
-  var constructor = getConstructorOf(value);
+  var constructor = inspect_x_esm_getConstructorOf(value);
   return is_function_x_esm(constructor) === false && is_function_x_esm(constructor, true);
 };
 
-var getSubName = function _getSubName(value, name) {
-  if (isSub(value)) {
-    var subName = get_function_name_x_esm(getConstructorOf(value));
+var inspect_x_esm_getSubName = function getSubName(value, name) {
+  if (inspect_x_esm_isSub(value)) {
+    var subName = get_function_name_x_esm(inspect_x_esm_getConstructorOf(value));
 
     if (subName && subName !== name) {
       return subName;
     }
   }
 
-  return name || get_function_name_x_esm(getConstructorOf(value));
+  return name || get_function_name_x_esm(inspect_x_esm_getConstructorOf(value));
 };
 
-var fmtNumber = function _fmtNumber(ctx, value) {
+var inspect_x_esm_fmtNumber = function fmtNumber(ctx, value) {
   // Format -0 as '-0'.
   return ctx.stylize(object_is_default()(value, -0) ? '-0' : numberToString(value), 'number');
 };
@@ -9592,7 +9586,7 @@ var fmtPrimitiveReplace = function _fmtPrimitiveReplace(acc, pair) {
   return inspect_x_esm_replace(acc, pair[0], pair[1]);
 };
 
-var fmtPrimitive = function _fmtPrimitive(ctx, value) {
+var inspect_x_esm_fmtPrimitive = function fmtPrimitive(ctx, value) {
   if (is_nil_x_esm(value)) {
     var str = to_string_x_esm(value);
     return ctx.stylize(str, str);
@@ -9603,7 +9597,7 @@ var fmtPrimitive = function _fmtPrimitive(ctx, value) {
   }
 
   if (inspect_x_esm_isNumberType(value)) {
-    return fmtNumber(ctx, value);
+    return inspect_x_esm_fmtNumber(ctx, value);
   }
 
   if (isBooleanType(value)) {
@@ -9620,15 +9614,15 @@ var fmtPrimitive = function _fmtPrimitive(ctx, value) {
   return void 0;
 };
 
-var fmtPrimNoColor = function _fmtPrimNoColor(ctx, value) {
+var fmtPrimNoColor = function fmtPrimNoColor(ctx, value) {
   var stylize = ctx.stylize;
   ctx.stylize = stylizeNoColor;
-  var str = fmtPrimitive(ctx, value);
+  var str = inspect_x_esm_fmtPrimitive(ctx, value);
   ctx.stylize = stylize;
   return str;
 };
 
-var recurse = function _recurse(depth) {
+var recurse = function recurse(depth) {
   return depth === null ? null : depth - 1;
 };
 
@@ -9642,7 +9636,7 @@ var fmtPropReplacer1 = [/\n/g, '\n  '];
 var fmtPropReplacer2 = [/(^|\n)/g, '\n   '];
 var fmtPropTestRx = /^"[\w$]+"$/;
 
-var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
+var inspect_x_esm_fmtProp = function fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   var desc = object_get_own_property_descriptor_x_esm(value, key) || {
     value: value[key]
   };
@@ -9656,8 +9650,8 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   var name;
 
   if (array_includes_x_esm(visibleKeys, key) === false) {
-    if (key === 'BYTES_PER_ELEMENT' && isFalsey(value.BYTES_PER_ELEMENT) && is_typed_array_default()(value)) {
-      var _constructor = getConstructorOf(value);
+    if (key === 'BYTES_PER_ELEMENT' && inspect_x_esm_isFalsey(value.BYTES_PER_ELEMENT) && is_typed_array_default()(value)) {
+      var _constructor = inspect_x_esm_getConstructorOf(value);
 
       if (_constructor) {
         desc.value = _constructor.BYTES_PER_ELEMENT;
@@ -9676,7 +9670,7 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   } else if (desc.set) {
     str = ctx.stylize('[Setter]', 'special');
   } else {
-    var formattedStr = fmtValue(ctx, desc.value, recurse(depth), key === 'prototype');
+    var formattedStr = $fmtValue(ctx, desc.value, recurse(depth), key === 'prototype');
 
     if (string_includes_x_esm(formattedStr, '\n')) {
       var replacer = arr ? fmtPropReplacer1 : fmtPropReplacer2;
@@ -9703,50 +9697,60 @@ var fmtProp = function _fmtProp(ctx, value, depth, visibleKeys, key, arr) {
   return "".concat(name, ": ").concat(str);
 };
 
-var fmtObject = function _fmtObject(ctx, value, depth, visibleKeys, keys) {
-  return array_map_x_esm(keys, function _mapFmObject(key) {
-    return fmtProp(ctx, value, depth, visibleKeys, key, false);
+var inspect_x_esm_fmtObject = function fmtObject() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice = array_slice_x_esm(arguments),
+      _slice2 = _slicedToArray(_slice, 5),
+      ctx = _slice2[0],
+      value = _slice2[1],
+      depth = _slice2[2],
+      visibleKeys = _slice2[3],
+      keys = _slice2[4];
+
+  return array_map_x_esm(keys, function mapFmObject(key) {
+    return inspect_x_esm_fmtProp(ctx, value, depth, visibleKeys, key, false);
   });
 };
 
-var getMoreItemText = function _getMoreItemText(remaining) {
+var getMoreItemText = function getMoreItemText(remaining) {
   return "... ".concat(remaining, " more item").concat(pluralEnding(remaining));
 };
 
-var getEmptyItemText = function _getEmptyItemText(emptyItems) {
+var getEmptyItemText = function getEmptyItemText(emptyItems) {
   return "<".concat(emptyItems, " empty item").concat(pluralEnding(emptyItems), ">");
 };
 
-var filterOutIndexes = function _filterOutIndexes(keys) {
-  var _this3 = this;
-
-  return array_filter_x_esm(keys, function (key) {
-    inspect_x_esm_newArrowCheck(this, _this3);
-
+var inspect_x_esm_filterOutIndexes = function filterOutIndexes(keys) {
+  return array_filter_x_esm(keys, function predicate(key) {
     return isSymbolType(key) || isDigits(key) === false;
-  }.bind(this));
+  });
 };
 
-var fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
-  var _this4 = this;
+var fmtArray = function _fmtArray() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice3 = array_slice_x_esm(arguments),
+      _slice4 = _slicedToArray(_slice3, 5),
+      ctx = _slice4[0],
+      value = _slice4[1],
+      depth = _slice4[2],
+      visibleKeys = _slice4[3],
+      keys = _slice4[4];
 
   var length = value.length;
   var maxLength = math_clamp_x_esm(length, 0, ctx.maxArrayLength);
   var lastIndex = 0;
   var nextIndex = 0;
   var output = [];
-  var moreItems = array_some_x_esm(value, function (item, index) {
-    inspect_x_esm_newArrowCheck(this, _this4);
-
+  var moreItems = array_some_x_esm(value, function predicate(item, index) {
     if (index !== nextIndex) {
       push(output, ctx.stylize(getEmptyItemText(index - lastIndex - 1), 'undefined'));
     }
 
-    push(output, fmtProp(ctx, value, depth, visibleKeys, numberToString(index), true));
+    push(output, inspect_x_esm_fmtProp(ctx, value, depth, visibleKeys, numberToString(index), true));
     lastIndex = index;
     nextIndex = index + 1;
     return nextIndex >= maxLength;
-  }.bind(this));
+  });
   var remaining = length - nextIndex;
 
   if (remaining > 0) {
@@ -9757,76 +9761,83 @@ var fmtArray = function _fmtArray(ctx, value, depth, visibleKeys, keys) {
     }
   }
 
-  var fmtdProps = array_map_x_esm(filterOutIndexes(keys), function (key) {
-    inspect_x_esm_newArrowCheck(this, _this4);
-
-    return fmtProp(ctx, value, depth, visibleKeys, key, true);
-  }.bind(this));
+  var fmtdProps = array_map_x_esm(inspect_x_esm_filterOutIndexes(keys), function iteratee(key) {
+    return inspect_x_esm_fmtProp(ctx, value, depth, visibleKeys, key, true);
+  });
   return inspect_x_esm_concat(output, fmtdProps);
 };
 
-var fmtTypedArray = function _fmtTypedArray(ctx, value, depth, visibleKeys, keys) {
-  var _this5 = this;
+var inspect_x_esm_fmtTypedArray = function fmtTypedArray() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice5 = array_slice_x_esm(arguments),
+      _slice6 = _slicedToArray(_slice5, 5),
+      ctx = _slice6[0],
+      value = _slice6[1],
+      depth = _slice6[2],
+      visibleKeys = _slice6[3],
+      keys = _slice6[4];
 
   var length = value.length;
   var maxLength = math_clamp_x_esm(length, 0, ctx.maxArrayLength);
   var output = [];
   output.length = maxLength;
-  var moreItems = array_some_x_esm(value, function (item, index) {
-    inspect_x_esm_newArrowCheck(this, _this5);
-
+  var moreItems = array_some_x_esm(value, function predicate(item, index) {
     if (index >= maxLength) {
       return true;
     }
 
-    output[index] = fmtNumber(ctx, value[index]);
+    output[index] = inspect_x_esm_fmtNumber(ctx, value[index]);
     return false;
-  }.bind(this));
+  });
 
   if (moreItems) {
     push(output, getMoreItemText(length - maxLength));
   }
 
-  var fmtdProps = array_map_x_esm(filterOutIndexes(keys), function (key) {
-    inspect_x_esm_newArrowCheck(this, _this5);
-
-    return fmtProp(ctx, value, depth, visibleKeys, key, true);
-  }.bind(this));
+  var fmtdProps = array_map_x_esm(inspect_x_esm_filterOutIndexes(keys), function iteratee(key) {
+    return inspect_x_esm_fmtProp(ctx, value, depth, visibleKeys, key, true);
+  });
   return inspect_x_esm_concat(output, fmtdProps);
 };
 
-var fmtSet = function _fmtSet(ctx, value, depth, visibleKeys, keys) {
-  var _this6 = this;
+var inspect_x_esm_fmtSet = function fmtSet() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice7 = array_slice_x_esm(arguments),
+      _slice8 = _slicedToArray(_slice7, 5),
+      ctx = _slice8[0],
+      value = _slice8[1],
+      depth = _slice8[2],
+      visibleKeys = _slice8[3],
+      keys = _slice8[4];
 
   var output = [];
-  setForEach(value, function (v) {
-    inspect_x_esm_newArrowCheck(this, _this6);
-
-    push(output, fmtValue(ctx, v, recurse(depth)));
-  }.bind(this));
-  var fmtdProps = array_map_x_esm(keys, function (key) {
-    inspect_x_esm_newArrowCheck(this, _this6);
-
-    return fmtProp(ctx, value, depth, visibleKeys, key, false);
-  }.bind(this));
+  setForEach(value, function iteratee(v) {
+    push(output, $fmtValue(ctx, v, recurse(depth)));
+  });
+  var fmtdProps = array_map_x_esm(keys, function iteratee(key) {
+    return inspect_x_esm_fmtProp(ctx, value, depth, visibleKeys, key, false);
+  });
   return inspect_x_esm_concat(output, fmtdProps);
 };
 
-var fmtMap = function _fmtMap(ctx, value, depth, visibleKeys, keys) {
-  var _this7 = this;
+var inspect_x_esm_fmtMap = function fmtMap() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice9 = array_slice_x_esm(arguments),
+      _slice10 = _slicedToArray(_slice9, 5),
+      ctx = _slice10[0],
+      value = _slice10[1],
+      depth = _slice10[2],
+      visibleKeys = _slice10[3],
+      keys = _slice10[4];
 
   var r = recurse(depth);
   var output = [];
-  mapForEach(value, function (v, k) {
-    inspect_x_esm_newArrowCheck(this, _this7);
-
-    push(output, "".concat(fmtValue(ctx, k, r), " => ").concat(fmtValue(ctx, v, r)));
-  }.bind(this));
-  var fmtdProps = array_map_x_esm(keys, function (key) {
-    inspect_x_esm_newArrowCheck(this, _this7);
-
-    return fmtProp(ctx, value, depth, visibleKeys, key, false);
-  }.bind(this));
+  mapForEach(value, function iteratee(v, k) {
+    push(output, "".concat($fmtValue(ctx, k, r), " => ").concat($fmtValue(ctx, v, r)));
+  });
+  var fmtdProps = array_map_x_esm(keys, function iteratee(key) {
+    return inspect_x_esm_fmtProp(ctx, value, depth, visibleKeys, key, false);
+  });
   return inspect_x_esm_concat(output, fmtdProps);
 };
 
@@ -9835,11 +9846,11 @@ var reSingle = new inspect_x_esm_RegExpCtr("\\{[".concat(white_space_x_esm, "]+\
 
 var lengthReduceRx = /\u001b\[\d\d?m/g;
 
-var lengthReduce = function _lengthReduce(prev, cur) {
+var lengthReduce = function lengthReduce(prev, cur) {
   return prev + inspect_x_esm_replace(cur, lengthReduceRx, inspect_x_esm_EMPTY_STRING).length + 1;
 };
 
-var reduceToSingleString = function _reduceToSingleString(out, base, braces, breakLength) {
+var inspect_x_esm_reduceToSingleString = function reduceToSingleString(out, base, braces, breakLength) {
   var result;
 
   if (array_reduce_x_esm(out, lengthReduce, 0) > breakLength) {
@@ -9855,16 +9866,16 @@ var reduceToSingleString = function _reduceToSingleString(out, base, braces, bre
   return inspect_x_esm_replace(result, reSingle, '{}');
 };
 
-var fmtDate = function _fmtDate(value) {
+var inspect_x_esm_fmtDate = function fmtDate(value) {
   return is_nan_default()(getTime(value)) ? 'Invalid Date' : to_iso_string_x_esm(value);
 };
 
-var fmtError = function _fmtError(value) {
+var inspect_x_esm_fmtError = function fmtError(value) {
   var stack = value.stack;
 
   if (stack) {
     if (supportsClasses) {
-      var subName = getSubName(value);
+      var subName = inspect_x_esm_getSubName(value);
 
       if (subName && string_starts_with_x_esm(stack, subName) === false) {
         var msg = value.message;
@@ -9885,18 +9896,24 @@ var collectionKeys = ['size'];
 var arrayKeys = ['length'];
 var errorKeys = ['message'];
 
-fmtValue = function _fmtValue(ctx, value, depth, isProto) {
-  var _this8 = this;
-
-  // Provide a hook for user-specified inspect functions.
+$fmtValue = function fmtValue() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice11 = array_slice_x_esm(arguments),
+      _slice12 = _slicedToArray(_slice11, 4),
+      ctx = _slice12[0],
+      value = _slice12[1],
+      depth = _slice12[2],
+      isProto = _slice12[3]; // Provide a hook for user-specified inspect functions.
   // Check that value is an object with an inspect function on it
+
+
   if (ctx.customInspect && value) {
     var maybeCustomInspect = value[customInspectSymbol] || value.inspect;
 
     if (is_function_x_esm(maybeCustomInspect)) {
       // Filter out the util module, its inspect function is special
-      if (maybeCustomInspect !== inspect) {
-        var _constructor2 = getConstructorOf(value); // Also filter out any prototype objects using the circular check.
+      if (maybeCustomInspect !== $inspect) {
+        var _constructor2 = inspect_x_esm_getConstructorOf(value); // Also filter out any prototype objects using the circular check.
 
 
         var isCircular = _constructor2 && _constructor2.prototype === value;
@@ -9906,7 +9923,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
           // infinite recursion.
 
           if (ret !== value) {
-            return isStringType(ret) ? ret : fmtValue(ctx, ret, depth);
+            return isStringType(ret) ? ret : $fmtValue(ctx, ret, depth);
           }
         }
       }
@@ -9914,7 +9931,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   } // Primitive types cannot have properties
 
 
-  var primitive = fmtPrimitive(ctx, value);
+  var primitive = inspect_x_esm_fmtPrimitive(ctx, value);
 
   if (primitive) {
     return primitive;
@@ -9925,17 +9942,13 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
 
   if (visibleKeys.length > 0) {
     if (shimmedDate && is_date_object_default()(value)) {
-      visibleKeys = array_filter_x_esm(visibleKeys, function (key) {
-        inspect_x_esm_newArrowCheck(this, _this8);
-
+      visibleKeys = array_filter_x_esm(visibleKeys, function predicate(key) {
         return key !== 'constructor';
-      }.bind(this));
+      });
     } else if (errProps.length > 0 && is_error_x_esm(value)) {
-      visibleKeys = array_filter_x_esm(visibleKeys, function (key) {
-        inspect_x_esm_newArrowCheck(this, _this8);
-
+      visibleKeys = array_filter_x_esm(visibleKeys, function predicate(key) {
         return array_includes_x_esm(errProps, key) === false;
-      }.bind(this));
+      });
     }
   }
 
@@ -9946,7 +9959,7 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
 
     if (is_error_x_esm(value)) {
       if (array_includes_x_esm(keys, 'message') === false) {
-        keys = promote(keys, errorKeys);
+        keys = inspect_x_esm_promote(keys, errorKeys);
       }
     } else if ((unwantedFnProps.length > 0 || mustFilterFnProps) && is_function_x_esm(value)) {
       if (unwantedFnProps.length > 0) {
@@ -9958,28 +9971,26 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
         var missingFnProps = array_difference_x_esm(fnPropsCheck, visibleKeys, keysDiff);
         keys = inspect_x_esm_concat(missingFnProps, keysDiff);
       }
-    } else if (hiddenFuncCtr && isProto && is_function_x_esm(getConstructorOf(value))) {
+    } else if (hiddenFuncCtr && isProto && is_function_x_esm(inspect_x_esm_getConstructorOf(value))) {
       if (array_includes_x_esm(visibleKeys, 'constructor') === false && array_includes_x_esm(keys, 'constructor') === false) {
-        keys = promote(keys, 'constructor');
+        keys = inspect_x_esm_promote(keys, 'constructor');
       }
     }
   } else {
-    var enumSymbols = array_filter_x_esm(get_own_property_symbols_x_esm(value), function (key) {
-      inspect_x_esm_newArrowCheck(this, _this8);
-
+    var enumSymbols = array_filter_x_esm(get_own_property_symbols_x_esm(value), function predicate(key) {
       return inspect_x_esm_propertyIsEnumerable(value, key);
-    }.bind(this));
+    });
     keys = inspect_x_esm_concat(visibleKeys, enumSymbols);
   }
 
   if (is_string_default()(value)) {
     // for boxed Strings, we have to remove the 0-n indexed entries,
     // since they just noisy up the out and are redundant
-    keys = filterIndexes(keys, value.length);
-    visibleKeys = filterIndexes(visibleKeys, value.length);
+    keys = inspect_x_esm_filterIndexes(keys, value.length);
+    visibleKeys = inspect_x_esm_filterIndexes(visibleKeys, value.length);
   } else if (is_array_buffer_x_esm(value)) {
-    keys = filterIndexes(keys, value.byteLength);
-    visibleKeys = filterIndexes(visibleKeys, value.byteLength);
+    keys = inspect_x_esm_filterIndexes(keys, value.byteLength);
+    visibleKeys = inspect_x_esm_filterIndexes(visibleKeys, value.byteLength);
   }
 
   var name;
@@ -9988,15 +9999,15 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   if (keys.length < 1) {
     // This could be a boxed primitive (new String(), etc.)
     if (is_string_default()(value)) {
-      return ctx.stylize("[".concat(getSubName(value, 'String'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]"), 'string');
+      return ctx.stylize("[".concat(inspect_x_esm_getSubName(value, 'String'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]"), 'string');
     }
 
     if (is_number_object_default()(value)) {
-      return ctx.stylize("[".concat(getSubName(value, 'Number'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]"), 'number');
+      return ctx.stylize("[".concat(inspect_x_esm_getSubName(value, 'Number'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]"), 'number');
     }
 
     if (is_boolean_object_default()(value)) {
-      return ctx.stylize("[".concat(getSubName(value, 'Boolean'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]"), 'boolean');
+      return ctx.stylize("[".concat(inspect_x_esm_getSubName(value, 'Boolean'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]"), 'boolean');
     }
 
     if (is_symbol_default()(value)) {
@@ -10004,19 +10015,19 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
     }
 
     if (is_async_function_x_esm(value)) {
-      return ctx.stylize("[AsyncFunction".concat(getNameSep(value), "]"), 'special');
+      return ctx.stylize("[AsyncFunction".concat(inspect_x_esm_getNameSep(value), "]"), 'special');
     }
 
     if (is_generator_function_default()(value)) {
-      return ctx.stylize("[GeneratorFunction".concat(getNameSep(value), "]"), 'special');
+      return ctx.stylize("[GeneratorFunction".concat(inspect_x_esm_getNameSep(value), "]"), 'special');
     }
 
     if (is_function_x_esm(value)) {
-      return ctx.stylize("[".concat(getSubName(value, 'Function')).concat(getNameSep(value), "]"), 'special');
+      return ctx.stylize("[".concat(inspect_x_esm_getSubName(value, 'Function')).concat(inspect_x_esm_getNameSep(value), "]"), 'special');
     }
 
-    if (isClass(value)) {
-      return ctx.stylize("[Class".concat(getNameSep(value), "]"), 'special');
+    if (inspect_x_esm_isClass(value)) {
+      return ctx.stylize("[Class".concat(inspect_x_esm_getNameSep(value), "]"), 'special');
     }
 
     if (is_regex_default()(value)) {
@@ -10024,8 +10035,8 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
     }
 
     if (is_date_object_default()(value)) {
-      name = getSubName(value);
-      formatted = ctx.stylize(fmtDate(value), 'date');
+      name = inspect_x_esm_getSubName(value);
+      formatted = ctx.stylize(inspect_x_esm_fmtDate(value), 'date');
 
       if (name === 'Date') {
         return formatted;
@@ -10035,32 +10046,32 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
     }
 
     if (is_error_x_esm(value)) {
-      return fmtError(value);
+      return inspect_x_esm_fmtError(value);
     } // Fast path for ArrayBuffer. Can't do the same for DataView because it
     // has a non-primitive buffer property that we need to recurse for.
 
 
     if (is_array_buffer_x_esm(value)) {
-      return "".concat(getSubName(value, 'ArrayBuffer'), " { byteLength: ").concat(fmtNumber(ctx, value.byteLength), " }");
+      return "".concat(inspect_x_esm_getSubName(value, 'ArrayBuffer'), " { byteLength: ").concat(inspect_x_esm_fmtNumber(ctx, value.byteLength), " }");
     }
 
-    if (isMapIterator(value)) {
-      return "".concat(getSubName(value, 'MapIterator'), " {}");
+    if (inspect_x_esm_isMapIterator(value)) {
+      return "".concat(inspect_x_esm_getSubName(value, 'MapIterator'), " {}");
     }
 
-    if (isSetIterator(value)) {
-      return "".concat(getSubName(value, 'SetIterator'), " {}");
+    if (inspect_x_esm_isSetIterator(value)) {
+      return "".concat(inspect_x_esm_getSubName(value, 'SetIterator'), " {}");
     }
 
     if (is_promise_default()(value)) {
-      return "".concat(getSubName(value, 'Promise'), " {}");
+      return "".concat(inspect_x_esm_getSubName(value, 'Promise'), " {}");
     }
   }
 
   var base = inspect_x_esm_EMPTY_STRING;
   var empty = false;
   var braces = ['{', '}'];
-  var fmtter = fmtObject; // We can't compare constructors for various objects using a comparison
+  var fmtter = inspect_x_esm_fmtObject; // We can't compare constructors for various objects using a comparison
   // like `constructor === Array` because the object could have come from a
   // different context and thus the constructor won't match. Instead we check
   // the constructor names (including those up the prototype chain where
@@ -10068,27 +10079,27 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
 
   if (is_string_default()(value)) {
     // Make boxed primitive Strings look like such
-    base = "[".concat(getSubName(value, 'String'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]");
+    base = "[".concat(inspect_x_esm_getSubName(value, 'String'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]");
   } else if (is_number_object_default()(value)) {
     // Make boxed primitive Numbers look like such
-    base = "[".concat(getSubName(value, 'Number'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]");
+    base = "[".concat(inspect_x_esm_getSubName(value, 'Number'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]");
   } else if (is_boolean_object_default()(value)) {
     // Make boxed primitive Booleans look like such
-    base = "[".concat(getSubName(value, 'Boolean'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]");
+    base = "[".concat(inspect_x_esm_getSubName(value, 'Boolean'), ": ").concat(fmtPrimNoColor(ctx, value.valueOf()), "]");
   } else if (is_function_x_esm(value)) {
     // Make functions say that they are functions
-    base = "[".concat(getSubName(value, 'Function')).concat(getNameSep(value), "]");
-  } else if (isClass(value)) {
+    base = "[".concat(inspect_x_esm_getSubName(value, 'Function')).concat(inspect_x_esm_getNameSep(value), "]");
+  } else if (inspect_x_esm_isClass(value)) {
     // Make functions say that they are functions
-    base = "[Class".concat(getNameSep(value), "]");
+    base = "[Class".concat(inspect_x_esm_getNameSep(value), "]");
   } else if (is_regex_default()(value)) {
     // Make RegExps say that they are RegExps
     // name = getSubName(value, 'RegExp');
     base = regexpToString(value);
   } else if (is_date_object_default()(value)) {
     // Make dates with properties first say the date
-    name = getSubName(value);
-    formatted = fmtDate(value);
+    name = inspect_x_esm_getSubName(value);
+    formatted = inspect_x_esm_fmtDate(value);
 
     if (name === 'Date') {
       base = formatted;
@@ -10096,69 +10107,69 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
       base = "[".concat(name, ": ").concat(formatted, "]");
     }
   } else if (is_error_x_esm(value)) {
-    name = getSubName(value); // Make error with message first say the error
+    name = inspect_x_esm_getSubName(value); // Make error with message first say the error
 
-    base = fmtError(value);
+    base = inspect_x_esm_fmtError(value);
   } else if (is_array_x_esm(value)) {
-    name = getSubName(value); // Unset the constructor to prevent "Array [...]" for ordinary arrays.
+    name = inspect_x_esm_getSubName(value); // Unset the constructor to prevent "Array [...]" for ordinary arrays.
 
     name = name === 'Array' ? inspect_x_esm_EMPTY_STRING : name;
     braces = ['[', ']'];
 
     if (ctx.showHidden) {
-      keys = promote(keys, arrayKeys);
+      keys = inspect_x_esm_promote(keys, arrayKeys);
     }
 
     empty = value.length < 1;
     fmtter = fmtArray;
   } else if (is_set_x_esm(value)) {
-    name = getSubName(value, 'Set');
-    fmtter = fmtSet; // With `showHidden`, `length` will display as a hidden property for
+    name = inspect_x_esm_getSubName(value, 'Set');
+    fmtter = inspect_x_esm_fmtSet; // With `showHidden`, `length` will display as a hidden property for
     // arrays. For consistency's sake, do the same for `size`, even though
     // this property isn't selected by Object.getOwnPropertyNames().
 
     if (ctx.showHidden) {
-      keys = promote(keys, collectionKeys);
+      keys = inspect_x_esm_promote(keys, collectionKeys);
     }
 
     empty = value.size < 1;
   } else if (is_map_x_esm(value)) {
-    name = getSubName(value, 'Map');
-    fmtter = fmtMap; // With `showHidden`, `length` will display as a hidden property for
+    name = inspect_x_esm_getSubName(value, 'Map');
+    fmtter = inspect_x_esm_fmtMap; // With `showHidden`, `length` will display as a hidden property for
     // arrays. For consistency's sake, do the same for `size`, even though
     // this property isn't selected by Object.getOwnPropertyNames().
 
     if (ctx.showHidden) {
-      keys = promote(keys, collectionKeys);
+      keys = inspect_x_esm_promote(keys, collectionKeys);
     }
 
     empty = value.size < 1;
   } else if (is_array_buffer_x_esm(value)) {
-    name = getSubName(value, 'ArrayBuffer');
-    keys = promote(keys, arrayBufferKeys);
-    visibleKeys = appendMissing(visibleKeys, arrayBufferKeys);
+    name = inspect_x_esm_getSubName(value, 'ArrayBuffer');
+    keys = inspect_x_esm_promote(keys, arrayBufferKeys);
+    visibleKeys = inspect_x_esm_appendMissing(visibleKeys, arrayBufferKeys);
   } else if (is_data_view_x_esm(value)) {
-    name = getSubName(value, 'DataView');
-    keys = promote(keys, dataViewKeys);
-    visibleKeys = appendMissing(visibleKeys, dataViewKeys);
+    name = inspect_x_esm_getSubName(value, 'DataView');
+    keys = inspect_x_esm_promote(keys, dataViewKeys);
+    visibleKeys = inspect_x_esm_appendMissing(visibleKeys, dataViewKeys);
   } else if (is_typed_array_default()(value)) {
-    name = getSubName(value);
+    name = inspect_x_esm_getSubName(value);
     braces = ['[', ']'];
-    fmtter = fmtTypedArray;
+    fmtter = inspect_x_esm_fmtTypedArray;
 
     if (ctx.showHidden) {
-      keys = promote(keys, typedArrayKeys);
+      keys = inspect_x_esm_promote(keys, typedArrayKeys);
     }
   } else if (is_promise_default()(value)) {
-    name = getSubName(value, 'Promise');
-  } else if (isMapIterator(value)) {
-    name = getSubName(value, 'MapIterator');
+    name = inspect_x_esm_getSubName(value, 'Promise');
+  } else if (inspect_x_esm_isMapIterator(value)) {
+    name = inspect_x_esm_getSubName(value, 'MapIterator');
     empty = true;
-  } else if (isSetIterator(value)) {
-    name = getSubName(value, 'SetIterator');
+  } else if (inspect_x_esm_isSetIterator(value)) {
+    name = inspect_x_esm_getSubName(value, 'SetIterator');
     empty = true;
   } else {
-    name = getSubName(value); // Unset the constructor to prevent "Object {...}" for ordinary objects.
+    name = inspect_x_esm_getSubName(value); // Unset the constructor to prevent "Object {...}" for ordinary objects.
 
     name = name === 'Object' ? inspect_x_esm_EMPTY_STRING : name;
     empty = true; // No other data than keys.
@@ -10196,10 +10207,10 @@ fmtValue = function _fmtValue(ctx, value, depth, isProto) {
   ctx.seen.add(value);
   var out = fmtter(ctx, value, depth, visibleKeys, keys);
   ctx.seen.delete(value);
-  return reduceToSingleString(out, base, braces, ctx.breakLength);
+  return inspect_x_esm_reduceToSingleString(out, base, braces, ctx.breakLength);
 };
 
-inspect = function _inspect(obj, opts) {
+$inspect = function inspect(obj, opts) {
   // default options
   var ctx = {
     seen: new SetConstructor(),
@@ -10227,9 +10238,9 @@ inspect = function _inspect(obj, opts) {
 
 
   if (supportsGetSet) {
-    ctx = object_assign_x_esm({}, inspect.defaultOptions, ctx, opts);
+    ctx = object_assign_x_esm({}, $inspect.defaultOptions, ctx, opts);
   } else {
-    ctx = object_assign_x_esm({}, inspectDefaultOptions, inspect.defaultOptions, ctx, opts);
+    ctx = object_assign_x_esm({}, inspectDefaultOptions, $inspect.defaultOptions, ctx, opts);
   }
 
   if (ctx.colors) {
@@ -10240,11 +10251,11 @@ inspect = function _inspect(obj, opts) {
     ctx.maxArrayLength = Infinity;
   }
 
-  return fmtValue(ctx, obj, ctx.depth);
+  return $fmtValue(ctx, obj, ctx.depth);
 };
 
 if (supportsGetSet) {
-  object_define_property_x_esm(inspect, 'defaultOptions', {
+  object_define_property_x_esm($inspect, 'defaultOptions', {
     get: function _get() {
       return inspectDefaultOptions;
     },
@@ -10257,7 +10268,7 @@ if (supportsGetSet) {
     }
   });
 } else {
-  object_define_properties_x_esm(inspect, {
+  object_define_properties_x_esm($inspect, {
     defaultOptions: {
       value: object_assign_x_esm({}, inspectDefaultOptions),
       writable: true
@@ -10265,7 +10276,7 @@ if (supportsGetSet) {
   });
 }
 
-object_define_properties_x_esm(inspect, {
+object_define_properties_x_esm($inspect, {
   // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
   colors: {
     value: {
@@ -10303,7 +10314,7 @@ object_define_properties_x_esm(inspect, {
     }
   }
 });
-var ins = inspect;
+var ins = $inspect;
 /* harmony default export */ var inspect_x_esm = __webpack_exports__["default"] = (ins);
 
 

@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-07-29T14:32:55.381Z",
+  "date": "2019-07-29T14:54:05.504Z",
   "describe": "",
   "description": "An implementation of node's ES6 inspect module.",
   "file": "inspect-x.js",
-  "hash": "c766508ead82189aa3ff",
+  "hash": "571bb763c896a050e67f",
   "license": "MIT",
   "version": "3.0.11"
 }
@@ -9636,7 +9636,17 @@ var fmtPropReplacer1 = [/\n/g, '\n  '];
 var fmtPropReplacer2 = [/(^|\n)/g, '\n   '];
 var fmtPropTestRx = /^"[\w$]+"$/;
 
-var inspect_x_esm_fmtProp = function fmtProp(ctx, value, depth, visibleKeys, key, arr) {
+var inspect_x_esm_fmtProp = function fmtProp() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice = array_slice_x_esm(arguments),
+      _slice2 = _slicedToArray(_slice, 6),
+      ctx = _slice2[0],
+      value = _slice2[1],
+      depth = _slice2[2],
+      visibleKeys = _slice2[3],
+      key = _slice2[4],
+      arr = _slice2[5];
+
   var desc = object_get_own_property_descriptor_x_esm(value, key) || {
     value: value[key]
   };
@@ -9699,13 +9709,13 @@ var inspect_x_esm_fmtProp = function fmtProp(ctx, value, depth, visibleKeys, key
 
 var inspect_x_esm_fmtObject = function fmtObject() {
   /* eslint-disable-next-line prefer-rest-params */
-  var _slice = array_slice_x_esm(arguments),
-      _slice2 = _slicedToArray(_slice, 5),
-      ctx = _slice2[0],
-      value = _slice2[1],
-      depth = _slice2[2],
-      visibleKeys = _slice2[3],
-      keys = _slice2[4];
+  var _slice3 = array_slice_x_esm(arguments),
+      _slice4 = _slicedToArray(_slice3, 5),
+      ctx = _slice4[0],
+      value = _slice4[1],
+      depth = _slice4[2],
+      visibleKeys = _slice4[3],
+      keys = _slice4[4];
 
   return array_map_x_esm(keys, function mapFmObject(key) {
     return inspect_x_esm_fmtProp(ctx, value, depth, visibleKeys, key, false);
@@ -9728,13 +9738,13 @@ var inspect_x_esm_filterOutIndexes = function filterOutIndexes(keys) {
 
 var fmtArray = function _fmtArray() {
   /* eslint-disable-next-line prefer-rest-params */
-  var _slice3 = array_slice_x_esm(arguments),
-      _slice4 = _slicedToArray(_slice3, 5),
-      ctx = _slice4[0],
-      value = _slice4[1],
-      depth = _slice4[2],
-      visibleKeys = _slice4[3],
-      keys = _slice4[4];
+  var _slice5 = array_slice_x_esm(arguments),
+      _slice6 = _slicedToArray(_slice5, 5),
+      ctx = _slice6[0],
+      value = _slice6[1],
+      depth = _slice6[2],
+      visibleKeys = _slice6[3],
+      keys = _slice6[4];
 
   var length = value.length;
   var maxLength = math_clamp_x_esm(length, 0, ctx.maxArrayLength);
@@ -9769,13 +9779,13 @@ var fmtArray = function _fmtArray() {
 
 var inspect_x_esm_fmtTypedArray = function fmtTypedArray() {
   /* eslint-disable-next-line prefer-rest-params */
-  var _slice5 = array_slice_x_esm(arguments),
-      _slice6 = _slicedToArray(_slice5, 5),
-      ctx = _slice6[0],
-      value = _slice6[1],
-      depth = _slice6[2],
-      visibleKeys = _slice6[3],
-      keys = _slice6[4];
+  var _slice7 = array_slice_x_esm(arguments),
+      _slice8 = _slicedToArray(_slice7, 5),
+      ctx = _slice8[0],
+      value = _slice8[1],
+      depth = _slice8[2],
+      visibleKeys = _slice8[3],
+      keys = _slice8[4];
 
   var length = value.length;
   var maxLength = math_clamp_x_esm(length, 0, ctx.maxArrayLength);
@@ -9802,13 +9812,13 @@ var inspect_x_esm_fmtTypedArray = function fmtTypedArray() {
 
 var inspect_x_esm_fmtSet = function fmtSet() {
   /* eslint-disable-next-line prefer-rest-params */
-  var _slice7 = array_slice_x_esm(arguments),
-      _slice8 = _slicedToArray(_slice7, 5),
-      ctx = _slice8[0],
-      value = _slice8[1],
-      depth = _slice8[2],
-      visibleKeys = _slice8[3],
-      keys = _slice8[4];
+  var _slice9 = array_slice_x_esm(arguments),
+      _slice10 = _slicedToArray(_slice9, 5),
+      ctx = _slice10[0],
+      value = _slice10[1],
+      depth = _slice10[2],
+      visibleKeys = _slice10[3],
+      keys = _slice10[4];
 
   var output = [];
   setForEach(value, function iteratee(v) {
@@ -9822,13 +9832,13 @@ var inspect_x_esm_fmtSet = function fmtSet() {
 
 var inspect_x_esm_fmtMap = function fmtMap() {
   /* eslint-disable-next-line prefer-rest-params */
-  var _slice9 = array_slice_x_esm(arguments),
-      _slice10 = _slicedToArray(_slice9, 5),
-      ctx = _slice10[0],
-      value = _slice10[1],
-      depth = _slice10[2],
-      visibleKeys = _slice10[3],
-      keys = _slice10[4];
+  var _slice11 = array_slice_x_esm(arguments),
+      _slice12 = _slicedToArray(_slice11, 5),
+      ctx = _slice12[0],
+      value = _slice12[1],
+      depth = _slice12[2],
+      visibleKeys = _slice12[3],
+      keys = _slice12[4];
 
   var r = recurse(depth);
   var output = [];
@@ -9850,7 +9860,15 @@ var lengthReduce = function lengthReduce(prev, cur) {
   return prev + inspect_x_esm_replace(cur, lengthReduceRx, inspect_x_esm_EMPTY_STRING).length + 1;
 };
 
-var inspect_x_esm_reduceToSingleString = function reduceToSingleString(out, base, braces, breakLength) {
+var inspect_x_esm_reduceToSingleString = function reduceToSingleString() {
+  /* eslint-disable-next-line prefer-rest-params */
+  var _slice13 = array_slice_x_esm(arguments),
+      _slice14 = _slicedToArray(_slice13, 4),
+      out = _slice14[0],
+      base = _slice14[1],
+      braces = _slice14[2],
+      breakLength = _slice14[3];
+
   var result;
 
   if (array_reduce_x_esm(out, lengthReduce, 0) > breakLength) {
@@ -9898,12 +9916,12 @@ var errorKeys = ['message'];
 
 $fmtValue = function fmtValue() {
   /* eslint-disable-next-line prefer-rest-params */
-  var _slice11 = array_slice_x_esm(arguments),
-      _slice12 = _slicedToArray(_slice11, 4),
-      ctx = _slice12[0],
-      value = _slice12[1],
-      depth = _slice12[2],
-      isProto = _slice12[3]; // Provide a hook for user-specified inspect functions.
+  var _slice15 = array_slice_x_esm(arguments),
+      _slice16 = _slicedToArray(_slice15, 4),
+      ctx = _slice16[0],
+      value = _slice16[1],
+      depth = _slice16[2],
+      isProto = _slice16[3]; // Provide a hook for user-specified inspect functions.
   // Check that value is an object with an inspect function on it
 
 

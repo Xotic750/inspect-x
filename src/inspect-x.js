@@ -414,7 +414,9 @@ const fmtPropReplacer1 = [/\n/g, '\n  '];
 const fmtPropReplacer2 = [/(^|\n)/g, '\n   '];
 const fmtPropTestRx = /^"[\w$]+"$/;
 
-const fmtProp = function fmtProp(ctx, value, depth, visibleKeys, key, arr) {
+const fmtProp = function fmtProp() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [ctx, value, depth, visibleKeys, key, arr] = slice(arguments);
   const desc = getOwnPropertyDescriptor(value, key) || {value: value[key]};
 
   /*
@@ -602,7 +604,9 @@ const lengthReduce = function lengthReduce(prev, cur) {
   return prev + replace(cur, lengthReduceRx, EMPTY_STRING).length + 1;
 };
 
-const reduceToSingleString = function reduceToSingleString(out, base, braces, breakLength) {
+const reduceToSingleString = function reduceToSingleString() {
+  /* eslint-disable-next-line prefer-rest-params */
+  const [out, base, braces, breakLength] = slice(arguments);
   let result;
 
   if (reduce(out, lengthReduce, 0) > breakLength) {

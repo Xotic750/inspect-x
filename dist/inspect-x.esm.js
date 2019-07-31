@@ -414,16 +414,14 @@ var fmtPropReplacer1 = [/\n/g, '\n  '];
 var fmtPropReplacer2 = [/(^|\n)/g, '\n   '];
 var fmtPropTestRx = /^"[\w$]+"$/;
 
-var fmtProp = function fmtProp() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice = slice(arguments),
-      _slice2 = _slicedToArray(_slice, 6),
-      ctx = _slice2[0],
-      value = _slice2[1],
-      depth = _slice2[2],
-      visibleKeys = _slice2[3],
-      key = _slice2[4],
-      arr = _slice2[5];
+var fmtProp = function fmtProp(args) {
+  var _args = _slicedToArray(args, 6),
+      ctx = _args[0],
+      value = _args[1],
+      depth = _args[2],
+      visibleKeys = _args[3],
+      key = _args[4],
+      arr = _args[5];
 
   var desc = getOwnPropertyDescriptor(value, key) || {
     value: value[key]
@@ -458,7 +456,7 @@ var fmtProp = function fmtProp() {
   } else if (desc.set) {
     str = ctx.stylize('[Setter]', 'special');
   } else {
-    var formattedStr = $fmtValue(ctx, desc.value, recurse(depth), key === 'prototype');
+    var formattedStr = $fmtValue([ctx, desc.value, recurse(depth), key === 'prototype']);
 
     if (strIncludes(formattedStr, '\n')) {
       var replacer = arr ? fmtPropReplacer1 : fmtPropReplacer2;
@@ -485,18 +483,16 @@ var fmtProp = function fmtProp() {
   return "".concat(name, ": ").concat(str);
 };
 
-var fmtObject = function fmtObject() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice3 = slice(arguments),
-      _slice4 = _slicedToArray(_slice3, 5),
-      ctx = _slice4[0],
-      value = _slice4[1],
-      depth = _slice4[2],
-      visibleKeys = _slice4[3],
-      keys = _slice4[4];
+var fmtObject = function fmtObject(args) {
+  var _args2 = _slicedToArray(args, 5),
+      ctx = _args2[0],
+      value = _args2[1],
+      depth = _args2[2],
+      visibleKeys = _args2[3],
+      keys = _args2[4];
 
   return map(keys, function mapFmObject(key) {
-    return fmtProp(ctx, value, depth, visibleKeys, key, false);
+    return fmtProp([ctx, value, depth, visibleKeys, key, false]);
   });
 };
 
@@ -514,15 +510,13 @@ var filterOutIndexes = function filterOutIndexes(keys) {
   });
 };
 
-var fmtArray = function _fmtArray() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice5 = slice(arguments),
-      _slice6 = _slicedToArray(_slice5, 5),
-      ctx = _slice6[0],
-      value = _slice6[1],
-      depth = _slice6[2],
-      visibleKeys = _slice6[3],
-      keys = _slice6[4];
+var fmtArray = function fmtArray(args) {
+  var _args3 = _slicedToArray(args, 5),
+      ctx = _args3[0],
+      value = _args3[1],
+      depth = _args3[2],
+      visibleKeys = _args3[3],
+      keys = _args3[4];
 
   var length = value.length;
   var maxLength = clamp(length, 0, ctx.maxArrayLength);
@@ -534,7 +528,7 @@ var fmtArray = function _fmtArray() {
       push(output, ctx.stylize(getEmptyItemText(index - lastIndex - 1), 'undefined'));
     }
 
-    push(output, fmtProp(ctx, value, depth, visibleKeys, numberToString(index), true));
+    push(output, fmtProp([ctx, value, depth, visibleKeys, numberToString(index), true]));
     lastIndex = index;
     nextIndex = index + 1;
     return nextIndex >= maxLength;
@@ -550,20 +544,18 @@ var fmtArray = function _fmtArray() {
   }
 
   var fmtdProps = map(filterOutIndexes(keys), function iteratee(key) {
-    return fmtProp(ctx, value, depth, visibleKeys, key, true);
+    return fmtProp([ctx, value, depth, visibleKeys, key, true]);
   });
   return concat(output, fmtdProps);
 };
 
-var fmtTypedArray = function fmtTypedArray() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice7 = slice(arguments),
-      _slice8 = _slicedToArray(_slice7, 5),
-      ctx = _slice8[0],
-      value = _slice8[1],
-      depth = _slice8[2],
-      visibleKeys = _slice8[3],
-      keys = _slice8[4];
+var fmtTypedArray = function fmtTypedArray(args) {
+  var _args4 = _slicedToArray(args, 5),
+      ctx = _args4[0],
+      value = _args4[1],
+      depth = _args4[2],
+      visibleKeys = _args4[3],
+      keys = _args4[4];
 
   var length = value.length;
   var maxLength = clamp(length, 0, ctx.maxArrayLength);
@@ -583,48 +575,44 @@ var fmtTypedArray = function fmtTypedArray() {
   }
 
   var fmtdProps = map(filterOutIndexes(keys), function iteratee(key) {
-    return fmtProp(ctx, value, depth, visibleKeys, key, true);
+    return fmtProp([ctx, value, depth, visibleKeys, key, true]);
   });
   return concat(output, fmtdProps);
 };
 
-var fmtSet = function fmtSet() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice9 = slice(arguments),
-      _slice10 = _slicedToArray(_slice9, 5),
-      ctx = _slice10[0],
-      value = _slice10[1],
-      depth = _slice10[2],
-      visibleKeys = _slice10[3],
-      keys = _slice10[4];
+var fmtSet = function fmtSet(args) {
+  var _args5 = _slicedToArray(args, 5),
+      ctx = _args5[0],
+      value = _args5[1],
+      depth = _args5[2],
+      visibleKeys = _args5[3],
+      keys = _args5[4];
 
   var output = [];
   setForEach(value, function iteratee(v) {
-    push(output, $fmtValue(ctx, v, recurse(depth)));
+    push(output, $fmtValue([ctx, v, recurse(depth)]));
   });
   var fmtdProps = map(keys, function iteratee(key) {
-    return fmtProp(ctx, value, depth, visibleKeys, key, false);
+    return fmtProp([ctx, value, depth, visibleKeys, key, false]);
   });
   return concat(output, fmtdProps);
 };
 
-var fmtMap = function fmtMap() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice11 = slice(arguments),
-      _slice12 = _slicedToArray(_slice11, 5),
-      ctx = _slice12[0],
-      value = _slice12[1],
-      depth = _slice12[2],
-      visibleKeys = _slice12[3],
-      keys = _slice12[4];
+var fmtMap = function fmtMap(args) {
+  var _args6 = _slicedToArray(args, 5),
+      ctx = _args6[0],
+      value = _args6[1],
+      depth = _args6[2],
+      visibleKeys = _args6[3],
+      keys = _args6[4];
 
   var r = recurse(depth);
   var output = [];
   mapForEach(value, function iteratee(v, k) {
-    push(output, "".concat($fmtValue(ctx, k, r), " => ").concat($fmtValue(ctx, v, r)));
+    push(output, "".concat($fmtValue([ctx, k, r]), " => ").concat($fmtValue([ctx, v, r])));
   });
   var fmtdProps = map(keys, function iteratee(key) {
-    return fmtProp(ctx, value, depth, visibleKeys, key, false);
+    return fmtProp([ctx, value, depth, visibleKeys, key, false]);
   });
   return concat(output, fmtdProps);
 };
@@ -638,14 +626,12 @@ var lengthReduce = function lengthReduce(prev, cur) {
   return prev + replace(cur, lengthReduceRx, EMPTY_STRING).length + 1;
 };
 
-var reduceToSingleString = function reduceToSingleString() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice13 = slice(arguments),
-      _slice14 = _slicedToArray(_slice13, 4),
-      out = _slice14[0],
-      base = _slice14[1],
-      braces = _slice14[2],
-      breakLength = _slice14[3];
+var reduceToSingleString = function reduceToSingleString(args) {
+  var _args7 = _slicedToArray(args, 4),
+      out = _args7[0],
+      base = _args7[1],
+      braces = _args7[2],
+      breakLength = _args7[3];
 
   var result;
 
@@ -692,14 +678,12 @@ var collectionKeys = ['size'];
 var arrayKeys = ['length'];
 var errorKeys = ['message'];
 
-$fmtValue = function fmtValue() {
-  /* eslint-disable-next-line prefer-rest-params */
-  var _slice15 = slice(arguments),
-      _slice16 = _slicedToArray(_slice15, 4),
-      ctx = _slice16[0],
-      value = _slice16[1],
-      depth = _slice16[2],
-      isProto = _slice16[3]; // Provide a hook for user-specified inspect functions.
+$fmtValue = function fmtValue(args) {
+  var _args8 = _slicedToArray(args, 4),
+      ctx = _args8[0],
+      value = _args8[1],
+      depth = _args8[2],
+      isProto = _args8[3]; // Provide a hook for user-specified inspect functions.
   // Check that value is an object with an inspect function on it
 
 
@@ -719,7 +703,7 @@ $fmtValue = function fmtValue() {
           // infinite recursion.
 
           if (ret !== value) {
-            return isStringType(ret) ? ret : $fmtValue(ctx, ret, depth);
+            return isStringType(ret) ? ret : $fmtValue([ctx, ret, depth]);
           }
         }
       }
@@ -1001,9 +985,9 @@ $fmtValue = function fmtValue() {
   }
 
   ctx.seen.add(value);
-  var out = fmtter(ctx, value, depth, visibleKeys, keys);
+  var out = fmtter([ctx, value, depth, visibleKeys, keys]);
   ctx.seen.delete(value);
-  return reduceToSingleString(out, base, braces, ctx.breakLength);
+  return reduceToSingleString([out, base, braces, ctx.breakLength]);
 };
 
 $inspect = function inspect(obj, opts) {
@@ -1047,7 +1031,7 @@ $inspect = function inspect(obj, opts) {
     ctx.maxArrayLength = Infinity;
   }
 
-  return $fmtValue(ctx, obj, ctx.depth);
+  return $fmtValue([ctx, obj, ctx.depth]);
 };
 
 if (supportsGetSet) {

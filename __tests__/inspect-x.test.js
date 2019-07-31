@@ -357,9 +357,7 @@ describe('inspect', function() {
       );
       match = match ? match.slice(1).join(' ') : ex;
       expect(match).toBe(
-        `65, 97 BYTES_PER_ELEMENT ${
-          item.Ctr.BYTES_PER_ELEMENT
-        } length ${length} byteLength ${byteLength} byteOffset 0 buffer ArrayBuffer byteLength: ${byteLength}`,
+        `65, 97 BYTES_PER_ELEMENT ${item.Ctr.BYTES_PER_ELEMENT} length ${length} byteLength ${byteLength} byteOffset 0 buffer ArrayBuffer byteLength: ${byteLength}`,
       );
 
       ex = inspect(array, false);
@@ -1176,7 +1174,7 @@ describe('inspect', function() {
       expect(inspect(x)).toBe('{ constructor: [Getter] }');
     }
 
-    x = new function() {}();
+    x = new (function() {})();
     expect(inspect(x)).toBe('{}');
 
     x = Object.create(null);

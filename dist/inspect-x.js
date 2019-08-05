@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-08-04T23:32:11.034Z",
+  "date": "2019-08-05T07:56:01.640Z",
   "describe": "",
   "description": "An implementation of node's ES6 inspect module.",
   "file": "inspect-x.js",
-  "hash": "28cdb661490364fcbb95",
+  "hash": "1f7a047241db8bb4d11f",
   "license": "MIT",
   "version": "3.0.12"
 }
@@ -7591,6 +7591,110 @@ object_define_properties_x_esm(big_counter_x_esm_BigCounter.prototype, {
 /* harmony default export */ var big_counter_x_esm = (big_counter_x_esm_BigCounter);
 
 
+// CONCATENATED MODULE: ./node_modules/symbol-iterator-x/dist/symbol-iterator-x.esm.js
+function symbol_iterator_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { symbol_iterator_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { symbol_iterator_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return symbol_iterator_x_esm_typeof(obj); }
+
+
+
+var ES6_SHIM_ITERATOR = '_es6-shim iterator_';
+var AT_AT_ITERATOR = '@@iterator';
+/* eslint-disable-next-line compat/compat */
+
+var hasRealSymbolIterator = has_symbol_support_x_esm && symbol_iterator_x_esm_typeof(Symbol.iterator) === 'symbol';
+/* eslint-disable-next-line compat/compat */
+
+var hasFakeSymbolIterator = (typeof Symbol === "undefined" ? "undefined" : symbol_iterator_x_esm_typeof(Symbol)) === 'object' && Symbol !== null && typeof Symbol.iterator === 'string';
+var hasSymbolIterator = hasRealSymbolIterator || hasFakeSymbolIterator;
+
+var getOtherSymbolIterator = function getOtherSymbolIterator(iterable) {
+  if (iterable[ES6_SHIM_ITERATOR]) {
+    return ES6_SHIM_ITERATOR;
+  }
+
+  if (iterable[AT_AT_ITERATOR]) {
+    return AT_AT_ITERATOR;
+  }
+
+  return null;
+};
+
+var getSymIt = function getSymIt() {
+  if (hasSymbolIterator) {
+    /* eslint-disable-next-line compat/compat */
+    return Symbol.iterator;
+  }
+
+  var result = getOtherSymbolIterator([]);
+
+  if (typeof result === 'string' && typeof [][result] === 'function') {
+    return result;
+  }
+
+  return AT_AT_ITERATOR;
+};
+/**
+ * Whenever an object needs to be iterated (such as at the beginning of a for..of loop),
+ * its @@iterator method is called with no arguments, and the returned iterator is used
+ * to obtain the values to be iterated.
+ *
+ * Possible values are.
+ *
+ * Symbol.iterator
+ * '_es6-shim iterator_'
+ * '@@iterator'.
+ *
+ * @type {symbol|string}
+ */
+
+
+var $iterator$ = getSymIt();
+/**
+ * Detect an iterator function.
+ *
+ * @private
+ * @param {*} iterable - Value to detect iterator function.
+ * @returns {symbol|string|undefined} The iterator property identifier.
+ */
+
+var symbol_iterator_x_esm_getSymbolIterator = function getSymbolIterator(iterable) {
+  if (is_nil_x_esm(iterable) === false) {
+    if (hasSymbolIterator && iterable[$iterator$]) {
+      return $iterator$;
+    }
+
+    var result = getOtherSymbolIterator(iterable);
+
+    if (typeof result === 'string') {
+      return result;
+    }
+  }
+  /* eslint-disable-next-line no-void */
+
+
+  return void 0;
+};
+/* harmony default export */ var symbol_iterator_x_esm = ($iterator$);
+
+
+// CONCATENATED MODULE: ./node_modules/symbol-species-x/dist/symbol-species-x.esm.js
+
+/**
+ * The species accessor property allows subclasses to override the default constructor for objects.
+ *
+ * Possible values are.
+ *
+ * Symbol.species
+ * '@@species'.
+ *
+ * @type {symbol|string}
+ */
+
+var symbolSpecies = has_symbol_support_x_esm && Symbol.species || '@@species';
+/* eslint-disable-line compat/compat */
+
+/* harmony default export */ var symbol_species_x_esm = (symbolSpecies);
+
+
 // CONCATENATED MODULE: ./node_modules/object-create-x/dist/object-create-x.esm.js
 function object_create_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { object_create_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { object_create_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return object_create_x_esm_typeof(obj); }
 
@@ -7823,8 +7927,86 @@ var object_create_x_esm_create = $create;
 /* harmony default export */ var object_create_x_esm = (object_create_x_esm_create);
 
 
+// CONCATENATED MODULE: ./node_modules/is-var-name/index.mjs
+/*!
+ * is-var-name | ISC (c) Shinnosuke Watanabe
+ * https://github.com/shinnn/is-var-name
+*/
+function isVarName(str) {
+	if (typeof str !== 'string') {
+		return false;
+	}
+
+	if (str.trim() !== str) {
+		return false;
+	}
+
+	try {
+		new Function(str, 'var ' + str);
+	} catch (e) {
+		return false;
+	}
+
+	return true;
+}
+
+// CONCATENATED MODULE: ./node_modules/rename-function-x/dist/rename-function-x.esm.js
+
+
+
+
+
+
+
+
+var rename_function_x_esm_rename = function rename(fn, name) {
+  var descriptor = object_get_own_property_descriptor_x_esm(fn, 'name');
+
+  if (descriptor && descriptor.configurable) {
+    object_define_property_x_esm(fn, 'name', {
+      configurable: true,
+      value: name
+    });
+  }
+
+  return fn.name;
+};
+
+var supportsFunctionRenaming = attempt_x_esm(function attemptee() {
+  /* eslint-disable-next-line lodash/prefer-noop */
+  return rename_function_x_esm_rename(function test1() {}, 'test2');
+}).value === 'test2'; // eslint-disable jsdoc/check-param-names
+// noinspection JSCommentMatchesSignature
+
+/**
+ * Renames a function.
+ *
+ * @param {Function} fn - The function to be renamed.
+ * @param {string} name - The new name for the function.
+ * @param {boolean} [force=false] - Rename even if reported as not valid.
+ * @returns {boolean} - Returns true if renaming was a success; otherwise false.
+ */
+// eslint-enable jsdoc/check-param-names
+
+var rename_function_x_esm_renameFunction = function renameFunction(fn, name) {
+  assert_is_function_x_esm(fn);
+  var string = to_string_x_esm(name);
+  /* eslint-disable-next-line prefer-rest-params */
+
+  var force = arguments.length > 2 && to_boolean_x_esm(arguments[2]);
+
+  if (force === false && isVarName(string) === false) {
+    throw new Error("Not a valid function name \"".concat(string, "\""));
+  }
+
+  return supportsFunctionRenaming && rename_function_x_esm_rename(fn, name) === string;
+};
+
+/* harmony default export */ var rename_function_x_esm = (rename_function_x_esm_renameFunction);
+
+
 // CONCATENATED MODULE: ./node_modules/collections-x/dist/collections-x.esm.js
-var _sizeDescriptor;
+var _sizeDescriptor, _defineProperties3, _defineProperties5;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -7863,6 +8045,7 @@ function collections_x_esm_typeof(obj) { if (typeof Symbol === "function" && typ
 
 
 
+
 /* eslint-disable-next-line no-void */
 
 var collections_x_esm_UNDEFINED = void 0;
@@ -7872,6 +8055,7 @@ var KEY = 'key';
 var VALUE = 'value';
 var DONE = 'done';
 var WRITABLE = 'writable';
+var DELETE = 'delete';
 var MAP = 'map';
 var SET = 'set';
 var PROP_CHANGED = '[[changed]]';
@@ -7891,78 +8075,19 @@ var KIND_VALUE = VALUE;
 var KIND_KEY = KEY;
 var KIND_KEY_VALUE = "".concat(KIND_KEY, "+").concat(KIND_VALUE);
 var SAMEVALUEZERO = 'SameValueZero';
-var ES6_SHIM_ITERATOR = '_es6-shim iterator_';
-var AT_AT_ITERATOR = '@@iterator';
 var collections_x_esm_ref = [],
     push = collections_x_esm_ref.push,
     splice = collections_x_esm_ref.splice;
 var collections_x_esm_charAt = KEY.charAt;
 var setPrototypeOf = {}.constructor.setPrototypeOf;
-/* eslint-disable-next-line compat/compat */
-
-var hasRealSymbolIterator = has_symbol_support_x_esm && collections_x_esm_typeof(Symbol.iterator) === 'symbol';
-/* eslint-disable-next-line compat/compat */
-
-var hasFakeSymbolIterator = (typeof Symbol === "undefined" ? "undefined" : collections_x_esm_typeof(Symbol)) === 'object' && typeof Symbol.iterator === 'string';
-var hasSymbolIterator = hasRealSymbolIterator || hasFakeSymbolIterator;
-
-var getOtherSymbolIterator = function getOtherSymbolIterator(iterable) {
-  if (iterable[ES6_SHIM_ITERATOR]) {
-    return ES6_SHIM_ITERATOR;
-  }
-
-  if (iterable[AT_AT_ITERATOR]) {
-    return AT_AT_ITERATOR;
-  }
-
-  return null;
-};
-
-var collections_x_esm_getSymIt = function getSymIt() {
-  if (hasSymbolIterator) {
-    /* eslint-disable-next-line compat/compat */
-    return Symbol.iterator;
-  }
-
-  var result = getOtherSymbolIterator([]);
-
-  if (typeof result === 'string' && is_function_x_esm([][result])) {
-    return result;
-  }
-
-  return AT_AT_ITERATOR;
-};
+var collections_x_esm_hasRealSymbolIterator = collections_x_esm_typeof(symbol_iterator_x_esm) === 'symbol';
 /**
  * The iterator identifier that is in use.
  *
  * Type {Symbol|string}.
  */
 
-
-var symIt = collections_x_esm_getSymIt();
-/**
- * Detect an iterator function.
- *
- * @private
- * @param {*} iterable - Value to detect iterator function.
- * @returns {symbol|string|undefined} The iterator property identifier.
- */
-
-var collections_x_esm_getSymbolIterator = function getSymbolIterator(iterable) {
-  if (is_nil_x_esm(iterable) === false) {
-    if (hasSymbolIterator && iterable[symIt]) {
-      return symIt;
-    }
-
-    var result = getOtherSymbolIterator(iterable);
-
-    if (typeof result === 'string') {
-      return result;
-    }
-  }
-
-  return collections_x_esm_UNDEFINED;
-};
+var symIt = symbol_iterator_x_esm;
 
 var collections_x_esm_assertIterableEntryObject = function assertIterableEntryObject(kind, next) {
   if (kind === MAP) {
@@ -8166,7 +8291,7 @@ var collections_x_esm_parse = function parse(args) {
       context = _args7[1],
       iterable = _args7[2];
 
-  var symbolIterator = collections_x_esm_getSymbolIterator(iterable);
+  var symbolIterator = symbol_iterator_x_esm_getSymbolIterator(iterable);
 
   if (kind === MAP) {
     object_define_property_x_esm(context, PROP_VALUE, _defineProperty({}, VALUE, []));
@@ -8392,6 +8517,12 @@ var collections_x_esm_baseAddSet = function baseAddSet(args) {
 var thisIteratorDescriptor = _defineProperty({}, VALUE, function iterator() {
   return this;
 });
+
+var thisSpeciesDescriptor = {
+  get: function species() {
+    return this;
+  }
+};
 /**
  * An object is an iterator when it knows how to access items from a
  * collection one at a time, while keeping track of its current position
@@ -8405,7 +8536,6 @@ var thisIteratorDescriptor = _defineProperty({}, VALUE, function iterator() {
  * @param {object} context - The Set object.
  * @param {string} [iteratorKind] - Values are `value`, `key` or `key+value`.
  */
-
 
 var SetIt = function SetIterator(context, iteratorKind) {
   var _PROP_ITERATORHASMORE, _PROP_SETNEXTINDEX, _defineProperties2;
@@ -8482,7 +8612,6 @@ var setValuesIterator = function values() {
  * values or object references.
  *
  * @class Set
- * @private
  * @param {*} [iterable] - If an iterable object is passed, all of its elements
  * will be added to the new Set. A null is treated as undefined.
  */
@@ -8499,9 +8628,7 @@ var SetImplementation = function Set() {
   collections_x_esm_parse([SET, this, arguments.length ? arguments[0] : collections_x_esm_UNDEFINED]);
 }; // noinspection JSValidateTypes
 
-object_define_properties_x_esm(SetImplementation.prototype,
-/** @lends SetImplementation.prototype */
-{
+object_define_properties_x_esm(SetImplementation.prototype, (_defineProperties3 = {
   /**
    * The add() method appends a new element with a specified value to the end
    * of a Set object.
@@ -8521,86 +8648,14 @@ object_define_properties_x_esm(SetImplementation.prototype,
    */
   clear: _defineProperty({}, VALUE, function clear() {
     return collections_x_esm_baseClear(SET, this);
-  }),
-
-  /**
-   * The delete() method removes the specified element from a Set object.
-   *
-   * @param {*} value - The value of the element to remove from the Set object.
-   * @returns {boolean} Returns true if an element in the Set object has been
-   *  removed successfully; otherwise false.
-   */
-  delete: _defineProperty({}, VALUE, function de1ete(value) {
-    return collections_x_esm_baseDelete([SET, this, value]);
-  }),
-
-  /**
-   * The entries() method returns a new Iterator object that contains an
-   * array of [value, value] for each element in the Set object, in
-   * insertion order. For Set objects there is no key like in Map objects.
-   * However, to keep the API similar to the Map object, each entry has the
-   * same value for its key and value here, so that an array [value, value]
-   * is returned.
-   *
-   * @function
-   * @returns {object} A new Iterator object.
-   */
-  entries: _defineProperty({}, VALUE, function entries() {
-    return new SetIt(this, KIND_KEY_VALUE);
-  }),
-
-  /**
-   * The forEach() method executes a provided function once per each value
-   * in the Set object, in insertion order.
-   *
-   * @param {Function} callback - Function to execute for each element.
-   * @param {*} [thisArg] - Value to use as this when executing callback.
-   * @returns {object} The Set object.
-   */
-  forEach: _defineProperty({}, VALUE, function forEach(callback, thisArg) {
-    return collections_x_esm_baseForEach([SET, this, callback, thisArg]);
-  }),
-
-  /**
-   * The has() method returns a boolean indicating whether an element with the
-   * specified value exists in a Set object or not.
-   *
-   * @function
-   * @param {*} value - The value to test for presence in the Set object.
-   * @returns {boolean} Returns true if an element with the specified value
-   *  exists in the Set object; otherwise false.
-   */
-  has: hasDescriptor,
-
-  /**
-   * The keys() method is an alias for the `values` method (for similarity
-   * with Map objects); it behaves exactly the same and returns values of Set elements.
-   *
-   * @function
-   * @returns {object} A new Iterator object.
-   */
-  keys: _defineProperty({}, VALUE, setValuesIterator),
-
-  /**
-   * The value of size is an integer representing how many entries the Set
-   * object has.
-   *
-   * @name size
-   * @memberof $SetObject
-   * @instance
-   * @type {number}
-   */
-  size: sizeDescriptor,
-
-  /**
-   * The values() method returns a new Iterator object that contains the
-   * values for each element in the Set object in insertion order.
-   *
-   * @function
-   * @returns {object} A new Iterator object.
-   */
-  values: _defineProperty({}, VALUE, setValuesIterator)
-});
+  })
+}, _defineProperty(_defineProperties3, DELETE, _defineProperty({}, VALUE, function $delete(value) {
+  return collections_x_esm_baseDelete([SET, this, value]);
+})), _defineProperty(_defineProperties3, "entries", _defineProperty({}, VALUE, function entries() {
+  return new SetIt(this, KIND_KEY_VALUE);
+})), _defineProperty(_defineProperties3, "forEach", _defineProperty({}, VALUE, function forEach(callback, thisArg) {
+  return collections_x_esm_baseForEach([SET, this, callback, thisArg]);
+})), _defineProperty(_defineProperties3, "has", hasDescriptor), _defineProperty(_defineProperties3, "keys", _defineProperty({}, VALUE, setValuesIterator)), _defineProperty(_defineProperties3, "size", sizeDescriptor), _defineProperty(_defineProperties3, "values", _defineProperty({}, VALUE, setValuesIterator)), _defineProperty(_defineProperties3, symbol_species_x_esm, thisSpeciesDescriptor), _defineProperties3));
 /**
  * The initial value of the @@iterator property is the same function object
  * as the initial value of the values property.
@@ -8611,6 +8666,7 @@ object_define_properties_x_esm(SetImplementation.prototype,
  */
 
 object_define_property_x_esm(SetImplementation.prototype, symIt, _defineProperty({}, VALUE, setValuesIterator));
+rename_function_x_esm(SetImplementation.prototype.delete, DELETE, true);
 /**
  * An object is an iterator when it knows how to access items from a
  * collection one at a time, while keeping track of its current position
@@ -8626,9 +8682,9 @@ object_define_property_x_esm(SetImplementation.prototype, symIt, _defineProperty
  */
 
 var MapIt = function MapIterator(context, iteratorKind) {
-  var _PROP_ITERATORHASMORE2, _PROP_MAPNEXTINDEX, _defineProperties3;
+  var _PROP_ITERATORHASMORE2, _PROP_MAPNEXTINDEX, _defineProperties4;
 
-  object_define_properties_x_esm(this, (_defineProperties3 = {}, _defineProperty(_defineProperties3, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE2 = {}, _defineProperty(_PROP_ITERATORHASMORE2, VALUE, true), _defineProperty(_PROP_ITERATORHASMORE2, WRITABLE, true), _PROP_ITERATORHASMORE2)), _defineProperty(_defineProperties3, PROP_MAP, _defineProperty({}, VALUE, assert_is_object_x_esm(context))), _defineProperty(_defineProperties3, PROP_MAPITERATIONKIND, _defineProperty({}, VALUE, iteratorKind)), _defineProperty(_defineProperties3, PROP_MAPNEXTINDEX, (_PROP_MAPNEXTINDEX = {}, _defineProperty(_PROP_MAPNEXTINDEX, VALUE, 0), _defineProperty(_PROP_MAPNEXTINDEX, WRITABLE, true), _PROP_MAPNEXTINDEX)), _defineProperties3));
+  object_define_properties_x_esm(this, (_defineProperties4 = {}, _defineProperty(_defineProperties4, PROP_ITERATORHASMORE, (_PROP_ITERATORHASMORE2 = {}, _defineProperty(_PROP_ITERATORHASMORE2, VALUE, true), _defineProperty(_PROP_ITERATORHASMORE2, WRITABLE, true), _PROP_ITERATORHASMORE2)), _defineProperty(_defineProperties4, PROP_MAP, _defineProperty({}, VALUE, assert_is_object_x_esm(context))), _defineProperty(_defineProperties4, PROP_MAPITERATIONKIND, _defineProperty({}, VALUE, iteratorKind)), _defineProperty(_defineProperties4, PROP_MAPNEXTINDEX, (_PROP_MAPNEXTINDEX = {}, _defineProperty(_PROP_MAPNEXTINDEX, VALUE, 0), _defineProperty(_PROP_MAPNEXTINDEX, WRITABLE, true), _PROP_MAPNEXTINDEX)), _defineProperties4));
 };
 
 var getMapNextObject = function getMapNextObject(args) {
@@ -8684,7 +8740,6 @@ object_define_property_x_esm(MapIt.prototype, symIt, thisIteratorDescriptor); //
  * primitive values) may be used as either a key or a value.
  *
  * @class Map
- * @private
  * @param {*} [iterable] - Iterable is an Array or other iterable object whose
  *  elements are key-value pairs (2-element Arrays). Each key-value pair is
  *  added to the new Map. A null is treated as undefined.
@@ -8701,9 +8756,7 @@ var MapImplementation = function Map() {
   collections_x_esm_parse([MAP, this, arguments.length ? arguments[0] : collections_x_esm_UNDEFINED]);
 }; // noinspection JSValidateTypes
 
-object_define_properties_x_esm(MapImplementation.prototype,
-/** @lends MapImplementation.prototype */
-{
+object_define_properties_x_esm(MapImplementation.prototype, (_defineProperties5 = {
   /**
    * The clear() method removes all elements from a Map object.
    *
@@ -8711,117 +8764,34 @@ object_define_properties_x_esm(MapImplementation.prototype,
    */
   clear: _defineProperty({}, VALUE, function clear() {
     return collections_x_esm_baseClear(MAP, this);
-  }),
-
-  /**
-   * The delete() method removes the specified element from a Map object.
-   *
-   * @param {*} key - The key of the element to remove from the Map object.
-   * @returns {boolean} Returns true if an element in the Map object has been
-   *  removed successfully.
-   */
-  delete: _defineProperty({}, VALUE, function de1ete(key) {
-    return collections_x_esm_baseDelete([MAP, this, key]);
-  }),
-
-  /**
-   * The entries() method returns a new Iterator object that contains the
-   * [key, value] pairs for each element in the Map object in insertion order.
-   *
-   * @returns {object} A new Iterator object.
-   */
-  entries: _defineProperty({}, VALUE, function entries() {
-    return new MapIt(this, KIND_KEY_VALUE);
-  }),
-
-  /**
-   * The forEach() method executes a provided function once per each
-   * key/value pair in the Map object, in insertion order.
-   *
-   * @param {Function} callback - Function to execute for each element..
-   * @param {*} [thisArg] - Value to use as this when executing callback.
-   * @returns {object} The Map object.
-   */
-  forEach: _defineProperty({}, VALUE, function forEach(callback, thisArg) {
-    return collections_x_esm_baseForEach([MAP, this, callback, thisArg]);
-  }),
-
-  /**
-   * The get() method returns a specified element from a Map object.
-   *
-   * @param {*} key - The key of the element to return from the Map object.
-   * @returns {*} Returns the element associated with the specified key or
-   *  undefined if the key can't be found in the Map object.
-   */
-  get: _defineProperty({}, VALUE, function get(key) {
-    var index = index_of_x_esm(assert_is_object_x_esm(this)[PROP_KEY], key, SAMEVALUEZERO);
-    return index > -1 ? this[PROP_VALUE][index] : collections_x_esm_UNDEFINED;
-  }),
-
-  /**
-   * The has() method returns a boolean indicating whether an element with
-   * the specified key exists or not.
-   *
-   * @function
-   * @param {*} key - The key of the element to test for presence in the Map object.
-   * @returns {boolean} Returns true if an element with the specified key
-   *  exists in the Map object; otherwise false.
-   */
-  has: hasDescriptor,
-
-  /**
-   * The keys() method returns a new Iterator object that contains the keys
-   * for each element in the Map object in insertion order.
-   *
-   * @returns {object} A new Iterator object.
-   */
-  keys: _defineProperty({}, VALUE, function keys() {
-    return new MapIt(this, KIND_KEY);
-  }),
-
-  /**
-   * The set() method adds a new element with a specified key and value to
-   * a Map object.
-   *
-   * @param {*} key - The key of the element to add to the Map object.
-   * @param {*} value - The value of the element to add to the Map object.
-   * @returns {object} The Map object.
-   */
-  set: _defineProperty({}, VALUE, function set(key, value) {
-    return collections_x_esm_baseAddSet([MAP, this, key, value]);
-  }),
-
-  /**
-   * The value of size is an integer representing how many entries the Map
-   * object has.
-   *
-   * @name size
-   * @memberof $MapObject
-   * @instance
-   * @type {number}
-   */
-  size: sizeDescriptor,
-
-  /**
-   * The values() method returns a new Iterator object that contains the
-   * values for each element in the Map object in insertion order.
-   *
-   * @returns {object} A new Iterator object.
-   */
-  values: _defineProperty({}, VALUE, function values() {
-    return new MapIt(this, KIND_VALUE);
   })
-});
+}, _defineProperty(_defineProperties5, DELETE, _defineProperty({}, VALUE, function $delete(key) {
+  return collections_x_esm_baseDelete([MAP, this, key]);
+})), _defineProperty(_defineProperties5, "entries", _defineProperty({}, VALUE, function entries() {
+  return new MapIt(this, KIND_KEY_VALUE);
+})), _defineProperty(_defineProperties5, "forEach", _defineProperty({}, VALUE, function forEach(callback, thisArg) {
+  return collections_x_esm_baseForEach([MAP, this, callback, thisArg]);
+})), _defineProperty(_defineProperties5, "get", _defineProperty({}, VALUE, function get(key) {
+  var index = index_of_x_esm(assert_is_object_x_esm(this)[PROP_KEY], key, SAMEVALUEZERO);
+  return index > -1 ? this[PROP_VALUE][index] : collections_x_esm_UNDEFINED;
+})), _defineProperty(_defineProperties5, "has", hasDescriptor), _defineProperty(_defineProperties5, "keys", _defineProperty({}, VALUE, function keys() {
+  return new MapIt(this, KIND_KEY);
+})), _defineProperty(_defineProperties5, "set", _defineProperty({}, VALUE, function set(key, value) {
+  return collections_x_esm_baseAddSet([MAP, this, key, value]);
+})), _defineProperty(_defineProperties5, "size", sizeDescriptor), _defineProperty(_defineProperties5, "values", _defineProperty({}, VALUE, function values() {
+  return new MapIt(this, KIND_VALUE);
+})), _defineProperty(_defineProperties5, symbol_species_x_esm, thisSpeciesDescriptor), _defineProperties5));
 /**
  * The initial value of the @@iterator property is the same function object
  * as the initial value of the entries property.
  *
  * @function symIt
- * @memberof module:collections-x.Map.prototype
+ * @memberof $MapObject.prototype
  * @returns {object} A new Iterator object.
  */
 
 object_define_property_x_esm(MapImplementation.prototype, symIt, _defineProperty({}, VALUE, MapImplementation.prototype.entries));
+rename_function_x_esm(MapImplementation.prototype.delete, DELETE, true);
 /*
  * Determine whether to use shim or native.
  */
@@ -8917,7 +8887,7 @@ var collections_x_esm_performMapFixes = function performMapFixes() {
     });
     return res.threw || res.value;
   }, collections_x_esm_badDoneFixee, collections_x_esm_badNextFunction, function fixee(Subject) {
-    var testMapProto = hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
+    var testMapProto = collections_x_esm_hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
     return to_boolean_x_esm(testMapProto) && is_function_x_esm(testMapProto[symIt]) === false;
   }];
   array_for_each_x_esm(fixees, function iteratee(fixee) {
@@ -8974,7 +8944,7 @@ var collections_x_esm_performSetFixes = function performSetFixes() {
     });
     return res.threw || res.value;
   }, collections_x_esm_badDoneFixee, collections_x_esm_badNextFunction, function fixee(Subject) {
-    var testSetProto = hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
+    var testSetProto = collections_x_esm_hasRealSymbolIterator && get_prototype_of_x_esm(new Subject().keys());
     return to_boolean_x_esm(testSetProto) && is_function_x_esm(testSetProto[symIt]) === false;
   }];
   array_for_each_x_esm(fixees, function iteratee(fixee) {
@@ -8982,8 +8952,27 @@ var collections_x_esm_performSetFixes = function performSetFixes() {
   });
   return Export;
 };
+/**
+ * The Map object is a simple key/value map. Any value (both objects and
+ * primitive values) may be used as either a key or a value.
+ *
+ * @class Map
+ * @param {*} [iterable] - Iterable is an Array or other iterable object whose
+ *  elements are key-value pairs (2-element Arrays). Each key-value pair is
+ *  added to the new Map. A null is treated as undefined.
+ */
+
 
 var MapConstructor = collections_x_esm_performMapFixes();
+/**
+ * The Set object lets you store unique values of any type, whether primitive
+ * values or object references.
+ *
+ * @class Set
+ * @param {*} [iterable] - If an iterable object is passed, all of its elements
+ * will be added to the new Set. A null is treated as undefined.
+ */
+
 var SetConstructor = collections_x_esm_performSetFixes();
 
 var collections_x_esm_hasImplementationProps = function hasImplementationProps(object) {

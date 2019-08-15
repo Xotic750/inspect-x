@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-08-14T16:03:05.120Z",
+  "date": "2019-08-15T20:49:38.830Z",
   "describe": "",
   "description": "An implementation of node's ES6 inspect module.",
   "file": "inspect-x.js",
-  "hash": "e4fe2fda86b9b95d3fb1",
+  "hash": "a857437de98ea8c98837",
   "license": "MIT",
   "version": "3.1.0"
 }
@@ -5535,6 +5535,22 @@ var is_boolean_object_default = /*#__PURE__*/__webpack_require__.n(is_boolean_ob
 var object_is = __webpack_require__(18);
 var object_is_default = /*#__PURE__*/__webpack_require__.n(object_is);
 
+// CONCATENATED MODULE: ./node_modules/is-primitive-x/dist/is-primitive-x.esm.js
+function is_primitive_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { is_primitive_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { is_primitive_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return is_primitive_x_esm_typeof(obj); }
+
+/**
+ * Returns true if the value is a primitive.
+ *
+ * @param {*} [val] - The value to test.
+ * @returns {boolean} True if a primitive, otherwise false..
+ */
+var isPrimitive = function isPrimitive(val) {
+  return is_primitive_x_esm_typeof(val) === 'object' ? val === null : typeof val !== 'function';
+};
+
+/* harmony default export */ var is_primitive_x_esm = (isPrimitive);
+
+
 // EXTERNAL MODULE: ./node_modules/is-nan/index.js
 var is_nan = __webpack_require__(19);
 var is_nan_default = /*#__PURE__*/__webpack_require__.n(is_nan);
@@ -9828,7 +9844,7 @@ var inspect_x_esm_getConstructorOf = function getConstructorOf(obj) {
 };
 
 var inspect_x_esm_isSub = function isSub(value) {
-  if (supportsClasses !== true || is_primitive_default()(value)) {
+  if (supportsClasses !== true || is_primitive_x_esm(value)) {
     return false;
   }
 

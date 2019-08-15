@@ -29,7 +29,7 @@ import isNumber from 'is-number-object';
 import isBoolean from 'is-boolean-object';
 import objectIs from 'object-is';
 import isSymbol from 'is-symbol';
-import isPrimitive from 'is-primitive';
+import isPrimitive from 'is-primitive-x';
 import isArray from 'is-array-x';
 import isNumberNaN from 'is-nan';
 import toStr from 'to-string-x';

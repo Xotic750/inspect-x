@@ -2,7 +2,7 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-08-17T22:16:22.666Z",
+  "date": "2019-08-18T14:30:53.238Z",
   "describe": "",
   "description": "An implementation of node's ES6 inspect module.",
   "file": "inspect-x.js",

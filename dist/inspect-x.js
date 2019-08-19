@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-08-18T14:30:53.238Z",
+  "date": "2019-08-19T12:45:52.968Z",
   "describe": "",
   "description": "An implementation of node's ES6 inspect module.",
   "file": "inspect-x.js",
-  "hash": "a857437de98ea8c98837",
+  "hash": "8f5079f9c5562c143885",
   "license": "MIT",
   "version": "3.1.0"
 }
@@ -157,28 +157,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/*!
- * is-primitive <https://github.com/jonschlinkert/is-primitive>
- *
- * Copyright (c) 2014-present, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-module.exports = function isPrimitive(val) {
-  if (typeof val === 'object') {
-    return val === null;
-  }
-  return typeof val !== 'function';
-};
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
 
 
 var strValue = String.prototype.valueOf;
@@ -198,6 +176,28 @@ module.exports = function isString(value) {
 	if (typeof value === 'string') { return true; }
 	if (typeof value !== 'object') { return false; }
 	return hasToStringTag ? tryStringObject(value) : toStr.call(value) === strClass;
+};
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * is-primitive <https://github.com/jonschlinkert/is-primitive>
+ *
+ * Copyright (c) 2014-present, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+module.exports = function isPrimitive(val) {
+  if (typeof val === 'object') {
+    return val === null;
+  }
+  return typeof val !== 'function';
 };
 
 
@@ -2196,7 +2196,7 @@ is_symbol_default()(Symbol.toStringTag));
 
 
 // EXTERNAL MODULE: ./node_modules/is-primitive/index.js
-var is_primitive = __webpack_require__(0);
+var is_primitive = __webpack_require__(1);
 var is_primitive_default = /*#__PURE__*/__webpack_require__.n(is_primitive);
 
 // CONCATENATED MODULE: ./node_modules/is-nil-x/dist/is-nil-x.esm.js
@@ -2780,6 +2780,151 @@ var is_function_x_esm_isFunction = function isFunction(value, allowClass) {
 /* harmony default export */ var is_function_x_esm = (is_function_x_esm_isFunction);
 
 
+// EXTERNAL MODULE: ./node_modules/is-generator-function/index.js
+var is_generator_function = __webpack_require__(17);
+var is_generator_function_default = /*#__PURE__*/__webpack_require__.n(is_generator_function);
+
+// CONCATENATED MODULE: ./node_modules/to-object-x/dist/to-object-x.esm.js
+
+var castObject = {}.constructor;
+/**
+ * The abstract operation ToObject converts argument to a value of
+ * type Object.
+ *
+ * @param {*} value - The `value` to convert.
+ * @throws {TypeError} If `value` is a `null` or `undefined`.
+ * @returns {!object} The `value` converted to an object.
+ */
+
+var to_object_x_esm_toObject = function toObject(value) {
+  return castObject(require_object_coercible_x_esm(value));
+};
+
+/* harmony default export */ var to_object_x_esm = (to_object_x_esm_toObject);
+
+
+// CONCATENATED MODULE: ./node_modules/get-prototype-of-x/dist/get-prototype-of-x.esm.js
+
+
+
+var ObjectCtr = {}.constructor;
+var nativeGetPrototypeOf = ObjectCtr.getPrototypeOf;
+
+var get_prototype_of_x_esm_test1 = function test1() {
+  var prototypeOfCtr = {};
+  /* eslint-disable-next-line lodash/prefer-noop */
+
+  var Ctr = function Ctr() {};
+
+  Ctr.prototype = prototypeOfCtr;
+  var ctr = new Ctr();
+
+  try {
+    return nativeGetPrototypeOf(ctr) === prototypeOfCtr;
+  } catch (ignore) {
+    return false;
+  }
+};
+
+var isWorking = to_boolean_x_esm(nativeGetPrototypeOf) && get_prototype_of_x_esm_test1();
+
+var patchedGetPrototypeOf = function getPrototypeOf(obj) {
+  return nativeGetPrototypeOf(to_object_x_esm(obj));
+};
+
+var implementation = function getPrototypeOf(obj) {
+  var object = to_object_x_esm(obj);
+  /* eslint-disable-next-line no-proto */
+
+  var proto = object.__proto__;
+
+  if (proto || proto === null) {
+    return proto;
+  }
+
+  if (is_function_x_esm(object.constructor)) {
+    return object.constructor.prototype;
+  }
+
+  if (object instanceof ObjectCtr) {
+    return ObjectCtr.prototype;
+  }
+
+  return null;
+};
+/**
+ * This method returns the prototype (i.e. The value of the internal [[Prototype]] property)
+ * of the specified object.
+ *
+ * @function getPrototypeOf
+ * @param {*} obj - The object whose prototype is to be returned.
+ * @returns {object} The prototype of the given object. If there are no inherited properties, null is returned.
+ */
+
+var gpo = isWorking ? patchedGetPrototypeOf : implementation;
+/* harmony default export */ var get_prototype_of_x_esm = (gpo);
+
+
+// CONCATENATED MODULE: ./node_modules/is-async-function-x/dist/is-async-function-x.esm.js
+
+
+
+
+
+
+var isFnRegex = /^async function/;
+var is_async_function_x_esm_test = isFnRegex.test;
+var functionCtr = attempt_x_esm.constructor;
+var is_async_function_x_esm_fToString = functionCtr.toString;
+var testRes = attempt_x_esm(function attemptee() {
+  return get_prototype_of_x_esm(functionCtr('return async function() {}')());
+});
+var supportsAsync = testRes.threw === false;
+var asyncProto = testRes.value;
+
+var is_async_function_x_esm_attemptToString = function attemptToString(fn) {
+  return attempt_x_esm(function attemptee() {
+    return normalize_space_x_esm(replace_comments_x_esm(is_async_function_x_esm_fToString.call(fn), ' '));
+  });
+};
+
+var is_async_function_x_esm_compare = function compare(fn) {
+  return has_to_string_tag_x_esm ? get_prototype_of_x_esm(fn) === asyncProto : to_string_tag_x_esm(fn) === '[object AsyncFunction]';
+};
+/**
+ * Checks if `value` is classified as an `Async Function` object.
+ *
+ * @param {*} fn - The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified,
+ * else `false`.
+ */
+
+
+var isAsyncFunction = function isAsyncFunction(fn) {
+  if (supportsAsync === false || typeof fn !== 'function') {
+    return false;
+  }
+
+  var result = is_async_function_x_esm_attemptToString(fn);
+
+  if (result.threw) {
+    return false;
+  }
+
+  if (is_async_function_x_esm_test.call(isFnRegex, result.value)) {
+    return true;
+  }
+
+  return is_async_function_x_esm_compare(fn);
+};
+
+/* harmony default export */ var is_async_function_x_esm = (isAsyncFunction);
+
+
+// EXTERNAL MODULE: ./node_modules/is-regex/index.js
+var is_regex = __webpack_require__(6);
+var is_regex_default = /*#__PURE__*/__webpack_require__.n(is_regex);
+
 // CONCATENATED MODULE: ./node_modules/to-string-symbols-supported-x/dist/to-string-symbols-supported-x.esm.js
 
 
@@ -2831,54 +2976,6 @@ var assert_is_function_x_esm_assertIsFunction = function assertIsFunction(callba
 };
 
 /* harmony default export */ var assert_is_function_x_esm = (assert_is_function_x_esm_assertIsFunction);
-
-
-// CONCATENATED MODULE: ./node_modules/to-object-x/dist/to-object-x.esm.js
-
-var castObject = {}.constructor;
-/**
- * The abstract operation ToObject converts argument to a value of
- * type Object.
- *
- * @param {*} value - The `value` to convert.
- * @throws {TypeError} If `value` is a `null` or `undefined`.
- * @returns {!object} The `value` converted to an object.
- */
-
-var to_object_x_esm_toObject = function toObject(value) {
-  return castObject(require_object_coercible_x_esm(value));
-};
-
-/* harmony default export */ var to_object_x_esm = (to_object_x_esm_toObject);
-
-
-// EXTERNAL MODULE: ./node_modules/is-arguments/index.js
-var is_arguments = __webpack_require__(5);
-var is_arguments_default = /*#__PURE__*/__webpack_require__.n(is_arguments);
-
-// CONCATENATED MODULE: ./node_modules/is-array-x/dist/is-array-x.esm.js
-
-
-var nia = [].isArray;
-var nativeIsArray = typeof nia === 'function' && nia;
-var is_array_x_esm_testResult = attempt_x_esm(function attemptee() {
-  return nativeIsArray([]) === true && nativeIsArray({
-    length: 0
-  }) === false;
-});
-var isWorking = is_array_x_esm_testResult.threw === false && is_array_x_esm_testResult.value === true;
-var implementation = function isArray(value) {
-  return to_string_tag_x_esm(value) === '[object Array]';
-};
-/**
- * Determines whether the passed value is an Array.
- *
- * @param {*} value - The value to test.
- * @returns {boolean} - True if an array; otherwise false.
- */
-
-var is_array_x_esm_isArray = isWorking ? nativeIsArray : implementation;
-/* harmony default export */ var is_array_x_esm = (is_array_x_esm_isArray);
 
 
 // EXTERNAL MODULE: ./node_modules/is-date-object/index.js
@@ -3372,7 +3469,7 @@ var hasBoxed = boxedString[0] === has_boxed_string_x_esm_string && 0 in boxedStr
 
 
 // EXTERNAL MODULE: ./node_modules/is-string/index.js
-var is_string = __webpack_require__(1);
+var is_string = __webpack_require__(0);
 var is_string_default = /*#__PURE__*/__webpack_require__.n(is_string);
 
 // CONCATENATED MODULE: ./node_modules/split-if-boxed-bug-x/dist/split-if-boxed-bug-x.esm.js
@@ -3396,420 +3493,6 @@ var splitIfBoxedBug = function splitIfBoxedBug(value) {
 
 /* harmony default export */ var split_if_boxed_bug_x_esm = (splitIfBoxedBug);
 
-
-// CONCATENATED MODULE: ./node_modules/array-like-slice-x/dist/array-like-slice-x.esm.js
-
-
-
-
-
-var getMax = function _getMax(a, b) {
-  return a >= b ? a : b;
-};
-
-var getMin = function _getMin(a, b) {
-  return a <= b ? a : b;
-};
-
-var setRelative = function _setRelative(value, length) {
-  return value < 0 ? getMax(length + value, 0) : getMin(value, length);
-};
-/**
- * The slice() method returns a shallow copy of a portion of an array into a new
- * array object selected from begin to end (end not included). The original
- * array will not be modified.
- *
- * @param {!object} arrayLike - The array like object to slice.
- * @param {number} [start] - Zero-based index at which to begin extraction.
- *  A negative index can be used, indicating an offset from the end of the
- *  sequence. Running slice(-2) extracts the last two elements in the sequence.
- *  If begin is undefined, slice begins from index 0.
- * @param {number} [end] - Zero-based index before which to end extraction.
- *  Slice extracts up to but not including end. For example, slice([0,1,2,3,4],1,4)
- *  extracts the second element through the fourth element (elements indexed
- *  1, 2, and 3).
- *  A negative index can be used, indicating an offset from the end of the
- *  sequence. Running slice(2,-1) extracts the third element through the second-to-last
- *  element in the sequence.
- *  If end is omitted, slice extracts through the end of the sequence (arr.length).
- *  If end is greater than the length of the sequence, slice extracts through
- *  the end of the sequence (arr.length).
- * @returns {Array} A new array containing the extracted elements.
- */
-
-
-var array_like_slice_x_esm_slice = function slice(arrayLike, start, end) {
-  var iterable = split_if_boxed_bug_x_esm(to_object_x_esm(arrayLike));
-  var length = to_length_x_esm(iterable.length);
-  var k = setRelative(to_integer_x_esm(start), length);
-  var relativeEnd = typeof end === 'undefined' ? length : to_integer_x_esm(end);
-  var finalEnd = setRelative(relativeEnd, length);
-  var val = [];
-  val.length = getMax(finalEnd - k, 0);
-  var next = 0;
-
-  while (k < finalEnd) {
-    if (k in iterable) {
-      val[next] = iterable[k];
-    }
-
-    next += 1;
-    k += 1;
-  }
-
-  return val;
-};
-
-/* harmony default export */ var array_like_slice_x_esm = (array_like_slice_x_esm_slice);
-
-
-// CONCATENATED MODULE: ./node_modules/array-slice-x/dist/array-slice-x.esm.js
-
-
-
-
-
-
-var nativeSlice = [].slice;
-
-var array_slice_x_esm_testArray = function testArray() {
-  var res = attempt_x_esm.call([1, 2, 3], nativeSlice, 1, 2);
-  return res.threw || is_array_x_esm(res.value) === false || res.value.length !== 1 || res.value[0] !== 2;
-};
-
-var array_slice_x_esm_testString = function testString() {
-  var res = attempt_x_esm.call('abc', nativeSlice, 1, 2);
-  return res.threw || is_array_x_esm(res.value) === false || res.value.length !== 1 || res.value[0] !== 'b';
-};
-
-var array_slice_x_esm_testDOM = function testDOM() {
-  var doc = typeof document !== 'undefined' && document;
-  var resultDocElement = doc ? attempt_x_esm.call(doc.documentElement, nativeSlice).threw : false;
-  return resultDocElement ? resultDocElement.threw : false;
-};
-
-var failArray = array_slice_x_esm_testArray();
-var failString = array_slice_x_esm_testString();
-var failDOM = array_slice_x_esm_testDOM();
-/**
- * The slice() method returns a shallow copy of a portion of an array into a new
- * array object selected from begin to end (end not included). The original
- * array will not be modified.
- *
- * @param {Array|object} array - The array to slice.
- * @param {number} [start] - Zero-based index at which to begin extraction.
- *  A negative index can be used, indicating an offset from the end of the
- *  sequence. Running slice(-2) extracts the last two elements in the sequence.
- *  If begin is undefined, slice begins from index 0.
- * @param {number} [end] - Zero-based index before which to end extraction.
- *  Slice extracts up to but not including end. For example, slice(1,4)
- *  extracts the second element through the fourth element (elements indexed
- *  1, 2, and 3).
- *  A negative index can be used, indicating an offset from the end of the
- *  sequence. Running slice(2,-1) extracts the third element through the second-to-last
- *  element in the sequence.
- *  If end is omitted, slice extracts through the end of the
- *  sequence (arr.length).
- *  If end is greater than the length of the sequence, slice extracts through
- *  the end of the sequence (arr.length).
- * @returns {Array} A new array containing the extracted elements.
- */
-
-var array_slice_x_esm_slice = function slice(array, start, end) {
-  var object = to_object_x_esm(array);
-
-  if (failArray || failDOM && is_array_x_esm(object) === false || failString && is_string_default()(object) || is_arguments_default()(object)) {
-    return array_like_slice_x_esm(object, start, end);
-  }
-  /* eslint-disable-next-line prefer-rest-params */
-
-
-  return nativeSlice.apply(object, array_like_slice_x_esm(arguments, 1));
-};
-
-/* harmony default export */ var array_slice_x_esm = (array_slice_x_esm_slice);
-
-
-// CONCATENATED MODULE: ./node_modules/bind-x/dist/bind-x.esm.js
-var bind_x_esm_this = undefined;
-
-function bind_x_esm_newArrowCheck(innerThis, boundThis) { if (innerThis !== boundThis) { throw new TypeError("Cannot instantiate an arrow function"); } }
-
-
-
-
-
-var nb = assert_is_function_x_esm.bind;
-var nativeBind = typeof nb === 'function' && nb;
-var bind_x_esm_isWorking;
-
-if (nativeBind) {
-  /* eslint-disable-next-line no-void */
-  var gra = void 0;
-  /* eslint-disable-next-line no-void */
-
-  var bind_x_esm_context = void 0;
-  /* eslint-disable-next-line no-unused-vars */
-
-  var bind_x_esm_fn = function fn(arg1, arg2) {
-    /* eslint-disable-next-line babel/no-invalid-this */
-    bind_x_esm_context = this;
-    gra = arg1;
-    /* eslint-disable-next-line prefer-rest-params */
-
-    return arguments;
-  };
-
-  var bind_x_esm_testThis = [];
-  var bind_x_esm_res = attempt_x_esm.call(bind_x_esm_fn, nativeBind, bind_x_esm_testThis, 1);
-  bind_x_esm_isWorking = bind_x_esm_res.threw === false && typeof bind_x_esm_res.value === 'function';
-
-  if (bind_x_esm_isWorking) {
-    bind_x_esm_res = attempt_x_esm(bind_x_esm_res.value, 2, 3);
-    bind_x_esm_isWorking = bind_x_esm_res.threw === false && gra === 1 && bind_x_esm_context === bind_x_esm_testThis && bind_x_esm_res.value.length === 3;
-  }
-
-  if (bind_x_esm_isWorking) {
-    var oracle = [1, 2, 3];
-
-    var Ctr = function Ctr() {
-      bind_x_esm_isWorking = this !== oracle;
-      return oracle;
-    };
-
-    bind_x_esm_res = attempt_x_esm.call(Ctr, nativeBind, null);
-    bind_x_esm_isWorking = bind_x_esm_res.threw === false && typeof bind_x_esm_res.value === 'function';
-
-    if (bind_x_esm_isWorking) {
-      bind_x_esm_res = attempt_x_esm(function () {
-        bind_x_esm_newArrowCheck(this, bind_x_esm_this);
-
-        /* eslint-disable-next-line babel/new-cap,new-cap */
-        return new bind_x_esm_res.value();
-      }.bind(undefined));
-
-      if (bind_x_esm_isWorking) {
-        bind_x_esm_isWorking = bind_x_esm_res.threw === false && bind_x_esm_res.value === oracle;
-      }
-    }
-  }
-}
-/* eslint-disable-next-line no-unused-vars */
-
-
-var patchedBind = function bind(target, thisArg) {
-  /* eslint-disable-next-line prefer-rest-params */
-  return nativeBind.apply(assert_is_function_x_esm(target), array_slice_x_esm(arguments, 1));
-};
-
-var bind_x_esm_concat = function concat(a, b) {
-  var aLength = a.length;
-  var bLength = b.length;
-  var result = array_slice_x_esm(a);
-  result.length += bLength;
-
-  for (var index = 0; index < bLength; index += 1) {
-    result[aLength + index] = b[index];
-  }
-
-  return result;
-};
-/* eslint-disable-next-line lodash/prefer-noop */
-
-
-var Empty = function Empty() {};
-
-var bind_x_esm_implementation = function bind(target, thisArg) {
-  assert_is_function_x_esm(target);
-  /* eslint-disable-next-line prefer-rest-params */
-
-  var args = array_slice_x_esm(arguments, 2);
-  var bound;
-
-  var binder = function _binder() {
-    /* eslint-disable-next-line babel/no-invalid-this */
-    if (this instanceof bound) {
-      /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
-      var result = target.apply(this, bind_x_esm_concat(args, arguments));
-      /* eslint-disable-next-line babel/no-invalid-this */
-
-      return is_primitive_default()(result) ? this : result;
-    }
-    /* eslint-disable-next-line prefer-rest-params */
-
-
-    return target.apply(thisArg, bind_x_esm_concat(args, arguments));
-  };
-
-  var boundLength = target.length - args.length;
-
-  if (boundLength < 0) {
-    boundLength = 0;
-  }
-
-  var lastIndex = boundLength - 1;
-  var boundArgs = '';
-
-  for (var index = 0; index < boundLength; index += 1) {
-    boundArgs += "$_".concat(index, "_$").concat(index < lastIndex ? ',' : '');
-  }
-  /* eslint-disable-next-line no-new-func */
-
-
-  bound = Function('binder', 'slice', "return function (".concat(boundArgs, "){ return binder.apply(this,slice(arguments)); }"))(binder, array_slice_x_esm);
-
-  if (target.prototype) {
-    Empty.prototype = target.prototype;
-    bound.prototype = new Empty();
-    Empty.prototype = null;
-  }
-
-  return bound;
-};
-/**
- * The bind() method creates a new function that, when called, has its this
- * keyword set to the provided value, with a given sequence of arguments
- * preceding any provided when the new function is called.
- *
- * @param {Function} target - The target function.
- * @param {*} thisArg - The value to be passed as the this parameter to the target
- *  function when the bound function is called. The value is ignored if the
- *  bound function is constructed using the new operator.
- * @param {*} [args] - Arguments to prepend to arguments provided to the bouund
- *  function when invoking the target function.
- * @throws {TypeError} If target is not a function.
- * @returns {Function} The bound function.
- */
-
-var $bind = bind_x_esm_isWorking ? patchedBind : bind_x_esm_implementation;
-/* harmony default export */ var bind_x_esm = ($bind);
-
-
-// EXTERNAL MODULE: ./node_modules/is-generator-function/index.js
-var is_generator_function = __webpack_require__(17);
-var is_generator_function_default = /*#__PURE__*/__webpack_require__.n(is_generator_function);
-
-// CONCATENATED MODULE: ./node_modules/get-prototype-of-x/dist/get-prototype-of-x.esm.js
-
-
-
-var ObjectCtr = {}.constructor;
-var nativeGetPrototypeOf = ObjectCtr.getPrototypeOf;
-
-var get_prototype_of_x_esm_test1 = function test1() {
-  var prototypeOfCtr = {};
-  /* eslint-disable-next-line lodash/prefer-noop */
-
-  var Ctr = function Ctr() {};
-
-  Ctr.prototype = prototypeOfCtr;
-  var ctr = new Ctr();
-
-  try {
-    return nativeGetPrototypeOf(ctr) === prototypeOfCtr;
-  } catch (ignore) {
-    return false;
-  }
-};
-
-var get_prototype_of_x_esm_isWorking = to_boolean_x_esm(nativeGetPrototypeOf) && get_prototype_of_x_esm_test1();
-
-var patchedGetPrototypeOf = function getPrototypeOf(obj) {
-  return nativeGetPrototypeOf(to_object_x_esm(obj));
-};
-
-var get_prototype_of_x_esm_implementation = function getPrototypeOf(obj) {
-  var object = to_object_x_esm(obj);
-  /* eslint-disable-next-line no-proto */
-
-  var proto = object.__proto__;
-
-  if (proto || proto === null) {
-    return proto;
-  }
-
-  if (is_function_x_esm(object.constructor)) {
-    return object.constructor.prototype;
-  }
-
-  if (object instanceof ObjectCtr) {
-    return ObjectCtr.prototype;
-  }
-
-  return null;
-};
-/**
- * This method returns the prototype (i.e. The value of the internal [[Prototype]] property)
- * of the specified object.
- *
- * @function getPrototypeOf
- * @param {*} obj - The object whose prototype is to be returned.
- * @returns {object} The prototype of the given object. If there are no inherited properties, null is returned.
- */
-
-var gpo = get_prototype_of_x_esm_isWorking ? patchedGetPrototypeOf : get_prototype_of_x_esm_implementation;
-/* harmony default export */ var get_prototype_of_x_esm = (gpo);
-
-
-// CONCATENATED MODULE: ./node_modules/is-async-function-x/dist/is-async-function-x.esm.js
-
-
-
-
-
-
-var isFnRegex = /^async function/;
-var is_async_function_x_esm_test = isFnRegex.test;
-var functionCtr = attempt_x_esm.constructor;
-var is_async_function_x_esm_fToString = functionCtr.toString;
-var testRes = attempt_x_esm(function attemptee() {
-  return get_prototype_of_x_esm(functionCtr('return async function() {}')());
-});
-var supportsAsync = testRes.threw === false;
-var asyncProto = testRes.value;
-
-var is_async_function_x_esm_attemptToString = function attemptToString(fn) {
-  return attempt_x_esm(function attemptee() {
-    return normalize_space_x_esm(replace_comments_x_esm(is_async_function_x_esm_fToString.call(fn), ' '));
-  });
-};
-
-var is_async_function_x_esm_compare = function compare(fn) {
-  return has_to_string_tag_x_esm ? get_prototype_of_x_esm(fn) === asyncProto : to_string_tag_x_esm(fn) === '[object AsyncFunction]';
-};
-/**
- * Checks if `value` is classified as an `Async Function` object.
- *
- * @param {*} fn - The value to check.
- * @returns {boolean} Returns `true` if `value` is correctly classified,
- * else `false`.
- */
-
-
-var isAsyncFunction = function isAsyncFunction(fn) {
-  if (supportsAsync === false || typeof fn !== 'function') {
-    return false;
-  }
-
-  var result = is_async_function_x_esm_attemptToString(fn);
-
-  if (result.threw) {
-    return false;
-  }
-
-  if (is_async_function_x_esm_test.call(isFnRegex, result.value)) {
-    return true;
-  }
-
-  return is_async_function_x_esm_compare(fn);
-};
-
-/* harmony default export */ var is_async_function_x_esm = (isAsyncFunction);
-
-
-// EXTERNAL MODULE: ./node_modules/is-regex/index.js
-var is_regex = __webpack_require__(6);
-var is_regex_default = /*#__PURE__*/__webpack_require__.n(is_regex);
 
 // CONCATENATED MODULE: ./node_modules/array-any-x/dist/array-any-x.esm.js
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
@@ -4327,6 +4010,101 @@ if (to_boolean_x_esm(nativeDefProp) === false || definePropertyFallback) {
 
 var defProp = $defineProperty;
 /* harmony default export */ var object_define_property_x_esm = (defProp);
+
+
+// CONCATENATED MODULE: ./node_modules/is-array-x/dist/is-array-x.esm.js
+
+
+var nia = [].isArray;
+var nativeIsArray = typeof nia === 'function' && nia;
+var is_array_x_esm_testResult = attempt_x_esm(function attemptee() {
+  return nativeIsArray([]) === true && nativeIsArray({
+    length: 0
+  }) === false;
+});
+var is_array_x_esm_isWorking = is_array_x_esm_testResult.threw === false && is_array_x_esm_testResult.value === true;
+var is_array_x_esm_implementation = function isArray(value) {
+  return to_string_tag_x_esm(value) === '[object Array]';
+};
+/**
+ * Determines whether the passed value is an Array.
+ *
+ * @param {*} value - The value to test.
+ * @returns {boolean} - True if an array; otherwise false.
+ */
+
+var is_array_x_esm_isArray = is_array_x_esm_isWorking ? nativeIsArray : is_array_x_esm_implementation;
+/* harmony default export */ var is_array_x_esm = (is_array_x_esm_isArray);
+
+
+// EXTERNAL MODULE: ./node_modules/is-arguments/index.js
+var is_arguments = __webpack_require__(5);
+var is_arguments_default = /*#__PURE__*/__webpack_require__.n(is_arguments);
+
+// CONCATENATED MODULE: ./node_modules/array-like-slice-x/dist/array-like-slice-x.esm.js
+
+
+
+
+
+var getMax = function _getMax(a, b) {
+  return a >= b ? a : b;
+};
+
+var getMin = function _getMin(a, b) {
+  return a <= b ? a : b;
+};
+
+var setRelative = function _setRelative(value, length) {
+  return value < 0 ? getMax(length + value, 0) : getMin(value, length);
+};
+/**
+ * The slice() method returns a shallow copy of a portion of an array into a new
+ * array object selected from begin to end (end not included). The original
+ * array will not be modified.
+ *
+ * @param {!object} arrayLike - The array like object to slice.
+ * @param {number} [start] - Zero-based index at which to begin extraction.
+ *  A negative index can be used, indicating an offset from the end of the
+ *  sequence. Running slice(-2) extracts the last two elements in the sequence.
+ *  If begin is undefined, slice begins from index 0.
+ * @param {number} [end] - Zero-based index before which to end extraction.
+ *  Slice extracts up to but not including end. For example, slice([0,1,2,3,4],1,4)
+ *  extracts the second element through the fourth element (elements indexed
+ *  1, 2, and 3).
+ *  A negative index can be used, indicating an offset from the end of the
+ *  sequence. Running slice(2,-1) extracts the third element through the second-to-last
+ *  element in the sequence.
+ *  If end is omitted, slice extracts through the end of the sequence (arr.length).
+ *  If end is greater than the length of the sequence, slice extracts through
+ *  the end of the sequence (arr.length).
+ * @returns {Array} A new array containing the extracted elements.
+ */
+
+
+var array_like_slice_x_esm_slice = function slice(arrayLike, start, end) {
+  var iterable = split_if_boxed_bug_x_esm(to_object_x_esm(arrayLike));
+  var length = to_length_x_esm(iterable.length);
+  var k = setRelative(to_integer_x_esm(start), length);
+  var relativeEnd = typeof end === 'undefined' ? length : to_integer_x_esm(end);
+  var finalEnd = setRelative(relativeEnd, length);
+  var val = [];
+  val.length = getMax(finalEnd - k, 0);
+  var next = 0;
+
+  while (k < finalEnd) {
+    if (k in iterable) {
+      val[next] = iterable[k];
+    }
+
+    next += 1;
+    k += 1;
+  }
+
+  return val;
+};
+
+/* harmony default export */ var array_like_slice_x_esm = (array_like_slice_x_esm_slice);
 
 
 // CONCATENATED MODULE: ./node_modules/is-object-like-x/dist/is-object-like-x.esm.js
@@ -5089,7 +4867,7 @@ var get_own_enumerable_property_symbols_x_esm_getOwnEnumerablePropertySymbols = 
 
 
 
-var get_own_enumerable_keys_x_esm_concat = [].concat;
+var concat = [].concat;
 /**
  * This method returns only the enumerable own keys of an object.
  *
@@ -5100,7 +4878,7 @@ var get_own_enumerable_keys_x_esm_concat = [].concat;
 
 var get_own_enumerable_keys_x_esm_getOwnNonEnumerableKeys = function getOwnNonEnumerableKeys(target) {
   var object = to_object_x_esm(target);
-  return get_own_enumerable_keys_x_esm_concat.call(object_keys_x_esm(object), get_own_enumerable_property_symbols_x_esm(object));
+  return concat.call(object_keys_x_esm(object), get_own_enumerable_property_symbols_x_esm(object));
 };
 
 /* harmony default export */ var get_own_enumerable_keys_x_esm = (get_own_enumerable_keys_x_esm_getOwnNonEnumerableKeys);
@@ -5168,7 +4946,7 @@ var is_array_buffer_x_esm_getBlength = function getBlength() {
   return descriptor && typeof descriptor.get === 'function' ? is_array_buffer_x_esm_getGetter(descriptor) : null;
 };
 
-var is_array_buffer_x_esm_bLength = hasABuf && has_to_string_tag_x_esm ? is_array_buffer_x_esm_getBlength() : null;
+var bLength = hasABuf && has_to_string_tag_x_esm ? is_array_buffer_x_esm_getBlength() : null;
 /**
  * Determine if an `object` is an `ArrayBuffer`.
  *
@@ -5182,11 +4960,11 @@ var is_array_buffer_x_esm_isArrayBuffer = function isArrayBuffer(object) {
     return false;
   }
 
-  if (to_boolean_x_esm(is_array_buffer_x_esm_bLength) === false) {
+  if (to_boolean_x_esm(bLength) === false) {
     return to_string_tag_x_esm(object) === aBufTag;
   }
 
-  var result = attempt_x_esm.call(object, is_array_buffer_x_esm_bLength);
+  var result = attempt_x_esm.call(object, bLength);
   return result.threw === false && typeof result.value === 'number';
 };
 
@@ -6238,6 +6016,73 @@ var array_map_x_esm_implementation = function map(array, callBack
 
 var $map = array_map_x_esm_isWorking ? patchedMap : array_map_x_esm_implementation;
 /* harmony default export */ var array_map_x_esm = ($map);
+
+
+// CONCATENATED MODULE: ./node_modules/array-slice-x/dist/array-slice-x.esm.js
+
+
+
+
+
+
+var nativeSlice = [].slice;
+
+var array_slice_x_esm_testArray = function testArray() {
+  var res = attempt_x_esm.call([1, 2, 3], nativeSlice, 1, 2);
+  return res.threw || is_array_x_esm(res.value) === false || res.value.length !== 1 || res.value[0] !== 2;
+};
+
+var array_slice_x_esm_testString = function testString() {
+  var res = attempt_x_esm.call('abc', nativeSlice, 1, 2);
+  return res.threw || is_array_x_esm(res.value) === false || res.value.length !== 1 || res.value[0] !== 'b';
+};
+
+var array_slice_x_esm_testDOM = function testDOM() {
+  var doc = typeof document !== 'undefined' && document;
+  var resultDocElement = doc ? attempt_x_esm.call(doc.documentElement, nativeSlice).threw : false;
+  return resultDocElement ? resultDocElement.threw : false;
+};
+
+var failArray = array_slice_x_esm_testArray();
+var failString = array_slice_x_esm_testString();
+var failDOM = array_slice_x_esm_testDOM();
+/**
+ * The slice() method returns a shallow copy of a portion of an array into a new
+ * array object selected from begin to end (end not included). The original
+ * array will not be modified.
+ *
+ * @param {Array|object} array - The array to slice.
+ * @param {number} [start] - Zero-based index at which to begin extraction.
+ *  A negative index can be used, indicating an offset from the end of the
+ *  sequence. Running slice(-2) extracts the last two elements in the sequence.
+ *  If begin is undefined, slice begins from index 0.
+ * @param {number} [end] - Zero-based index before which to end extraction.
+ *  Slice extracts up to but not including end. For example, slice(1,4)
+ *  extracts the second element through the fourth element (elements indexed
+ *  1, 2, and 3).
+ *  A negative index can be used, indicating an offset from the end of the
+ *  sequence. Running slice(2,-1) extracts the third element through the second-to-last
+ *  element in the sequence.
+ *  If end is omitted, slice extracts through the end of the
+ *  sequence (arr.length).
+ *  If end is greater than the length of the sequence, slice extracts through
+ *  the end of the sequence (arr.length).
+ * @returns {Array} A new array containing the extracted elements.
+ */
+
+var array_slice_x_esm_slice = function slice(array, start, end) {
+  var object = to_object_x_esm(array);
+
+  if (failArray || failDOM && is_array_x_esm(object) === false || failString && is_string_default()(object) || is_arguments_default()(object)) {
+    return array_like_slice_x_esm(object, start, end);
+  }
+  /* eslint-disable-next-line prefer-rest-params */
+
+
+  return nativeSlice.apply(object, array_like_slice_x_esm(arguments, 1));
+};
+
+/* harmony default export */ var array_slice_x_esm = (array_slice_x_esm_slice);
 
 
 // CONCATENATED MODULE: ./node_modules/has-reflect-support-x/dist/has-reflect-support-x.esm.js
@@ -9508,6 +9353,278 @@ var array_union_x_esm_union = function union() {
 /* harmony default export */ var array_union_x_esm = (array_union_x_esm_union);
 
 
+// CONCATENATED MODULE: ./node_modules/util-pusher-x/dist/util-pusher-x.esm.js
+
+
+var util_pusher_x_esm_EMPTY_STRING = '';
+var split = util_pusher_x_esm_EMPTY_STRING.split;
+var splitter = [util_pusher_x_esm_EMPTY_STRING];
+
+var util_pusher_x_esm_getIterable = function getIterable(arrayLike) {
+  // noinspection JSUnresolvedFunction
+  return is_string_default()(arrayLike) ? split.apply(arrayLike, splitter) : arrayLike;
+}; // eslint-disable jsdoc/no-undefined-types
+// noinspection JSCommentMatchesSignature
+
+/**
+ * This pushes or concatenates into a new or existing array.
+ *
+ * @param {Array} arrayLike - The source.
+ * @param {number} [from=0] - The from source index.
+ * @param {Array} [target=[]] - The target array.
+ * @returns {*} The target array.
+ */
+// eslint-enable jsdoc/no-undefined-types
+
+
+var util_pusher_x_esm_pusher = function pusher(arrayLike, from) {
+  /* eslint-disable-next-line prefer-rest-params */
+  var target = arguments.length > 2 ? arguments[2] : [];
+
+  if (typeof arrayLike !== 'string' && is_primitive_x_esm(arrayLike)) {
+    return target;
+  }
+
+  var iterable = util_pusher_x_esm_getIterable(arrayLike);
+  var length = iterable.length;
+
+  for (var i = from || 0; i < length; i += 1) {
+    target[target.length] = arrayLike[i];
+  }
+
+  return target;
+};
+
+/* harmony default export */ var util_pusher_x_esm = (util_pusher_x_esm_pusher);
+
+
+// CONCATENATED MODULE: ./node_modules/simple-bind-x/dist/simple-bind-x.esm.js
+function simple_bind_x_esm_slicedToArray(arr, i) { return simple_bind_x_esm_arrayWithHoles(arr) || simple_bind_x_esm_iterableToArrayLimit(arr, i) || simple_bind_x_esm_nonIterableRest(); }
+
+function simple_bind_x_esm_nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function simple_bind_x_esm_iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function simple_bind_x_esm_arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+
+var simple_bind_x_esm_ERROR_MESSAGE = 'bind called on incompatible ';
+var simple_bind_x_esm_object = {};
+var simple_bind_x_esm_ObjectCtr = simple_bind_x_esm_object.constructor;
+var simple_bind_x_esm_toStringTag = simple_bind_x_esm_object.toString;
+var funcType = '[object Function]';
+var simple_bind_x_esm_ZERO = 0;
+var argsOffset = 2;
+
+var simple_bind_x_esm_getMax = function getMax(a, b) {
+  return a >= b ? a : b;
+};
+
+var simple_bind_x_esm_assertIsFunction = function assertIsFunction(value) {
+  if (typeof value !== 'function' && simple_bind_x_esm_toStringTag.apply(value) !== funcType) {
+    throw new TypeError(simple_bind_x_esm_ERROR_MESSAGE + value);
+  }
+};
+
+var boundFns = [function zero(binder) {
+  return function boundFn() {
+    /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
+    return binder.apply(this, util_pusher_x_esm(arguments));
+  };
+}, function one(binder, boundLength) {
+  return function boundFn(a) {
+    /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
+    return binder.apply(this, util_pusher_x_esm(arguments, boundLength, [a]));
+  };
+}, function two(binder, boundLength) {
+  return function boundFn(a, b) {
+    /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
+    return binder.apply(this, util_pusher_x_esm(arguments, boundLength, [a, b]));
+  };
+}, function three(binder, boundLength) {
+  /* eslint-disable-next-line max-params */
+  return function boundFn(a, b, c) {
+    /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
+    return binder.apply(this, util_pusher_x_esm(arguments, boundLength, [a, b, c]));
+  };
+}, function four(binder, boundLength) {
+  /* eslint-disable-next-line max-params */
+  return function boundFn(a, b, c, d) {
+    /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
+    return binder.apply(this, util_pusher_x_esm(arguments, boundLength, [a, b, c, d]));
+  };
+}, function five(binder, boundLength) {
+  /* eslint-disable-next-line max-params */
+  return function boundFn(a, b, c, d, e) {
+    /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
+    return binder.apply(this, util_pusher_x_esm(arguments, boundLength, [a, b, c, d, e]));
+  };
+}, function six(binder, boundLength) {
+  /* eslint-disable-next-line max-params */
+  return function boundFn(a, b, c, d, e, f) {
+    /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
+    return binder.apply(this, util_pusher_x_esm(arguments, boundLength, [a, b, c, d, e, f]));
+  };
+}, function seven(binder, boundLength) {
+  /* eslint-disable-next-line max-params */
+  return function boundFn(a, b, c, d, e, f, g) {
+    /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
+    return binder.apply(this, util_pusher_x_esm(arguments, boundLength, [a, b, c, d, e, f, g]));
+  };
+}, function eight(binder, boundLength) {
+  /* eslint-disable-next-line max-params */
+  return function boundFn(a, b, c, d, e, f, g, h) {
+    /* eslint-disable-next-line babel/no-invalid-this,prefer-rest-params */
+    return binder.apply(this, util_pusher_x_esm(arguments, boundLength, [a, b, c, d, e, f, g, h]));
+  };
+}];
+
+var getBoundFn = function getBoundFn(args) {
+  var _args = simple_bind_x_esm_slicedToArray(args, 3),
+      binder = _args[0],
+      target = _args[1],
+      bindArgs = _args[2];
+
+  var boundLength = simple_bind_x_esm_getMax(simple_bind_x_esm_ZERO, target.length - simple_bind_x_esm_getMax(simple_bind_x_esm_ZERO, bindArgs.length - argsOffset));
+  var fn = boundFns[boundLength];
+  var boundFn = fn ? fn(binder, boundLength) : boundFns[simple_bind_x_esm_ZERO](binder);
+
+  if (target.prototype) {
+    /* eslint-disable-next-line lodash/prefer-noop */
+    var Empty = function Empty() {};
+
+    Empty.prototype = target.prototype;
+    boundFn.prototype = new Empty();
+    Empty.prototype = null;
+  }
+
+  return boundFn;
+};
+
+var getResult = function getResult(target, boundArgs) {
+  /* eslint-disable-next-line babel/no-invalid-this */
+  var result = target.apply(this, boundArgs);
+  /* eslint-disable-next-line babel/no-invalid-this,babel/new-cap */
+
+  return simple_bind_x_esm_ObjectCtr(result) === result ? result : this;
+}; // eslint-disable jsdoc/check-param-names
+// noinspection JSCommentMatchesSignature
+
+/**
+ * The bind() method creates a new function that, when called, has its this
+ * keyword set to the provided value, with a given sequence of arguments
+ * preceding any provided when the new function is called.
+ *
+ * @param {Function} target - The target function.
+ * @param {*} [thisArg] - The value to be passed as the this parameter to the target
+ *  function when the bound function is called. The value is ignored if the
+ *  bound function is constructed using the new operator.
+ * @param {...*} [args] - Arguments to prepend to arguments provided to the bound
+ *  function when invoking the target function.
+ * @throws {TypeError} If target is not a function.
+ * @returns {Function} The bound function.
+ */
+// eslint-enable jsdoc/check-param-names
+
+
+var simple_bind_x_esm_bind = function bind(target, thisArg) {
+  simple_bind_x_esm_assertIsFunction(target);
+  /* eslint-disable-next-line prefer-rest-params */
+
+  var bindArgs = arguments;
+  var bound;
+
+  var binder = function binder() {
+    /* eslint-disable-next-line prefer-rest-params */
+    var boundArgs = util_pusher_x_esm(arguments, simple_bind_x_esm_ZERO, util_pusher_x_esm(bindArgs, argsOffset));
+    /* eslint-disable-next-line babel/no-invalid-this */
+
+    return this instanceof bound ? getResult.apply(this, [target, boundArgs]) : target.apply(thisArg, boundArgs);
+  };
+
+  bound = getBoundFn([binder, target, bindArgs]);
+  return bound;
+};
+
+/* harmony default export */ var simple_bind_x_esm = (simple_bind_x_esm_bind);
+
+
+// CONCATENATED MODULE: ./node_modules/simple-call-x/dist/simple-call-x.esm.js
+
+
+var $TypeError = TypeError;
+var nativeApply = simple_bind_x_esm.apply,
+    nativeCall = simple_bind_x_esm.call;
+var $apply = simple_bind_x_esm(nativeCall, nativeApply);
+var simple_call_x_esm_toStringTag = simple_bind_x_esm(nativeApply, {}.toString);
+var simple_call_x_esm_ERROR_MESSAGE = ' is not a function';
+var simple_call_x_esm_funcType = '[object Function]';
+
+var simple_call_x_esm_assertIsFunction = function assertIsFunction(value) {
+  if (typeof value !== 'function' && simple_call_x_esm_toStringTag(value) !== simple_call_x_esm_funcType) {
+    throw new $TypeError(value + simple_call_x_esm_ERROR_MESSAGE);
+  }
+
+  return value;
+}; // eslint-disable jsdoc/check-param-names
+// noinspection JSCommentMatchesSignature
+
+/**
+ * The abstract operation Call is used to call the [[Call]] internal method of a function object.
+ *
+ * @function call
+ * @param {Function} F - The target function.
+ * @param {*} [V] - The context.
+ * @param {Array} [args] - Argument to call the function with.
+ * @throws {TypeError} If target is not a function.
+ * @returns {*} The the result of invoking the function.
+ * @see https://www.ecma-international.org/ecma-262/6.0/#sec-call
+ */
+// eslint-enable jsdoc/check-param-names
+
+
+var simple_call_x_esm_call = function call(F, V) {
+  /* eslint-disable-next-line prefer-rest-params */
+  return $apply(simple_call_x_esm_assertIsFunction(F), V, util_pusher_x_esm(arguments[2]));
+};
+
+/* harmony default export */ var simple_call_x_esm = (simple_call_x_esm_call);
+
+
+// CONCATENATED MODULE: ./node_modules/simple-methodize-x/dist/simple-methodize-x.esm.js
+
+
+var simple_methodize_x_esm_toStringTag = {}.toString;
+var simple_methodize_x_esm_ERROR_MESSAGE = 'methodize called on incompatible ';
+var simple_methodize_x_esm_funcType = '[object Function]';
+
+var simple_methodize_x_esm_assertIsFunction = function assertIsFunction(value) {
+  if (typeof value !== 'function' && simple_call_x_esm(simple_methodize_x_esm_toStringTag, value) !== simple_methodize_x_esm_funcType) {
+    throw new TypeError(simple_methodize_x_esm_ERROR_MESSAGE + value);
+  }
+
+  return value;
+};
+/**
+ * Methodize a prototype method. Compliant to 8 arguments.
+ *
+ * @param {Function} prototypeMethod - The prototype method to methodize.
+ * @throws {TypeError} If target is not a function.
+ * @returns {Function} The static method.
+ */
+
+
+var simple_methodize_x_esm_methodize = function methodize(prototypeMethod) {
+  simple_methodize_x_esm_assertIsFunction(prototypeMethod);
+  return function methodized() {
+    /* eslint-disable-next-line prefer-rest-params */
+    return simple_call_x_esm(prototypeMethod, arguments[0], util_pusher_x_esm(arguments, 1));
+  };
+};
+
+/* harmony default export */ var simple_methodize_x_esm = (simple_methodize_x_esm_methodize);
+
+
 // CONCATENATED MODULE: ./dist/inspect-x.esm.js
 function inspect_x_esm_slicedToArray(arr, i) { return inspect_x_esm_arrayWithHoles(arr) || inspect_x_esm_iterableToArrayLimit(arr, i) || inspect_x_esm_nonIterableRest(); }
 
@@ -9572,49 +9689,49 @@ function inspect_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof 
 
 
 
+
 var EMPTY_ARRAY = [];
 var inspect_x_esm_RegExpCtr = /none/.constructor;
 var inspect_x_esm_EMPTY_STRING = '';
 var EMPTY_OBJECT = {};
-var call = is_function_x_esm.call;
 /* eslint-disable-next-line compat/compat */
 
 var hasSet = typeof Set === 'function' && is_set_x_esm(new Set());
 /* eslint-disable-next-line compat/compat */
 
 var inspect_x_esm_testSet = hasSet && new Set(['SetSentinel']);
-var setForEach = hasSet && bind_x_esm(call, inspect_x_esm_testSet.forEach);
-var setValues = hasSet && bind_x_esm(call, inspect_x_esm_testSet.values);
+var setForEach = hasSet && simple_methodize_x_esm(inspect_x_esm_testSet.forEach);
+var setValues = hasSet && simple_methodize_x_esm(inspect_x_esm_testSet.values);
 /* eslint-disable-next-line compat/compat */
 
 var hasMap = typeof Map === 'function' && is_map_x_esm(new Map());
 /* eslint-disable-next-line compat/compat */
 
 var inspect_x_esm_testMap = hasMap && new Map([[1, 'MapSentinel']]);
-var mapForEach = hasMap && bind_x_esm(call, inspect_x_esm_testMap.forEach);
-var mapValues = hasMap && bind_x_esm(call, inspect_x_esm_testMap.values);
+var mapForEach = hasMap && simple_methodize_x_esm(inspect_x_esm_testMap.forEach);
+var mapValues = hasMap && simple_methodize_x_esm(inspect_x_esm_testMap.values);
 /* eslint-disable-next-line compat/compat */
 
-var symbolToString = has_symbol_support_x_esm && bind_x_esm(call, Symbol.prototype.toString);
+var symbolToString = has_symbol_support_x_esm && simple_methodize_x_esm(Symbol.prototype.toString);
 /* eslint-disable-next-line compat/compat */
 
-var symbolValueOf = has_symbol_support_x_esm && bind_x_esm(call, Symbol.prototype.valueOf);
+var symbolValueOf = has_symbol_support_x_esm && simple_methodize_x_esm(Symbol.prototype.valueOf);
 var oSeal = EMPTY_OBJECT.constructor.seal;
 var objectSeal = is_function_x_esm(oSeal) ? oSeal : function seal(value) {
   return value;
 };
-var regexpToString = bind_x_esm(call, inspect_x_esm_RegExpCtr.prototype.toString);
-var regexpTest = bind_x_esm(call, inspect_x_esm_RegExpCtr.prototype.test);
-var errorToString = bind_x_esm(call, Error.prototype.toString);
-var numberToString = bind_x_esm(call, 0 .toString);
-var booleanToString = bind_x_esm(call, true.toString);
-var inspect_x_esm_concat = bind_x_esm(call, EMPTY_ARRAY.concat, EMPTY_ARRAY);
-var inspect_x_esm_join = bind_x_esm(call, EMPTY_ARRAY.join);
-var inspect_x_esm_push = bind_x_esm(call, EMPTY_ARRAY.push);
-var inspect_x_esm_getTime = bind_x_esm(call, Date.prototype.getTime);
-var inspect_x_esm_replace = bind_x_esm(call, inspect_x_esm_EMPTY_STRING.replace);
-var strSlice = bind_x_esm(call, inspect_x_esm_EMPTY_STRING.slice);
-var inspect_x_esm_propertyIsEnumerable = bind_x_esm(call, EMPTY_OBJECT.propertyIsEnumerable);
+var regexpToString = simple_methodize_x_esm(inspect_x_esm_RegExpCtr.prototype.toString);
+var regexpTest = simple_methodize_x_esm(inspect_x_esm_RegExpCtr.prototype.test);
+var errorToString = simple_methodize_x_esm(Error.prototype.toString);
+var numberToString = simple_methodize_x_esm(0 .toString);
+var booleanToString = simple_methodize_x_esm(true.toString);
+var inspect_x_esm_concat = simple_methodize_x_esm(EMPTY_ARRAY.concat, EMPTY_ARRAY);
+var inspect_x_esm_join = simple_methodize_x_esm(EMPTY_ARRAY.join);
+var inspect_x_esm_push = simple_methodize_x_esm(EMPTY_ARRAY.push);
+var inspect_x_esm_getTime = simple_methodize_x_esm(Date.prototype.getTime);
+var inspect_x_esm_replace = simple_methodize_x_esm(inspect_x_esm_EMPTY_STRING.replace);
+var strSlice = simple_methodize_x_esm(inspect_x_esm_EMPTY_STRING.slice);
+var inspect_x_esm_propertyIsEnumerable = simple_methodize_x_esm(EMPTY_OBJECT.propertyIsEnumerable);
 /* eslint-disable-next-line compat/compat */
 
 var customInspectSymbol = has_symbol_support_x_esm ? Symbol('inspect.custom') : '_inspect.custom_';
@@ -9778,7 +9895,7 @@ var inspect_x_esm_isMapIterator = function isMapIterator(value) {
   }
 
   try {
-    return value.next.call(mapValues(inspect_x_esm_testMap)).value === 'MapSentinel';
+    return simple_call_x_esm(value.next, mapValues(inspect_x_esm_testMap)).value === 'MapSentinel';
   } catch (ignore) {// empty
   }
 
@@ -9791,7 +9908,7 @@ var inspect_x_esm_isSetIterator = function isSetIterator(value) {
   }
 
   try {
-    return value.next.call(setValues(inspect_x_esm_testSet)).value === 'SetSentinel';
+    return simple_call_x_esm(value.next, setValues(inspect_x_esm_testSet)).value === 'SetSentinel';
   } catch (ignore) {// empty
   }
 
@@ -10210,7 +10327,7 @@ $fmtValue = function fmtValue(args) {
         var isCircular = _constructor2 && _constructor2.prototype === value;
 
         if (isCircular === false) {
-          var ret = maybeCustomInspect.call(value, depth, ctx); // If the custom inspection method returned `this`, don't go into
+          var ret = simple_call_x_esm(maybeCustomInspect, value, [depth, ctx]); // If the custom inspection method returned `this`, don't go into
           // infinite recursion.
 
           if (ret !== value) {

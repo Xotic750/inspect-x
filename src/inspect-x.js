@@ -1,4 +1,3 @@
-import bind from 'bind-x';
 import isFunction from 'is-function-x';
 import isGeneratorFunction from 'is-generator-function';
 import isAsyncFunction from 'is-async-function-x';
@@ -51,29 +50,30 @@ import intersection from 'array-intersection-x';
 import union from 'array-union-x';
 import toBoolean from 'to-boolean-x';
 import toObject from 'to-object-x';
+import call from 'simple-call-x';
+import methodize from 'simple-methodize-x';
 
 const EMPTY_ARRAY = [];
 const RegExpCtr = /none/.constructor;
 const EMPTY_STRING = '';
 const EMPTY_OBJECT = {};
-const {call} = isFunction;
 
 /* eslint-disable-next-line compat/compat */
 const hasSet = typeof Set === 'function' && isSet(new Set());
 /* eslint-disable-next-line compat/compat */
 const testSet = hasSet && new Set(['SetSentinel']);
-const setForEach = hasSet && bind(call, testSet.forEach);
-const setValues = hasSet && bind(call, testSet.values);
+const setForEach = hasSet && methodize(testSet.forEach);
+const setValues = hasSet && methodize(testSet.values);
 /* eslint-disable-next-line compat/compat */
 const hasMap = typeof Map === 'function' && isMap(new Map());
 /* eslint-disable-next-line compat/compat */
 const testMap = hasMap && new Map([[1, 'MapSentinel']]);
-const mapForEach = hasMap && bind(call, testMap.forEach);
-const mapValues = hasMap && bind(call, testMap.values);
+const mapForEach = hasMap && methodize(testMap.forEach);
+const mapValues = hasMap && methodize(testMap.values);
 /* eslint-disable-next-line compat/compat */
-const symbolToString = hasSymbolSupport && bind(call, Symbol.prototype.toString);
+const symbolToString = hasSymbolSupport && methodize(Symbol.prototype.toString);
 /* eslint-disable-next-line compat/compat */
-const symbolValueOf = hasSymbolSupport && bind(call, Symbol.prototype.valueOf);
+const symbolValueOf = hasSymbolSupport && methodize(Symbol.prototype.valueOf);
 const oSeal = EMPTY_OBJECT.constructor.seal;
 const objectSeal = isFunction(oSeal)
   ? oSeal
@@ -81,18 +81,18 @@ const objectSeal = isFunction(oSeal)
       return value;
     };
 
-const regexpToString = bind(call, RegExpCtr.prototype.toString);
-const regexpTest = bind(call, RegExpCtr.prototype.test);
-const errorToString = bind(call, Error.prototype.toString);
-const numberToString = bind(call, (0).toString);
-const booleanToString = bind(call, true.toString);
-const concat = bind(call, EMPTY_ARRAY.concat, EMPTY_ARRAY);
-const join = bind(call, EMPTY_ARRAY.join);
-const push = bind(call, EMPTY_ARRAY.push);
-const getTime = bind(call, Date.prototype.getTime);
-const replace = bind(call, EMPTY_STRING.replace);
-const strSlice = bind(call, EMPTY_STRING.slice);
-const propertyIsEnumerable = bind(call, EMPTY_OBJECT.propertyIsEnumerable);
+const regexpToString = methodize(RegExpCtr.prototype.toString);
+const regexpTest = methodize(RegExpCtr.prototype.test);
+const errorToString = methodize(Error.prototype.toString);
+const numberToString = methodize((0).toString);
+const booleanToString = methodize(true.toString);
+const concat = methodize(EMPTY_ARRAY.concat, EMPTY_ARRAY);
+const join = methodize(EMPTY_ARRAY.join);
+const push = methodize(EMPTY_ARRAY.push);
+const getTime = methodize(Date.prototype.getTime);
+const replace = methodize(EMPTY_STRING.replace);
+const strSlice = methodize(EMPTY_STRING.slice);
+const propertyIsEnumerable = methodize(EMPTY_OBJECT.propertyIsEnumerable);
 /* eslint-disable-next-line compat/compat */
 const customInspectSymbol = hasSymbolSupport ? Symbol('inspect.custom') : '_inspect.custom_';
 
@@ -262,7 +262,7 @@ const isMapIterator = function isMapIterator(value) {
   }
 
   try {
-    return value.next.call(mapValues(testMap)).value === 'MapSentinel';
+    return call(value.next, mapValues(testMap)).value === 'MapSentinel';
   } catch (ignore) {
     // empty
   }
@@ -276,7 +276,7 @@ const isSetIterator = function isSetIterator(value) {
   }
 
   try {
-    return value.next.call(setValues(testSet)).value === 'SetSentinel';
+    return call(value.next, setValues(testSet)).value === 'SetSentinel';
   } catch (ignore) {
     // empty
   }
@@ -664,7 +664,7 @@ $fmtValue = function fmtValue(args) {
         const isCircular = constructor && constructor.prototype === value;
 
         if (isCircular === false) {
-          const ret = maybeCustomInspect.call(value, depth, ctx);
+          const ret = call(maybeCustomInspect, value, [depth, ctx]);
 
           // If the custom inspection method returned `this`, don't go into
           // infinite recursion.

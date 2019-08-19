@@ -8,7 +8,6 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-import bind from 'bind-x';
 import isFunction from 'is-function-x';
 import isGeneratorFunction from 'is-generator-function';
 import isAsyncFunction from 'is-async-function-x';
@@ -61,49 +60,50 @@ import intersection from 'array-intersection-x';
 import union from 'array-union-x';
 import toBoolean from 'to-boolean-x';
 import toObject from 'to-object-x';
+import call from 'simple-call-x';
+import methodize from 'simple-methodize-x';
 var EMPTY_ARRAY = [];
 var RegExpCtr = /none/.constructor;
 var EMPTY_STRING = '';
 var EMPTY_OBJECT = {};
-var call = isFunction.call;
 /* eslint-disable-next-line compat/compat */
 
 var hasSet = typeof Set === 'function' && isSet(new Set());
 /* eslint-disable-next-line compat/compat */
 
 var testSet = hasSet && new Set(['SetSentinel']);
-var setForEach = hasSet && bind(call, testSet.forEach);
-var setValues = hasSet && bind(call, testSet.values);
+var setForEach = hasSet && methodize(testSet.forEach);
+var setValues = hasSet && methodize(testSet.values);
 /* eslint-disable-next-line compat/compat */
 
 var hasMap = typeof Map === 'function' && isMap(new Map());
 /* eslint-disable-next-line compat/compat */
 
 var testMap = hasMap && new Map([[1, 'MapSentinel']]);
-var mapForEach = hasMap && bind(call, testMap.forEach);
-var mapValues = hasMap && bind(call, testMap.values);
+var mapForEach = hasMap && methodize(testMap.forEach);
+var mapValues = hasMap && methodize(testMap.values);
 /* eslint-disable-next-line compat/compat */
 
-var symbolToString = hasSymbolSupport && bind(call, Symbol.prototype.toString);
+var symbolToString = hasSymbolSupport && methodize(Symbol.prototype.toString);
 /* eslint-disable-next-line compat/compat */
 
-var symbolValueOf = hasSymbolSupport && bind(call, Symbol.prototype.valueOf);
+var symbolValueOf = hasSymbolSupport && methodize(Symbol.prototype.valueOf);
 var oSeal = EMPTY_OBJECT.constructor.seal;
 var objectSeal = isFunction(oSeal) ? oSeal : function seal(value) {
   return value;
 };
-var regexpToString = bind(call, RegExpCtr.prototype.toString);
-var regexpTest = bind(call, RegExpCtr.prototype.test);
-var errorToString = bind(call, Error.prototype.toString);
-var numberToString = bind(call, 0 .toString);
-var booleanToString = bind(call, true.toString);
-var concat = bind(call, EMPTY_ARRAY.concat, EMPTY_ARRAY);
-var join = bind(call, EMPTY_ARRAY.join);
-var push = bind(call, EMPTY_ARRAY.push);
-var getTime = bind(call, Date.prototype.getTime);
-var replace = bind(call, EMPTY_STRING.replace);
-var strSlice = bind(call, EMPTY_STRING.slice);
-var propertyIsEnumerable = bind(call, EMPTY_OBJECT.propertyIsEnumerable);
+var regexpToString = methodize(RegExpCtr.prototype.toString);
+var regexpTest = methodize(RegExpCtr.prototype.test);
+var errorToString = methodize(Error.prototype.toString);
+var numberToString = methodize(0 .toString);
+var booleanToString = methodize(true.toString);
+var concat = methodize(EMPTY_ARRAY.concat, EMPTY_ARRAY);
+var join = methodize(EMPTY_ARRAY.join);
+var push = methodize(EMPTY_ARRAY.push);
+var getTime = methodize(Date.prototype.getTime);
+var replace = methodize(EMPTY_STRING.replace);
+var strSlice = methodize(EMPTY_STRING.slice);
+var propertyIsEnumerable = methodize(EMPTY_OBJECT.propertyIsEnumerable);
 /* eslint-disable-next-line compat/compat */
 
 var customInspectSymbol = hasSymbolSupport ? Symbol('inspect.custom') : '_inspect.custom_';
@@ -267,7 +267,7 @@ var isMapIterator = function isMapIterator(value) {
   }
 
   try {
-    return value.next.call(mapValues(testMap)).value === 'MapSentinel';
+    return call(value.next, mapValues(testMap)).value === 'MapSentinel';
   } catch (ignore) {// empty
   }
 
@@ -280,7 +280,7 @@ var isSetIterator = function isSetIterator(value) {
   }
 
   try {
-    return value.next.call(setValues(testSet)).value === 'SetSentinel';
+    return call(value.next, setValues(testSet)).value === 'SetSentinel';
   } catch (ignore) {// empty
   }
 
@@ -699,7 +699,7 @@ $fmtValue = function fmtValue(args) {
         var isCircular = _constructor2 && _constructor2.prototype === value;
 
         if (isCircular === false) {
-          var ret = maybeCustomInspect.call(value, depth, ctx); // If the custom inspection method returned `this`, don't go into
+          var ret = call(maybeCustomInspect, value, [depth, ctx]); // If the custom inspection method returned `this`, don't go into
           // infinite recursion.
 
           if (ret !== value) {

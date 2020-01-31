@@ -68,8 +68,6 @@ try {
     },
     set(val) {
       testVar = val;
-
-      return testVar;
     },
   });
   testObject.defaultOptions = 'test';

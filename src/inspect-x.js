@@ -3,7 +3,7 @@ import isGeneratorFunction from 'is-generator-function';
 import isAsyncFunction from 'is-async-function-x';
 import isRegExp from 'is-regex';
 import defineProperties from 'object-define-properties-x';
-import isDate from 'is-date-object';
+import isDateOriginal from 'is-date-object';
 import isArrayBuffer from 'is-array-buffer-x';
 import isSet from 'is-set-x';
 import isMap from 'is-map-x';
@@ -183,6 +183,8 @@ try {
   }
 }
 
+let isDate = isDateOriginal;
+
 if (isDate(Date.prototype)) {
   isDate = function $isDate(value) {
     try {
@@ -357,7 +359,11 @@ const fmtNumber = function fmtNumber(ctx, value) {
   return ctx.stylize(objectIs(value, -0) ? '-0' : numberToString(value), 'number');
 };
 
-const fmtPrimitiveReplacers = [[/^"|"$/g, EMPTY_STRING], [/'/g, "\\'"], [/\\"/g, '"']];
+const fmtPrimitiveReplacers = [
+  [/^"|"$/g, EMPTY_STRING],
+  [/'/g, "\\'"],
+  [/\\"/g, '"'],
+];
 
 const fmtPrimitiveReplace = function _fmtPrimitiveReplace(acc, pair) {
   return replace(acc, pair[0], pair[1]);
@@ -404,7 +410,12 @@ const recurse = function recurse(depth) {
   return depth === null ? null : depth - 1;
 };
 
-const fmtPropReplacers = [[/'/g, "\\'"], [/\\"/g, '"'], [/(^"|"$)/g, "'"], [/\\\\/g, '\\']];
+const fmtPropReplacers = [
+  [/'/g, "\\'"],
+  [/\\"/g, '"'],
+  [/(^"|"$)/g, "'"],
+  [/\\\\/g, '\\'],
+];
 
 const fmtPropReplace = function _fmtPropReplace(acc, pair) {
   return replace(acc, pair[0], pair[1]);

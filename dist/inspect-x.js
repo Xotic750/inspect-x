@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2015-2017",
-  "date": "2019-09-05T20:32:36.499Z",
+  "date": "2020-01-31T10:32:00.020Z",
   "describe": "",
   "description": "An implementation of node's ES6 inspect module.",
   "file": "inspect-x.js",
-  "hash": "45c11d9694cafc400d8c",
+  "hash": "776db56679e020de590e",
   "license": "MIT",
   "version": "3.1.2"
 }
@@ -9721,11 +9721,11 @@ function inspect_x_esm_slicedToArray(arr, i) { return inspect_x_esm_arrayWithHol
 
 function inspect_x_esm_nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
 
-function inspect_x_esm_iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function inspect_x_esm_iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function inspect_x_esm_arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function inspect_x_esm_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { inspect_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { inspect_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return inspect_x_esm_typeof(obj); }
+function inspect_x_esm_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { inspect_x_esm_typeof = function _typeof(obj) { return typeof obj; }; } else { inspect_x_esm_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return inspect_x_esm_typeof(obj); }
 
 
 
@@ -9913,7 +9913,9 @@ try {
   }
 }
 
-if (is_date_object_default()(Date.prototype)) {
+var isDate = is_date_object_default.a;
+
+if (isDate(Date.prototype)) {
   isDate = function $isDate(value) {
     try {
       inspect_x_esm_getTime(value);
@@ -10440,7 +10442,7 @@ $fmtValue = function fmtValue(args) {
   var visibleKeys = object_keys_x_esm(value);
 
   if (visibleKeys.length > 0) {
-    if (shimmedDate && is_date_object_default()(value)) {
+    if (shimmedDate && isDate(value)) {
       visibleKeys = array_filter_x_esm(visibleKeys, function predicate(key) {
         return key !== 'constructor';
       });
@@ -10533,7 +10535,7 @@ $fmtValue = function fmtValue(args) {
       return ctx.stylize(regexpToString(value), 'regexp');
     }
 
-    if (is_date_object_default()(value)) {
+    if (isDate(value)) {
       name = inspect_x_esm_getSubName(value);
       formatted = ctx.stylize(inspect_x_esm_fmtDate(value), 'date');
 
@@ -10595,7 +10597,7 @@ $fmtValue = function fmtValue(args) {
     // Make RegExps say that they are RegExps
     // name = getSubName(value, 'RegExp');
     base = regexpToString(value);
-  } else if (is_date_object_default()(value)) {
+  } else if (isDate(value)) {
     // Make dates with properties first say the date
     name = inspect_x_esm_getSubName(value);
     formatted = inspect_x_esm_fmtDate(value);
